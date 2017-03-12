@@ -26,6 +26,16 @@
 /* declared non-terminals */
 %type <type_double> Exp Factor Term
 
+/* declared unite */
+%right ASSIGNOP
+%left OR
+%left AND
+%left RELOP
+%left PLUS MINUS
+%left STAR DIV
+%right NOT 
+%left DOT LP RP LB RB LC RC
+
 %%
 /*
 // high-level Definitions
@@ -94,9 +104,7 @@ DecList : Dec
 Dec : VarDec
 	| VarDec ASSIGNOP Exp
 	;
-*/
 // Expressions 
-/*
 Exp : Exp ASSIGNOP Exp
 	| Exp AND Exp
 	| Exp OR Exp
@@ -124,6 +132,22 @@ Calc :
 	| Exp {printf("= %lf \n", $1); }
 	;
 
+Exp : Term
+	| Exp PLUS Exp { $$ = $1 + $3; }
+	| Exp MINUS Exp { $$ = $1 - $3; }
+	| Exp STAR Exp { $$ = $1 * $3; }
+	| Exp DIV Exp { $$ = $1 / $3; }
+	;
+Factor : Term
+	;
+Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
+	| FLOAT { printf(" %d \n", @1);$$ = $1;}
+	;
+/*
+Calc :
+	| Exp {printf("= %lf \n", $1); }
+	;
+
 Exp : Factor
 	| Exp PLUS Factor { $$ = $1 + $3; }
 	| Exp MINUS Factor { $$ = $1 - $3; }
@@ -137,7 +161,7 @@ Factor : Term
 Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 	| FLOAT { printf(" %d \n", @1);$$ = $1;}
 	;
-
+*/
 %%
 #include "lex.yy.c"
 /*
