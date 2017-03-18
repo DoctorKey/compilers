@@ -14,8 +14,7 @@ int main(int argc, char** argv)
 	while(yylex() != 0);
 	return 0;
 */
-	yyparse();
-/*
+//	yyparse();
 	if (argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
 	if(!f) {
@@ -25,7 +24,6 @@ int main(int argc, char** argv)
 	yyrestart(f);
 	yyparse();
 	return 0;
-*/
 /*
 	if(argc < 2) {
 		fprintf(stderr, "need filename\n");

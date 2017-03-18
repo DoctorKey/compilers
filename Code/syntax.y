@@ -24,7 +24,13 @@
 %token RETURN IF ELSE WHILE
 
 /* declared non-terminals */
-%type <type_double> Exp Factor Term
+/*%type <type_double> Exp Factor Term*/
+%type <type_double> Program ExtDefList ExtDef ExtDecList
+%type <type_str> Specifier StructSpecifier OptTag Tag
+%type <type_str> VarDec FunDec VarList ParamDec
+%type <type_int> CompSt StmtList Stmt 
+%type <type_int> DefList Def DecList Dec
+%type <type_double> Exp Args
 
 /* declared unite */
 %right ASSIGNOP
@@ -33,12 +39,13 @@
 %left RELOP
 %left PLUS MINUS
 %left STAR DIV
-%right NOT 
+%right NOT UMINUS 
 %left DOT LP RP LB RB LC RC
 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %%
-/*
-// high-level Definitions
+/* high-level Definitions */
 Program : ExtDefList
 	;
 ExtDefList : 
@@ -68,6 +75,7 @@ Tag : ID
 // Declarators 
 VarDec : ID
 	| VarDec LB INT RB
+	| error RB { yyerror("]"); }
 	;
 FunDec : ID LP VarList RP
 	| ID LP RP
@@ -80,6 +88,7 @@ ParamDec : Specifier VarDec
 
 // Statements 
 CompSt : LC DefList StmtList RC
+	| error RC { yyerror("}"); }
 	;
 StmtList : 
 	| Stmt StmtList
@@ -87,9 +96,10 @@ StmtList :
 Stmt : Exp SEMI
 	| CompSt
 	| RETURN Exp SEMI
-	| IF LP Exp RP Stmt
+	| IF LP Exp RP Stmt %prec LOWER_THAN_ELSE
 	| IF LP Exp RP Stmt ELSE Stmt
 	| WHILE LP Exp RP Stmt
+	| error ELSE { yyerror(";");}
 	;
 
 // Local Definitions 
@@ -105,7 +115,7 @@ Dec : VarDec
 	| VarDec ASSIGNOP Exp
 	;
 // Expressions 
-Exp : Exp ASSIGNOP Exp
+Exp : Exp ASSIGNOP Exp 
 	| Exp AND Exp
 	| Exp OR Exp
 	| Exp RELOP Exp
@@ -114,12 +124,12 @@ Exp : Exp ASSIGNOP Exp
 	| Exp STAR Exp
 	| Exp DIV Exp
 	| LP Exp RP
-	| MINUS Exp
+	| MINUS Exp %prec UMINUS
 	| NOT Exp
 	| ID LP Args RP
 	| ID LP RP
 	| Exp LB Exp RB
-	| Exp NOT ID
+	| Exp DOT ID
 	| ID
 	| INT
 	| FLOAT
@@ -127,7 +137,7 @@ Exp : Exp ASSIGNOP Exp
 Args : Exp COMMA Args
 	| Exp
 	;
-*/
+/*
 Calc :
 	| Exp {printf("= %lf \n", $1); }
 	;
@@ -143,7 +153,6 @@ Factor : Term
 Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 	| FLOAT { printf(" %d \n", @1);$$ = $1;}
 	;
-/*
 Calc :
 	| Exp {printf("= %lf \n", $1); }
 	;
@@ -170,5 +179,6 @@ int main() {
 }
 */
 yyerror(char *msg) {
-	fprintf(stderr, "error: %s\n", msg);
+//	fprintf(stderr, "error: %s\n", msg);
+	fprintf(stderr, "Error type B at Line %d column %d: Missing \"%s\"\n",yylineno,yycolumn,msg);
 }
