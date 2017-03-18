@@ -1,5 +1,6 @@
 #include "tree.h"
 #include "syntax.tab.h" 
+#include "name.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -49,12 +50,30 @@ struct node *newtokenNode(int type,double num)
 	}
 	return temp;
 }
+void clearTree(struct node *node)
+{
+	int i = 0;
+	for(i = 0;i != CHILD_NUM;i++) {
+		if(node->children[i] != NULL) {
+			clearTree(node->children[i]);
+		}
+	}
+	free(node);
+}
 void showTree(struct node *node)
 {
 	int i = 0;
 	for(i = 0;i != node->depth; i++){
-		printf("\t");
+		printf("    ");
 	}
+	printf("%s", getName(node->nodetype));
+	/*
+	if(node->nodetype >= INT) {
+		printf("%s", tokenName[node->nodetype - INT]);
+	}else{
+		printf("%s", name[node->nodetype]);
+	}*/
+	/*
 	switch(node->nodetype){
 	case TYPE:printf("TYPE");break;
 	case ID:printf("ID");break;
@@ -70,8 +89,9 @@ void showTree(struct node *node)
 	case CompSt:printf("CompSt");break;
 	case StmtList:printf("StmtList");break;
 	case DefList:printf("DefList");break;
-	}
-	printf("  %d\n", node->nodetype);
+	}*/
+//	printf("  %d\n", node->nodetype);
+	printf("\n");
 	for(i = 0;i != CHILD_NUM;i++) {
 		if(node->children[i] != NULL){
 			showTree(node->children[i]);

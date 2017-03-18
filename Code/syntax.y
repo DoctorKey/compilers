@@ -1,7 +1,8 @@
 %locations
 %{
 	#include <stdio.h>
-	#include "tree.h"
+//	#include "tree.h"
+	#include "name.h"
 %}
 /* declared types */
 %union {
@@ -48,7 +49,7 @@
 %nonassoc ELSE
 %%
 /* high-level Definitions */
-Program : ExtDefList	{ $$ = newNode(Program,1,$1); showTree($$);}
+Program : ExtDefList	{ $$ = newNode(Program,1,$1); showTree($$); clearTree($$); }
 	;
 ExtDefList : 	{ $$ = newNode(ExtDefList, 0); }
 	| ExtDef ExtDefList	{ $$ = newNode(ExtDefList, 2, $1, $2); }
@@ -181,6 +182,5 @@ int main() {
 }
 */
 yyerror(char *msg) {
-//	fprintf(stderr, "error: %s\n", msg);
 	fprintf(stderr, "Error type B at Line %d column %d: Missing \"%s\"\n",yylineno,yycolumn,msg);
 }
