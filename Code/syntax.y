@@ -1,6 +1,7 @@
 %locations
 %{
 	#include <stdio.h>
+	#include "tree.h"
 %}
 /* declared types */
 %union {
@@ -8,29 +9,30 @@
 	float type_float;
 	double type_double;
 	char* type_str;
+	struct node* type_node;
 }
 
 /* declared tokens */
 %token <type_int> INT
 %token <type_float> FLOAT
 %token <type_str> ID
-%token SEMI COMMA
-%token ASSIGNOP RELOP
-%token PLUS MINUS STAR DIV
-%token AND OR DOT NOT
-%token TYPE
-%token LP RP LB RB LC RC
-%token STRUCT
-%token RETURN IF ELSE WHILE
+%token <type_node> SEMI COMMA
+%token <type_node> ASSIGNOP RELOP
+%token <type_node> PLUS MINUS STAR DIV
+%token <type_node> AND OR DOT NOT
+%token <type_node> TYPE
+%token <type_node> LP RP LB RB LC RC
+%token <type_node> STRUCT
+%token <type_node> RETURN IF ELSE WHILE
 
 /* declared non-terminals */
 /*%type <type_double> Exp Factor Term*/
-%type <type_double> Program ExtDefList ExtDef ExtDecList
-%type <type_str> Specifier StructSpecifier OptTag Tag
-%type <type_str> VarDec FunDec VarList ParamDec
-%type <type_int> CompSt StmtList Stmt 
-%type <type_int> DefList Def DecList Dec
-%type <type_double> Exp Args
+%type <type_node> Program ExtDefList ExtDef ExtDecList
+%type <type_node> Specifier StructSpecifier OptTag Tag
+%type <type_node> VarDec FunDec VarList ParamDec
+%type <type_node> CompSt StmtList Stmt 
+%type <type_node> DefList Def DecList Dec
+%type <type_node> Exp Args
 
 /* declared unite */
 %right ASSIGNOP
@@ -46,21 +48,21 @@
 %nonassoc ELSE
 %%
 /* high-level Definitions */
-Program : ExtDefList
+Program : ExtDefList	{ $$ = newNode(Program,1,$1); showTree($$);}
 	;
-ExtDefList : 
-	| ExtDef ExtDefList
+ExtDefList : 	{ $$ = newNode(ExtDefList, 0); }
+	| ExtDef ExtDefList	{ $$ = newNode(ExtDefList, 2, $1, $2); }
 	;
 ExtDef : Specifier ExtDecList SEMI
 	| Specifier SEMI
-	| Specifier FunDec CompSt
+	| Specifier FunDec CompSt { $$ = newNode(ExtDef, 3,$1, $2, $3); }
 	;
 ExtDecList : VarDec
 	| VarDec COMMA ExtDecList
 	;
 
 // Specifiers 
-Specifier : TYPE
+Specifier : TYPE { $$ = newNode(Specifier, 1, newtokenNode(TYPE,0)); }
 	| StructSpecifier
 	;
 StructSpecifier : STRUCT OptTag LC DefList RC
@@ -78,7 +80,7 @@ VarDec : ID
 	| error RB { yyerror("]"); }
 	;
 FunDec : ID LP VarList RP
-	| ID LP RP
+	| ID LP RP { $$ = newNode(FunDec, 3, newtokenNode(ID,0), newtokenNode(LP,0), newtokenNode(RP,0)); }
 	;
 VarList : ParamDec COMMA VarList
 	| ParamDec
@@ -87,10 +89,10 @@ ParamDec : Specifier VarDec
 	;
 
 // Statements 
-CompSt : LC DefList StmtList RC
+CompSt : LC DefList StmtList RC {$$ = newNode(CompSt, 4,newtokenNode(LC,0), $2,$3,newtokenNode(RC,0)); }
 	| error RC { yyerror("}"); }
 	;
-StmtList : 
+StmtList : 	{ $$ = newNode(StmtList, 0); }
 	| Stmt StmtList
 	;
 Stmt : Exp SEMI
@@ -103,7 +105,7 @@ Stmt : Exp SEMI
 	;
 
 // Local Definitions 
-DefList :
+DefList :	{$$ = newNode(DefList, 0);}
 	| Def DefList
 	;
 Def : Specifier DecList SEMI
@@ -115,9 +117,9 @@ Dec : VarDec
 	| VarDec ASSIGNOP Exp
 	;
 // Expressions 
-Exp : Exp ASSIGNOP Exp 
-	| Exp AND Exp
-	| Exp OR Exp
+Exp : Exp ASSIGNOP Exp { $$ = newNode(ASSIGNOP,3,$1,$3);}
+	| Exp AND Exp  { $$ = newNode(AND,3,$1,$3);}
+	| Exp OR Exp  
 	| Exp RELOP Exp
 	| Exp PLUS Exp
 	| Exp MINUS Exp
