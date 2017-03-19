@@ -4,14 +4,21 @@
 //#include "name.h"
 
 #define CHILD_NUM 7
+union value {
+	int INT;
+	float FLOAT;
+	int ID_index;
+};
 struct node {
 	int nodetype;
+	union value nodevalue;
 	int depth;
+	int lineno;
 	struct node *children[CHILD_NUM];
 };
 
 struct node *newNode(int type,int num, ...);
-struct node *newtokenNode(int type,double num);
+struct node *newtokenNode(int type,float nodevalue);
 void clearTree(struct node *node);
 void showTree(struct node *node);
 #endif

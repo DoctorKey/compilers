@@ -1,22 +1,22 @@
 %locations
 %{
 	#include <stdio.h>
-//	#include "tree.h"
+	#include "tree.h"
 	#include "name.h"
+	#include "lex.yy.c"
 %}
 /* declared types */
 %union {
 	int type_int;
 	float type_float;
-	double type_double;
 	char* type_str;
 	struct node* type_node;
 }
 
 /* declared tokens */
-%token <type_int> INT
-%token <type_float> FLOAT
-%token <type_str> ID
+%token <type_node> INT
+%token <type_node> FLOAT
+%token <type_node> ID
 %token <type_node> SEMI COMMA
 %token <type_node> ASSIGNOP RELOP
 %token <type_node> PLUS MINUS STAR DIV
@@ -27,7 +27,6 @@
 %token <type_node> RETURN IF ELSE WHILE
 
 /* declared non-terminals */
-/*%type <type_double> Exp Factor Term*/
 %type <type_node> Program ExtDefList ExtDef ExtDecList
 %type <type_node> Specifier StructSpecifier OptTag Tag
 %type <type_node> VarDec FunDec VarList ParamDec
@@ -49,138 +48,167 @@
 %nonassoc ELSE
 %%
 /* high-level Definitions */
-Program : ExtDefList	{ $$ = newNode(Program,1,$1); showTree($$); clearTree($$); }
+Program : ExtDefList	
+		{ $$ = newNode(Program,1,$1); showTree($$); clearTree($$); }
 	;
-ExtDefList : 	{ $$ = newNode(ExtDefList, 0); }
-	| ExtDef ExtDefList	{ $$ = newNode(ExtDefList, 2, $1, $2); }
+ExtDefList : 	
+		{ $$ = NULL; }
+	| ExtDef ExtDefList	
+		{ $$ = newNode(ExtDefList, 2, $1, $2); }
 	;
-ExtDef : Specifier ExtDecList SEMI
-	| Specifier SEMI
-	| Specifier FunDec CompSt { $$ = newNode(ExtDef, 3,$1, $2, $3); }
+ExtDef : Specifier ExtDecList SEMI 
+		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
+	| Specifier SEMI	
+		{ $$ = newNode(Specifier, 2, $1, $2); }
+	| Specifier FunDec CompSt 
+		{ $$ = newNode(ExtDef, 3,$1, $2, $3); }
 	;
-ExtDecList : VarDec
-	| VarDec COMMA ExtDecList
+ExtDecList : VarDec	
+		{ $$ = newNode(ExtDecList, 1, $1); }
+	| VarDec COMMA ExtDecList	
+		{ $$ = newNode(ExtDecList, 3, $1, $2, $3); }
 	;
 
 // Specifiers 
-Specifier : TYPE { $$ = newNode(Specifier, 1, newtokenNode(TYPE,0)); }
-	| StructSpecifier
+Specifier : TYPE 
+		{ $$ = newNode(Specifier, 1, $1); }
+	| StructSpecifier	
+		{ $$ = newNode(Specifier, 1, $1); }
 	;
-StructSpecifier : STRUCT OptTag LC DefList RC
-	| STRUCT Tag
+StructSpecifier : STRUCT OptTag LC DefList RC	
+		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, $4, $5);}
+	| STRUCT Tag	
+		{ $$ = newNode(StructSpecifier, 2, $1, $2); }
 	;
-OptTag : 
-	| ID
+OptTag : 	
+		{ $$ = NULL; }
+	| ID	
+		{ $$ = newNode(OptTag, 1, $1); }
 	;
-Tag : ID
+Tag : ID	
+		{ $$ = newNode(Tag, 1, $1); }
 	;
 
 // Declarators 
-VarDec : ID
-	| VarDec LB INT RB
-	| error RB { yyerror("]"); }
+VarDec : ID	
+		{ $$ = newNode(VarDec, 1, $1); }
+	| VarDec LB INT RB 
+		{ $$ = newNode(VarDec, 4, $1, $2, $3, $4); }
+	| error RB 
+		{ yyerror("]"); }
 	;
-FunDec : ID LP VarList RP
-	| ID LP RP { $$ = newNode(FunDec, 3, newtokenNode(ID,0), newtokenNode(LP,0), newtokenNode(RP,0)); }
+FunDec : ID LP VarList RP 
+		{ $$ = newNode(FunDec, 4, $1, $2, $3, $4); }
+	| ID LP RP 
+		{ $$ = newNode(FunDec, 3, $1, $2, $3); }
 	;
-VarList : ParamDec COMMA VarList
-	| ParamDec
+VarList : ParamDec COMMA VarList	
+		{ $$ = newNode(VarList, 3, $1, $2, $3); }
+	| ParamDec	
+		{ $$ = newNode(VarList, 1, $1); }
 	;
-ParamDec : Specifier VarDec
+ParamDec : Specifier VarDec	
+		{ $$ = newNode(ParamDec, 2, $1, $2); }
 	;
 
 // Statements 
-CompSt : LC DefList StmtList RC {$$ = newNode(CompSt, 4,newtokenNode(LC,0), $2,$3,newtokenNode(RC,0)); }
-	| error RC { yyerror("}"); }
+CompSt : LC DefList StmtList RC 
+		{ $$ = newNode(CompSt, 4, $1, $2, $3, $4); }
+	| error RC 
+		{ yyerror("}"); }
 	;
-StmtList : 	{ $$ = newNode(StmtList, 0); }
-	| Stmt StmtList
+StmtList : 	
+		{ $$ = NULL; }
+	| Stmt StmtList	
+		{ $$ = newNode(StmtList, 2, $1, $2); }
 	;
-Stmt : Exp SEMI
-	| CompSt
-	| RETURN Exp SEMI
-	| IF LP Exp RP Stmt %prec LOWER_THAN_ELSE
+Stmt : Exp SEMI	
+		{ $$ = newNode(Stmt, 2, $1, $2); }
+	| CompSt	
+		{ $$ = newNode(Stmt, 1, $1); }
+	| RETURN Exp SEMI	
+		{ $$ = newNode(Stmt, 3, $1, $2, $3); }
+	| IF LP Exp RP Stmt %prec LOWER_THAN_ELSE 
+		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
 	| IF LP Exp RP Stmt ELSE Stmt
+		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $5, $6, $7); }
 	| WHILE LP Exp RP Stmt
-	| error ELSE { yyerror(";");}
+		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
+	| error ELSE 
+		{ yyerror(";");}
 	;
 
 // Local Definitions 
-DefList :	{$$ = newNode(DefList, 0);}
-	| Def DefList
+DefList :	
+		{$$ = NULL;}
+	| Def DefList	
+		{ $$ = newNode(DefList, 2, $1, $2); }
 	;
-Def : Specifier DecList SEMI
+Def : Specifier DecList SEMI 
+		{ $$ = newNode(Def, 3, $1, $2, $3); }
 	;
-DecList : Dec
-	| Dec COMMA DecList
+DecList : Dec	
+		{ $$ = newNode(DecList, 1, $1); }
+	| Dec COMMA DecList	
+		{ $$ = newNode(DecList, 3, $1, $2, $3); }
 	;
-Dec : VarDec
-	| VarDec ASSIGNOP Exp
+Dec : VarDec	
+		{ $$ = newNode(Dec, 1, $1); }
+	| VarDec ASSIGNOP Exp	
+		{ $$ = newNode(Dec, 3, $1, $2, $3); }
 	;
 // Expressions 
-Exp : Exp ASSIGNOP Exp { $$ = newNode(ASSIGNOP,3,$1,$3);}
-	| Exp AND Exp  { $$ = newNode(AND,3,$1,$3);}
+Exp : Exp ASSIGNOP Exp 
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
+	| Exp AND Exp  
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp OR Exp  
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp RELOP Exp
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp PLUS Exp
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp MINUS Exp
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp STAR Exp
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp DIV Exp
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| LP Exp RP
+		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| MINUS Exp %prec UMINUS
-	| NOT Exp
-	| ID LP Args RP
-	| ID LP RP
-	| Exp LB Exp RB
-	| Exp DOT ID
-	| ID
-	| INT
-	| FLOAT
+		{ $$ = newNode(Exp, 2, $1, $2);}
+	| NOT Exp	
+		{ $$ = newNode( Exp, 2, $1, $2);}
+	| ID LP Args RP	
+		{ $$ = newNode(Exp, 4, $1, $2, $3, $4); }
+	| ID LP RP	
+		{ $$ = newNode(Exp, 3, $1, $2, $3); }
+	| Exp LB Exp RB	
+		{ $$ = newNode(Exp, 4, $1, $2, $3, $4); }
+	| Exp DOT ID	
+		{ $$ = newNode(Exp, 3, $1, $2, $3); }
+	| ID		
+		{ $$ = newNode(Exp, 1, $1); }
+	| INT		
+		{ $$ = newNode(Exp, 1, $1); }
+	| FLOAT		
+		{ $$ = newNode(Exp, 1, $1); }
 	;
-Args : Exp COMMA Args
-	| Exp
+Args : Exp COMMA Args	
+		{ $$ = newNode(Args, 3, $1, $2, $3); }
+	| Exp		
+		{ $$ = newNode(Args, 1, $1); }
 	;
 /*
-Calc :
-	| Exp {printf("= %lf \n", $1); }
-	;
-
-Exp : Term
-	| Exp PLUS Exp { $$ = $1 + $3; }
-	| Exp MINUS Exp { $$ = $1 - $3; }
-	| Exp STAR Exp { $$ = $1 * $3; }
-	| Exp DIV Exp { $$ = $1 / $3; }
-	;
-Factor : Term
-	;
 Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 	| FLOAT { printf(" %d \n", @1);$$ = $1;}
 	;
-Calc :
-	| Exp {printf("= %lf \n", $1); }
-	;
-
-Exp : Factor
-	| Exp PLUS Factor { $$ = $1 + $3; }
-	| Exp MINUS Factor { $$ = $1 - $3; }
-	;
-
-Factor : Term
-	| Factor STAR Term { $$ = $1 * $3; }
-	| Factor DIV Term { $$ = $1 / $3; }
-	;
-
 Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 	| FLOAT { printf(" %d \n", @1);$$ = $1;}
 	;
 */
 %%
-#include "lex.yy.c"
-/*
-int main() {
-	yyparse();
-}
-*/
 yyerror(char *msg) {
 	fprintf(stderr, "Error type B at Line %d column %d: Missing \"%s\"\n",yylineno,yycolumn,msg);
 }
