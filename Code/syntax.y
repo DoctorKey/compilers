@@ -49,7 +49,7 @@
 %%
 /* high-level Definitions */
 Program : ExtDefList	
-		{ $$ = newNode(Program,1,$1); showTree($$); clearTree($$); }
+		{ $$ = newNode(Program, 1, $1); showTree($$); clearTree($$); }
 	;
 ExtDefList : 	
 		{ $$ = NULL; }
@@ -61,7 +61,7 @@ ExtDef : Specifier ExtDecList SEMI
 	| Specifier SEMI	
 		{ $$ = newNode(Specifier, 2, $1, $2); }
 	| Specifier FunDec CompSt 
-		{ $$ = newNode(ExtDef, 3,$1, $2, $3); }
+		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
 	;
 ExtDecList : VarDec	
 		{ $$ = newNode(ExtDecList, 1, $1); }

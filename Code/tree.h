@@ -8,6 +8,7 @@ union value {
 	int INT;
 	float FLOAT;
 	int ID_index;
+	char *str;
 };
 struct node {
 	int nodetype;
@@ -21,4 +22,5 @@ struct node *newNode(int type,int num, ...);
 struct node *newtokenNode(int type,float nodevalue);
 void clearTree(struct node *node);
 void showTree(struct node *node);
+
 #endif

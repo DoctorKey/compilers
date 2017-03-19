@@ -40,7 +40,7 @@ const char *tokenName[] = {
      "UMINUS",
      "LOWER_THAN_ELSE"
 };
-char *getName(int type)
+const char *getName(int type)
 {
 	if(type >= INT){
 		return tokenName[type - INT];

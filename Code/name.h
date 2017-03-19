@@ -10,6 +10,6 @@ enum {
 	Exp, Args
 };
 
-char *getName(int type);
+const char *getName(int type);
 
 #endif

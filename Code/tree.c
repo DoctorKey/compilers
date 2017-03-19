@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern yylineno;
+extern int yylineno;
 void updateChildDepth(struct node *node)
 {
 	int i;
@@ -18,6 +18,7 @@ void updateChildDepth(struct node *node)
 struct node *newNode(int type,int num, ...)
 {
 	int i;
+	/* if the file has more than minlineno lines, change the init value of minlineno */
 	int minlineno = 9999;
 	void **argc = (void **)&num + 1;
 	struct node *temp = malloc(sizeof(struct node));
@@ -27,18 +28,16 @@ struct node *newNode(int type,int num, ...)
 	}
 	temp->nodetype = type;
 	temp->depth = 0;
-	for(i = 1;i <= num;i++) {
+	for(i = 0;i < num;i++, argc++) {
 		if(*argc == NULL)
 			continue;
-		temp->children[i - 1] = (struct node*)*argc;
-		updateChildDepth(temp->children[i - 1]);
-		if(temp->children[i - 1]->lineno < minlineno)
-			minlineno = temp->children[i - 1]->lineno; 
-		argc++;
+		temp->children[i] = (struct node*)*argc;
+		updateChildDepth(temp->children[i]);
+		minlineno = temp->children[i]->lineno < minlineno? temp->children[i]->lineno: minlineno;
 	}
 	temp->lineno = minlineno;
-	for(;i != CHILD_NUM + 1; i++) {
-		temp->children[i - 1] = NULL;
+	for(;i != CHILD_NUM; i++) {
+		temp->children[i] = NULL;
 	}
 	return temp;
 }
@@ -59,9 +58,10 @@ struct node *newtokenNode(int type,float nodevalue)
 	if(type == FLOAT){
 		temp->nodevalue.FLOAT = nodevalue;
 	}
-	if(type == ID){
+/*	if(type == ID){
 		temp->nodevalue.ID_index = (int)nodevalue;
 	}
+	*/
 	for(i = 0;i != CHILD_NUM; i++) {
 		temp->children[i] = NULL;
 	}
@@ -84,7 +84,6 @@ void showTree(struct node *node)
 		printf("    ");
 	}
 	printf("%s", getName(node->nodetype));
-//	printf("  %d\n", node->nodetype);
 	if(node->nodetype >= INT){
 		if(node->nodetype == INT){
 			printf(": %d", node->nodevalue.INT);
@@ -93,9 +92,11 @@ void showTree(struct node *node)
 			printf(": %f", node->nodevalue.FLOAT);
 		}
 		if(node->nodetype == ID){
-			printf(": %d", node->nodevalue.ID_index);
+			printf(": %s", node->nodevalue.str);
 		}
-		printf(" (%d)", node->lineno);
+		if(node->nodetype == TYPE){
+			printf(": %s", node->nodevalue.str);
+		}
 	}else{
 		printf(" (%d)", node->lineno);
 	}
