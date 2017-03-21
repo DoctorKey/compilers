@@ -41,7 +41,7 @@ struct node *newNode(int type,int num, ...)
 	}
 	return temp;
 }
-struct node *newtokenNode(int type,float nodevalue)
+struct node *newtokenNode(int type)
 {
 	int i;
 	struct node *temp = malloc(sizeof(struct node));
@@ -52,16 +52,6 @@ struct node *newtokenNode(int type,float nodevalue)
 	temp->nodetype = type;
 	temp->lineno = yylineno;
 	temp->depth = 0;
-	if(type == INT){
-		temp->nodevalue.INT = (int)nodevalue;
-	}
-	if(type == FLOAT){
-		temp->nodevalue.FLOAT = nodevalue;
-	}
-/*	if(type == ID){
-		temp->nodevalue.ID_index = (int)nodevalue;
-	}
-	*/
 	for(i = 0;i != CHILD_NUM; i++) {
 		temp->children[i] = NULL;
 	}
@@ -74,6 +64,9 @@ void clearTree(struct node *node)
 		if(node->children[i] != NULL) {
 			clearTree(node->children[i]);
 		}
+	}
+	if(node->nodetype == TYPE || node->nodetype == ID) {
+		free(node->nodevalue.str);
 	}
 	free(node);
 }

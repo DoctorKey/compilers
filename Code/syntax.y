@@ -7,9 +7,9 @@
 %}
 /* declared types */
 %union {
-	int type_int;
-	float type_float;
-	char* type_str;
+//	int type_int;
+//	float type_float;
+//	char* type_str;
 	struct node* type_node;
 }
 

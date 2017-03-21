@@ -19,7 +19,7 @@ struct node {
 };
 
 struct node *newNode(int type,int num, ...);
-struct node *newtokenNode(int type,float nodevalue);
+struct node *newtokenNode(int type);
 void clearTree(struct node *node);
 void showTree(struct node *node);
 
