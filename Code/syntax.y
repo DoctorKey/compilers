@@ -4,6 +4,8 @@
 	#include "tree.h"
 	#include "name.h"
 	#include "lex.yy.c"
+	/* indicate grammar analyze is error or not*/
+	int isError = 0;
 %}
 /* declared types */
 %union {
@@ -49,7 +51,12 @@
 %%
 /* high-level Definitions */
 Program : ExtDefList	
-		{ $$ = newNode(Program, 1, $1); showTree($$); clearTree($$); }
+		{ 
+			$$ = newNode(Program, 1, $1); 
+			if(isError == 0)
+				showTree($$); 
+			clearTree($$); 
+		}
 	;
 ExtDefList : 	
 		{ $$ = NULL; }
@@ -94,8 +101,6 @@ VarDec : ID
 		{ $$ = newNode(VarDec, 1, $1); }
 	| VarDec LB INT RB 
 		{ $$ = newNode(VarDec, 4, $1, $2, $3, $4); }
-	| error RB 
-		{ yyerror("]"); }
 	;
 FunDec : ID LP VarList RP 
 		{ $$ = newNode(FunDec, 4, $1, $2, $3, $4); }
@@ -115,7 +120,7 @@ ParamDec : Specifier VarDec
 CompSt : LC DefList StmtList RC 
 		{ $$ = newNode(CompSt, 4, $1, $2, $3, $4); }
 	| error RC 
-		{ yyerror("}"); }
+		{ }
 	;
 StmtList : 	
 		{ $$ = NULL; }
@@ -134,8 +139,7 @@ Stmt : Exp SEMI
 		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $5, $6, $7); }
 	| WHILE LP Exp RP Stmt
 		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
-	| error ELSE 
-		{ yyerror(";");}
+	| error SEMI {} 
 	;
 
 // Local Definitions 
@@ -146,6 +150,7 @@ DefList :
 	;
 Def : Specifier DecList SEMI 
 		{ $$ = newNode(Def, 3, $1, $2, $3); }
+	| error SEMI {} 
 	;
 DecList : Dec	
 		{ $$ = newNode(DecList, 1, $1); }
@@ -179,7 +184,7 @@ Exp : Exp ASSIGNOP Exp
 	| MINUS Exp %prec UMINUS
 		{ $$ = newNode(Exp, 2, $1, $2);}
 	| NOT Exp	
-		{ $$ = newNode( Exp, 2, $1, $2);}
+		{ $$ = newNode(Exp, 2, $1, $2);}
 	| ID LP Args RP	
 		{ $$ = newNode(Exp, 4, $1, $2, $3, $4); }
 	| ID LP RP	
@@ -210,5 +215,7 @@ Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 */
 %%
 yyerror(char *msg) {
-	fprintf(stderr, "Error type B at Line %d column %d: Missing \"%s\"\n",yylineno,yycolumn,msg);
+	isError = 1;
+//	fprintf(stderr, "Error type B at Line %d:column %d Missing \"%s\" source is \"%s\"\n",yylineno,yycolumn,msg, yytext);
+	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d is error!\n", yylineno, yytext, yycolumn);
 }

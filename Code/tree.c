@@ -74,7 +74,7 @@ void showTree(struct node *node)
 {
 	int i = 0;
 	for(i = 0;i != node->depth; i++){
-		printf("    ");
+		printf("  ");
 	}
 	printf("%s", getName(node->nodetype));
 	if(node->nodetype >= INT){

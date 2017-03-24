@@ -8,6 +8,7 @@
 	#include "syntax.tab.h"
 	#include "tree.h"
 	#include <string.h>
+	#include <stdlib.h>
 	int yycolumn = 1;
 	#define YY_USER_ACTION \
 		yylloc.first_line = yylloc.last_line = yylineno; \
@@ -19,6 +20,7 @@
 digit [0-9]
 letter [_a-zA-Z]
 space [ \t\n]
+xdigit [0-9a-fA-F]
 
 %%
 
@@ -27,6 +29,16 @@ space [ \t\n]
 //					printf("INT(%d) ", yylval.type_int);
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = atoi(yytext);
+					return INT;
+				}
+(0[1-7]+[0-7]*)			{
+					yylval.type_node = newtokenNode(INT);
+					yylval.type_node->nodevalue.INT = strtol(yytext, NULL, 8);
+					return INT;
+				}
+0[Xx]{xdigit}*			{
+					yylval.type_node = newtokenNode(INT);
+					yylval.type_node->nodevalue.INT = strtol(yytext, NULL, 16);
 					return INT;
 				}
 
@@ -108,9 +120,8 @@ space [ \t\n]
 "int"|"float"			{ 
 //					printf("TYPE  "); 
 					yylval.type_node = newtokenNode(TYPE);
-					char *str = malloc(sizeof(yytext));
-					strcpy(str, yytext);
-					yylval.type_node->nodevalue.str = str;
+					//strdup need to free
+					yylval.type_node->nodevalue.str = strdup(yytext);
 					return TYPE;
 				}
 "("				{ 
@@ -161,9 +172,8 @@ space [ \t\n]
 {letter}+({digit}|{letter})*	{ 
 //					printf("ID  "); 
 					yylval.type_node = newtokenNode(ID);
-					char *str = malloc(sizeof(yytext));
-					strcpy(str, yytext);
-					yylval.type_node->nodevalue.str = str;
+					//strdup need to free
+					yylval.type_node->nodevalue.str = strdup(yytext);
 					return ID;}
 [ \t\r]				{ }
 ^.				{
