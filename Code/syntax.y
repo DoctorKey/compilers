@@ -6,6 +6,7 @@
 	#include "lex.yy.c"
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
+	extern int lexical_isError;
 %}
 /* declared types */
 %union {
@@ -48,10 +49,14 @@
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
+
 %%
 /* high-level Definitions */
 Program : ExtDefList	
 		{ 
+			if(lexical_isError == 1) {
+				exit(1);
+			}
 			$$ = newNode(Program, 1, $1); 
 			if(isError == 0)
 				showTree($$); 
@@ -214,8 +219,9 @@ Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 	;
 */
 %%
+extern struct bufstack *curbs;
 yyerror(char *msg) {
 	isError = 1;
 //	fprintf(stderr, "Error type B at Line %d:column %d Missing \"%s\" source is \"%s\"\n",yylineno,yycolumn,msg, yytext);
-	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d is error!\n", yylineno, yytext, yycolumn);
+	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
 }

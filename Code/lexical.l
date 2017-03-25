@@ -3,12 +3,30 @@
 %option nodefault
 %option noyywrap
 /* %option location */
+%x IFILE
 
 %{
+	#include "main.h"
 	#include "syntax.tab.h"
 	#include "tree.h"
+	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
+	int lexical_isError = 0;
+	
+	struct bufstack { struct bufstack *prev;
+		YY_BUFFER_STATE bs;
+		int lineno;
+		char *filename;
+		char pwd[32];
+		FILE *f;
+	};
+	struct bufstack *curbs = NULL;
+	char *curfilename;
+
+	int newfile(char *fn);
+	int popfile(void);
+
 	int yycolumn = 1;
 	#define YY_USER_ACTION \
 		yylloc.first_line = yylloc.last_line = yylineno; \
@@ -23,6 +41,32 @@ space [ \t\n]
 xdigit [0-9a-fA-F]
 
 %%
+
+"#include"[ \t]*[\"<]		{	
+//					fprintf(yyout, "begin include\n");
+					BEGIN IFILE; 
+				}
+
+<IFILE>[^ \t\n\">]+		{
+					int c;
+					while((c = input()) && c != '\n');
+
+					yylineno++;
+//					fprintf(yyout, "file name %s\n", yytext);
+					if(!newfile(yytext))
+						yyterminate();
+					BEGIN INITIAL;
+				}
+
+<IFILE>.|\n			{
+					fprintf(stderr, "%4d bad include line\n", yylineno);
+					yyterminate();
+				}
+
+<<EOF>>				{
+					if(!popfile())
+						yyterminate();
+				}
 
 (0|[1-9]+[0-9]*)		{ 
 //					yylval.type_int = atoi(yytext);
@@ -176,17 +220,89 @@ xdigit [0-9a-fA-F]
 					yylval.type_node->nodevalue.str = strdup(yytext);
 					return ID;}
 [ \t\r]				{ }
-^.				{
-					fprintf(yyout, "%4d %s", yylineno, yytext);
-				}
-
-^\n				{
-					fprintf(yyout, "%4d %s", yylineno++, yytext);
-				}
 
 \n				{
 					yycolumn = 1;
 //					ECHO; 
 				}
-. 				{ printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);	}
+
+. 				{ 
+					lexical_isError = 1;
+					printf("Error type A at Line %d: Mysterious characters \'%s\' in %s\n", 
+						yylineno, yytext, curbs->filename);
+				}
 %%
+
+char* 
+getpwd(char *dest, char *str)
+{
+	int i = strlen(str);
+	while(i >= 0) {
+		if(str[i] == '/')
+			break;
+		i--;
+	}
+	return strncat(dest, str, i + 1);
+}
+newfile(char *fn)
+{
+	FILE *f;
+	struct bufstack *bs = malloc(sizeof(struct bufstack));
+	if(!bs) {
+		perror("malloc");
+		exit(1);
+	}
+	if(curbs){
+		curbs->lineno = yylineno;
+		strcpy(bs->pwd, curbs->pwd);
+		bs->filename = malloc(sizeof(char)*(strlen(fn) + strlen(bs->pwd)));
+		strcpy(bs->filename, bs->pwd);
+	}else{
+		getpwd(bs->pwd, fn);
+		bs->filename = malloc(sizeof(char)*(strlen(fn)));
+	}
+	strcat(bs->filename, fn);
+	f = fopen(bs->filename, "r");
+
+	if(!f) {
+		printf("can't open %s\n", bs->filename);
+		perror(bs->filename);
+		return 0;
+	}
+
+	bs->prev = curbs;
+
+	bs->bs = yy_create_buffer(f, YY_BUF_SIZE);
+	bs->f = f;
+	yy_switch_to_buffer(bs->bs);
+	curbs = bs;
+	yylineno = 1;
+	curfilename = fn;
+	return 1;
+}
+
+int 
+popfile(void)
+{
+	struct bufstack *bs = curbs;
+	struct bufstack *prevbs;
+
+	if(!bs)
+		return 0;
+
+	fclose(bs->f);
+	free(bs->filename);
+	yy_delete_buffer(bs->bs);
+
+	prevbs = bs->prev;
+	free(bs);
+
+	if(!prevbs)
+		return 0;
+	
+	yy_switch_to_buffer(prevbs->bs);
+	curbs = prevbs;
+	yylineno = curbs->lineno;
+	curfilename = curbs->filename;
+	return 1;
+}

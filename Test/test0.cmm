@@ -1,3 +1,7 @@
+#include "test1.cmm"
+#include "test4.cmm"
+#include "test5.cmm"
+
 int main()
 {
 }
