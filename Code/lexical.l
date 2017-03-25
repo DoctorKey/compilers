@@ -18,11 +18,11 @@
 		YY_BUFFER_STATE bs;
 		int lineno;
 		char *filename;
-		char pwd[32];
 		FILE *f;
 	};
 	struct bufstack *curbs = NULL;
 	char *curfilename;
+	char *curpwd;
 
 	int newfile(char *fn);
 	int popfile(void);
@@ -51,7 +51,7 @@ xdigit [0-9a-fA-F]
 					int c;
 					while((c = input()) && c != '\n');
 
-					yylineno++;
+//					yylineno++;
 //					fprintf(yyout, "file name %s\n", yytext);
 					if(!newfile(yytext))
 						yyterminate();
@@ -69,8 +69,6 @@ xdigit [0-9a-fA-F]
 				}
 
 (0|[1-9]+[0-9]*)		{ 
-//					yylval.type_int = atoi(yytext);
-//					printf("INT(%d) ", yylval.type_int);
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = atoi(yytext);
 					return INT;
@@ -233,17 +231,14 @@ xdigit [0-9a-fA-F]
 				}
 %%
 
-char* 
-getpwd(char *dest, char *str)
+void lexical_init()
 {
-	int i = strlen(str);
-	while(i >= 0) {
-		if(str[i] == '/')
-			break;
-		i--;
-	}
-	return strncat(dest, str, i + 1);
+	lexical_isError = 0;
+	curbs = NULL;
+	yycolumn = 1;
 }
+
+int
 newfile(char *fn)
 {
 	FILE *f;
@@ -254,14 +249,13 @@ newfile(char *fn)
 	}
 	if(curbs){
 		curbs->lineno = yylineno;
-		strcpy(bs->pwd, curbs->pwd);
-		bs->filename = malloc(sizeof(char)*(strlen(fn) + strlen(bs->pwd)));
-		strcpy(bs->filename, bs->pwd);
+		bs->filename = malloc(sizeof(char)*(strlen(fn) + strlen(curpwd)));
+		strcpy(bs->filename, curpwd);
+		strcat(bs->filename, fn);
 	}else{
-		getpwd(bs->pwd, fn);
 		bs->filename = malloc(sizeof(char)*(strlen(fn)));
+		strcpy(bs->filename, fn);
 	}
-	strcat(bs->filename, fn);
 	f = fopen(bs->filename, "r");
 
 	if(!f) {
@@ -297,9 +291,10 @@ popfile(void)
 	prevbs = bs->prev;
 	free(bs);
 
-	if(!prevbs)
+	if(!prevbs) {
 		return 0;
-	
+	}
+
 	yy_switch_to_buffer(prevbs->bs);
 	curbs = prevbs;
 	yylineno = curbs->lineno;

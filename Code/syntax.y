@@ -222,6 +222,10 @@ Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
 extern struct bufstack *curbs;
 yyerror(char *msg) {
 	isError = 1;
-//	fprintf(stderr, "Error type B at Line %d:column %d Missing \"%s\" source is \"%s\"\n",yylineno,yycolumn,msg, yytext);
 	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
+}
+
+void syntax_init()
+{
+	isError = 0;
 }
