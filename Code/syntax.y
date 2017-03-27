@@ -4,6 +4,8 @@
 	#include "tree.h"
 	#include "name.h"
 	#include "lex.yy.c"
+	#define YYERROR_VERBOSE 1
+//	#define YYDEBUG 1
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
 	extern int lexical_isError;
@@ -58,7 +60,7 @@ Program : ExtDefList
 				exit(1);
 			}
 			$$ = newNode(Program, 1, $1); 
-			if(isError == 0)
+		//	if(isError == 0)
 				showTree($$); 
 			clearTree($$); 
 		}
@@ -74,6 +76,8 @@ ExtDef : Specifier ExtDecList SEMI
 		{ $$ = newNode(Specifier, 2, $1, $2); }
 	| Specifier FunDec CompSt 
 		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
+	| error SEMI 
+		{ yyerrok; }
 	;
 ExtDecList : VarDec	
 		{ $$ = newNode(ExtDecList, 1, $1); }
@@ -91,6 +95,8 @@ StructSpecifier : STRUCT OptTag LC DefList RC
 		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, $4, $5);}
 	| STRUCT Tag	
 		{ $$ = newNode(StructSpecifier, 2, $1, $2); }
+	| STRUCT OptTag LC error RC 
+		{ yyerrok; }
 	;
 OptTag : 	
 		{ $$ = NULL; }
@@ -111,6 +117,8 @@ FunDec : ID LP VarList RP
 		{ $$ = newNode(FunDec, 4, $1, $2, $3, $4); }
 	| ID LP RP 
 		{ $$ = newNode(FunDec, 3, $1, $2, $3); }
+	| ID LP error RP
+		{ yyerrok; }
 	;
 VarList : ParamDec COMMA VarList	
 		{ $$ = newNode(VarList, 3, $1, $2, $3); }
@@ -124,8 +132,8 @@ ParamDec : Specifier VarDec
 // Statements 
 CompSt : LC DefList StmtList RC 
 		{ $$ = newNode(CompSt, 4, $1, $2, $3, $4); }
-	| error RC 
-		{ }
+	| LC error RC 
+		{  yyerrok; }
 	;
 StmtList : 	
 		{ $$ = NULL; }
@@ -144,7 +152,7 @@ Stmt : Exp SEMI
 		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $5, $6, $7); }
 	| WHILE LP Exp RP Stmt
 		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
-	| error SEMI {} 
+	| error SEMI { yyerrok; } 
 	;
 
 // Local Definitions 
@@ -155,7 +163,7 @@ DefList :
 	;
 Def : Specifier DecList SEMI 
 		{ $$ = newNode(Def, 3, $1, $2, $3); }
-	| error SEMI {} 
+	| error SEMI { yyerrok; } 
 	;
 DecList : Dec	
 		{ $$ = newNode(DecList, 1, $1); }
@@ -210,19 +218,17 @@ Args : Exp COMMA Args
 	| Exp		
 		{ $$ = newNode(Args, 1, $1); }
 	;
-/*
-Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
-	| FLOAT { printf(" %d \n", @1);$$ = $1;}
-	;
-Term : INT { printf(" @1 %d %d \n", @$.first_column, @$.last_column);$$ = $1; }
-	| FLOAT { printf(" %d \n", @1);$$ = $1;}
-	;
-*/
 %%
 extern struct bufstack *curbs;
+
 yyerror(char *msg) {
 	isError = 1;
-	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
+//	fprintf(stderr, "\033[31m\033[4m\033[1m");
+//	fprintf(stderr, "%s\n", msg);
+//	fprintf(stderr, "\033[0m");
+//	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
+	fprintf(stderr, "Error type B at Line %d: %s:", yylineno, curbs->filename);
+	PrintError(msg);
 }
 
 void syntax_init()
