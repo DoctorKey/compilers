@@ -24,6 +24,9 @@ int debug = 0;
 int main(int argc, char** argv)
 {
 	int i;
+#if YYDEBUG == 1
+	yydebug = 1;
+#endif
 	if (argc <= 1) {
 		printf("you must input file!\n");
 		return 1;
@@ -42,14 +45,14 @@ int main(int argc, char** argv)
 
 			curpwd = malloc(sizeof(char)*strlen(argv[i]));
 			getpwd(curpwd, argv[i]);
-			newfile(argv[i]);
-#if YYDEBUG == 1
-			yydebug = 1;
-#endif
-			if(getNextLine() == 0)
-				yyparse();
-			free(curpwd);
-			//		fclose(f);	
+			if(newfile(argv[i])) {
+				fprintf(stderr, "newfile(%s) error!\n", argv[i]);
+				continue;
+			}else {
+				if(getNextLine() == 0)
+					yyparse();
+				free(curpwd);
+			}
 		}
 	}
   	free_buffer();

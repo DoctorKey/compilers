@@ -61,7 +61,7 @@ xdigit [0-9a-fA-F]
 
 //					yylineno++;
 //					fprintf(yyout, "file name %s\n", yytext);
-					if(!newfile(yytext))
+					if(newfile(yytext))
 						yyterminate();
 					BEGIN INITIAL;
 				}
@@ -74,7 +74,7 @@ xdigit [0-9a-fA-F]
 
 <<EOF>>				{
     					BeginToken(yytext); 
-					if(!popfile())
+					if(popfile())
 						yyterminate();
 				}
 
@@ -294,7 +294,7 @@ newfile(char *fn)
 	struct bufstack *bs = malloc(sizeof(struct bufstack));
 	if(!bs) {
 		perror("malloc");
-		exit(1);
+		return 1;
 	}
 	if(curbs){
 		curbs->lineno = yylineno;
@@ -310,7 +310,7 @@ newfile(char *fn)
 	if(!f) {
 		printf("can't open %s\n", bs->filename);
 		perror(bs->filename);
-		return 0;
+		return 1;
 	}
 
 	bs->prev = curbs;
@@ -321,7 +321,7 @@ newfile(char *fn)
 	curbs = bs;
 	yylineno = 1;
 	curfilename = fn;
-	return 1;
+	return 0;
 }
 
 int 
@@ -331,7 +331,7 @@ popfile(void)
 	struct bufstack *prevbs;
 
 	if(!bs)
-		return 0;
+		return 1;
 
 	fclose(bs->f);
 	free(bs->filename);
@@ -341,14 +341,14 @@ popfile(void)
 	free(bs);
 
 	if(!prevbs) {
-		return 0;
+		return 1;
 	}
 
 	yy_switch_to_buffer(prevbs->bs);
 	curbs = prevbs;
 	yylineno = curbs->lineno;
 	curfilename = curbs->filename;
-	return 1;
+	return 0;
 }
 FILE *getCurFile()
 {
