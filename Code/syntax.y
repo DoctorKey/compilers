@@ -60,7 +60,7 @@ Program : ExtDefList
 				exit(1);
 			}
 			$$ = newNode(Program, 1, $1); 
-		//	if(isError == 0)
+			if(isError == 0)
 				showTree($$); 
 			clearTree($$); 
 		}
@@ -223,12 +223,12 @@ extern struct bufstack *curbs;
 
 yyerror(char *msg) {
 	isError = 1;
-//	fprintf(stderr, "\033[31m\033[4m\033[1m");
-//	fprintf(stderr, "%s\n", msg);
-//	fprintf(stderr, "\033[0m");
+	fprintf(stderr, "\033[31m\033[1m");
+	fprintf(stderr, "Error ");
+	fprintf(stderr, "\033[0m");
 //	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
-	fprintf(stderr, "Error type B at Line %d: %s:", yylineno, curbs->filename);
-	PrintError(msg);
+	fprintf(stderr, "type B at Line %d: ", yylineno);
+	PrintError('B', msg);
 }
 
 void syntax_init()

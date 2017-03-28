@@ -262,6 +262,9 @@ xdigit [0-9a-fA-F]
 
 \n				{
     					BeginToken(yytext); 
+					//may be can not detect \n I don't know why
+					if(debug)
+						fprintf(stderr, "new line\n");
 					yycolumn = 1;
 //					ECHO; 
 				}
@@ -269,8 +272,11 @@ xdigit [0-9a-fA-F]
 . 				{ 
     					BeginToken(yytext); 
 					lexical_isError = 1;
-					printf("Error type A at Line %d: Mysterious characters \'%s\' in %s\n", 
-						yylineno, yytext, curbs->filename);
+					fprintf(stderr, "\033[31m\033[1m");
+					fprintf(stderr, "Error ");
+					fprintf(stderr, "\033[0m");
+					fprintf(stderr, "type A at Line %d: ", yylineno);
+					PrintError('A', yytext);
 				}
 %%
 
