@@ -60,15 +60,19 @@ struct node *newtokenNode(int type)
 void clearTree(struct node *node)
 {
 	int i = 0;
+	if(node == NULL)
+		return;
 	for(i = 0;i != CHILD_NUM;i++) {
 		if(node->children[i] != NULL) {
 			clearTree(node->children[i]);
+			node->children[i] = NULL;
 		}
 	}
 	if(node->nodetype == TYPE || node->nodetype == ID) {
 		free(node->nodevalue.str);
 	}
 	free(node);
+	node = NULL;
 }
 void showTree(struct node *node)
 {

@@ -1,4 +1,6 @@
 #include "error.h"
+//extern int lMaxBuffer;
+
 /*--------------------------------------------------------------------
  * MarkToken
  * 
