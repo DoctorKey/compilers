@@ -1,0 +1,60 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        StructSpecifier (1)
+          STRUCT
+          OptTag (1)
+            ID: Complex
+          LC
+          DefList (3)
+            Def (3)
+              Specifier (3)
+                TYPE: float
+              DecList (3)
+                Dec (3)
+                  VarDec (3)
+                    ID: real
+                COMMA
+                DecList (3)
+                  Dec (3)
+                    VarDec (3)
+                      ID: image
+              SEMI
+          RC
+      SEMI
+    ExtDefList (6)
+      ExtDef (6)
+        Specifier (6)
+          TYPE: int
+        FunDec (6)
+          ID: main
+          LP
+          RP
+        CompSt (7)
+          LC
+          DefList (8)
+            Def (8)
+              Specifier (8)
+                StructSpecifier (8)
+                  STRUCT
+                  Tag (8)
+                    ID: Complex
+              DecList (8)
+                Dec (8)
+                  VarDec (8)
+                    ID: x
+              SEMI
+          StmtList (9)
+            Stmt (9)
+              Exp (9)
+                Exp (9)
+                  Exp (9)
+                    ID: y
+                  DOT
+                  ID: image
+                ASSIGNOP
+                Exp (9)
+                  FLOAT: 3.500000
+              SEMI
+          RC

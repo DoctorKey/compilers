@@ -1,0 +1,6 @@
+test100.cmm~test109.cmm:
+is the sample from the book which is example1.1~example1.10
+
+test110.cmm:
+第一行少一段括号（应该报两个错误吧）
+

@@ -235,7 +235,6 @@ Args : Exp COMMA Args
 		{ $$ = newNode(Args, 1, $1); }
 	;
 %%
-extern struct bufstack *curbs;
 
 yyerror(char *msg) {
 	isError = 1;

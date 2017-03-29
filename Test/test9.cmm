@@ -1,0 +1,11 @@
+int main()
+{
+	struct{ 
+		int c
+	}	
+	int a
+	int b;
+
+int f()
+{
+}

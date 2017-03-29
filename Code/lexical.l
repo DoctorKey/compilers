@@ -47,7 +47,8 @@ xdigit [0-9a-fA-F]
     					BeginToken(yytext); 
 					while((c = input()) && c != '\n');
 //					fprintf(yyout, "file name %s\n", yytext);
-					printf("new file!\n");
+					if(debug)
+						printf("begin file!\n");
 					if(newfile(yytext))
 						yyterminate();
 					BEGIN INITIAL;
@@ -60,11 +61,10 @@ xdigit [0-9a-fA-F]
 				}
 
 <<EOF>>				{
-//					if(debug)
+					if(debug)
 						printf("eof of file!\n");
     					BeginToken(yytext); 
 					if(popfile()) {
-						printf("terminate\n");
 						yyterminate();
 					}
 				}
@@ -274,7 +274,8 @@ xdigit [0-9a-fA-F]
 void lexical_init()
 {
 	lexical_isError = 0;
-	curbs = NULL;
+	curfile = NULL;
+	curbuffer = NULL;
 	yycolumn = 1;
 }
 

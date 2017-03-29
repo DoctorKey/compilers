@@ -13,8 +13,6 @@ extern char *curpwd;
 extern void lexical_init();
 extern void syntax_init();
 
-extern int init_buffer();
-extern void free_buffer();
 char* getpwd(char *dest, char *str);
 
 int debug = 0;
@@ -24,9 +22,6 @@ int main(int argc, char** argv)
 	int i;
 	if (argc <= 1) {
 		printf("you must input file!\n");
-		return 1;
-	}
-	if(init_buffer()) {
 		return 1;
 	}
 	for(i = 1; i < argc; i++) {
@@ -53,18 +48,6 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-  	free_buffer();
 	return 0;
 }
 
-char* 
-getpwd(char *dest, char *str)
-{
-	int i = strlen(str);
-	while(i >= 0) {
-		if(str[i] == '/')
-			break;
-		i--;
-	}
-	return strncpy(dest, str, i + 1);
-}
