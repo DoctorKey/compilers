@@ -8,7 +8,8 @@ extern int yylineno;
 void updateChildDepth(struct node *node)
 {
 	int i;
-	node->depth++;
+	if(node != NULL)
+		node->depth++;
 	for(i = 0;i != CHILD_NUM; i++) {
 		if(node->children[i] != NULL){
 			updateChildDepth(node->children[i]);
@@ -70,6 +71,7 @@ void clearTree(struct node *node)
 	}
 	if(node->nodetype == TYPE || node->nodetype == ID) {
 		free(node->nodevalue.str);
+		node->nodevalue.str = NULL;
 	}
 	free(node);
 	node = NULL;

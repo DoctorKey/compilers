@@ -75,7 +75,7 @@ xdigit [0-9a-fA-F]
 					yylval.type_node->nodevalue.INT = atoi(yytext);
 					return INT;
 				}
-(0[1-7]+[0-7]*)			{
+(0+[1-7]+[0-7]*)		{
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = strtol(yytext, NULL, 8);

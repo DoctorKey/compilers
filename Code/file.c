@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include "main.h"
 #include "file.h"
+#include "error.h"
 #include "syntax.tab.h"
 
 struct Filestack *curfile = NULL;
@@ -176,9 +177,13 @@ void DumpRow(void) {
 void
 cleanBuffer(void) {
 	int i;
+	errorbuffer = malloc(curbuffer->lBuffer);
+	strcpy(errorbuffer, curbuffer->buffer);
 	for(i = 0;i < curbuffer->lBuffer; i++) {
-		if(curbuffer->buffer[i] == '\t' || curbuffer->buffer[i] == '\r' || curbuffer->buffer[i] == '\n') 
-			curbuffer->buffer[i] = ' ';
+		if(errorbuffer[i] == '\t' || errorbuffer[i] == '\r' || errorbuffer[i] == '\n') 
+			errorbuffer[i] = ' ';
+		//if(curbuffer->buffer[i] == '\t' || curbuffer->buffer[i] == '\r' || curbuffer->buffer[i] == '\n') 
+		//	curbuffer->buffer[i] = ' ';
 	}
 }
 /*--------------------------------------------------------------------

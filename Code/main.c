@@ -13,8 +13,6 @@ extern char *curpwd;
 extern void lexical_init();
 extern void syntax_init();
 
-char* getpwd(char *dest, char *str);
-
 int debug = 0;
 
 int main(int argc, char** argv)
@@ -38,14 +36,16 @@ int main(int argc, char** argv)
 
 			curpwd = malloc(sizeof(char)*strlen(argv[i]));
 			getpwd(curpwd, argv[i]);
+
 			if(newfile(argv[i])) {
 				fprintf(stderr, "newfile(%s) error!\n", argv[i]);
-				continue;
 			}else {
 				if(getNextLine() == 0)
 					yyparse();
-				free(curpwd);
 			}
+
+			free(curpwd);
+			curpwd = NULL;
 		}
 	}
 	return 0;

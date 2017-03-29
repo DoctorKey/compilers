@@ -1,6 +1,6 @@
 #include "error.h"
-//extern int lMaxBuffer;
 
+char *errorbuffer = NULL;
 /*--------------------------------------------------------------------
  * MarkToken
  * 
@@ -11,7 +11,8 @@ void PrintError(char type, char *errorstring, ...) {
 	static char errmsg[10000];
 	va_list args;
 
-	if(!curbuffer) {
+	cleanBuffer();
+	if(!errorbuffer) {
 		va_start(args, errorstring);
 		vsprintf(errmsg, errorstring, args);
 		va_end(args);
@@ -28,13 +29,17 @@ void PrintError(char type, char *errorstring, ...) {
 	}
 	/*================================================================*/
 	/* a bit more complicate version ---------------------------------*/
-	cleanBuffer();
-	fprintf(stderr, "\"%.*s", start - 1, curbuffer->buffer);
+	//fprintf(stderr, "\"%.*s", start - 1, curbuffer->buffer);
+	fprintf(stderr, "\"%.*s", start - 1, errorbuffer);
 	fprintf(stderr, "\033[31m\033[1m");
-	fprintf(stderr, "%.*s", end - start + 1, curbuffer->buffer + start - 1);
+	//fprintf(stderr, "%.*s", end - start + 1, curbuffer->buffer + start - 1);
+	fprintf(stderr, "%.*s", end - start + 1, errorbuffer + start - 1);
 	fprintf(stderr, "\033[0m");
 	//lBuffer - end - 1 need -1 and don't printf \n
-	fprintf(stderr, "%.*s\"", curbuffer->lBuffer - end , curbuffer->buffer + end);
+	//fprintf(stderr, "%.*s\"", curbuffer->lBuffer - end , curbuffer->buffer + end);
+	fprintf(stderr, "%.*s\"", curbuffer->lBuffer - end , errorbuffer + end);
+	free(errorbuffer);
+	errorbuffer = NULL;
 
 	/*================================================================*/
 	/* print it using variable arguments -----------------------------*/

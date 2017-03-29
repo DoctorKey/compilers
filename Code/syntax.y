@@ -10,6 +10,7 @@
 	int isError = 0;
 	extern int lexical_isError;
 %}
+
 /* declared types */
 %union {
 //	int type_int;
@@ -52,17 +53,20 @@
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+%destructor {
+//			printf("free at node\n");
+			clearTree($$);
+			$$ = NULL;
+		} <type_node>
 %%
 /* high-level Definitions */
 Program : ExtDefList	
 		{ 
-			if(lexical_isError == 1) {
-				exit(1);
-			}
 			$$ = newNode(Program, 1, $1); 
-			if(isError == 0)
+			if(isError == 0 && lexical_isError == 0)
 				showTree($$); 
 			clearTree($$); 
+			$$ = NULL;
 		}
 	;
 ExtDefList : 	
