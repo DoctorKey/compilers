@@ -7,9 +7,7 @@
 
 //extern void yyrestart  (FILE * input_file );
 extern int yyparse ();
-#if YYDEBUG == 1
 extern int yydebug;
-#endif
 extern int newfile(char *fn);
 extern char *curpwd;
 extern void lexical_init();
@@ -24,9 +22,6 @@ int debug = 0;
 int main(int argc, char** argv)
 {
 	int i;
-#if YYDEBUG == 1
-	yydebug = 1;
-#endif
 	if (argc <= 1) {
 		printf("you must input file!\n");
 		return 1;
@@ -38,6 +33,9 @@ int main(int argc, char** argv)
 		if (  strcmp(argv[i], "-debug") == 0  ) {
 			printf("debugging activated\n");
 			debug = 1;
+		}else if( strcmp(argv[i], "-yydebug") == 0  ) {
+			printf("yydebug activated\n");
+			yydebug = 1;
 		}
 		else {
 			lexical_init();

@@ -5,7 +5,7 @@
 	#include "name.h"
 	#include "lex.yy.c"
 	#define YYERROR_VERBOSE 1
-//	#define YYDEBUG 1
+	#define YYDEBUG 1
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
 	extern int lexical_isError;
@@ -73,7 +73,7 @@ ExtDefList :
 ExtDef : Specifier ExtDecList SEMI 
 		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
 	| Specifier SEMI	
-		{ $$ = newNode(Specifier, 2, $1, $2); }
+		{ $$ = newNode(ExtDef, 2, $1, $2); }
 	| Specifier FunDec CompSt 
 		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
 	| error SEMI 
@@ -97,6 +97,10 @@ StructSpecifier : STRUCT OptTag LC DefList RC
 		{ $$ = newNode(StructSpecifier, 2, $1, $2); }
 	| STRUCT OptTag LC error RC 
 		{ yyerrok; }
+	| error LC DefList RC 
+		{ yyerrok; }
+	| error LC error RC 
+		{ yyerrok; }
 	;
 OptTag : 	
 		{ $$ = NULL; }
@@ -117,6 +121,10 @@ FunDec : ID LP VarList RP
 		{ $$ = newNode(FunDec, 4, $1, $2, $3, $4); }
 	| ID LP RP 
 		{ $$ = newNode(FunDec, 3, $1, $2, $3); }
+	| error LP VarList RP 
+		{ yyerrok; }
+	| error LP error RP 
+		{ yyerrok; }
 	| ID LP error RP
 		{ yyerrok; }
 	;
@@ -152,7 +160,14 @@ Stmt : Exp SEMI
 		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $5, $6, $7); }
 	| WHILE LP Exp RP Stmt
 		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
-	| error SEMI { yyerrok; } 
+	| error SEMI 
+		{ yyerrok; } 
+	| IF LP error RP Stmt %prec LOWER_THAN_ELSE 
+		{ yyerrok; }
+	| IF LP error RP Stmt ELSE Stmt
+		{ yyerrok; }
+	| WHILE LP error RP Stmt
+		{ yyerrok; }
 	;
 
 // Local Definitions 
@@ -163,7 +178,8 @@ DefList :
 	;
 Def : Specifier DecList SEMI 
 		{ $$ = newNode(Def, 3, $1, $2, $3); }
-	| error SEMI { yyerrok; } 
+	| error SEMI 
+		{ yyerrok; } 
 	;
 DecList : Dec	
 		{ $$ = newNode(DecList, 1, $1); }

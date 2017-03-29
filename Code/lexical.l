@@ -9,23 +9,11 @@
 	#include "main.h"
 	#include "syntax.tab.h"
 	#include "tree.h"
+	#include "file.h"
 	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
 	int lexical_isError = 0;
-	
-	struct bufstack { struct bufstack *prev;
-		YY_BUFFER_STATE bs;
-		int lineno;
-		char *filename;
-		FILE *f;
-	};
-	struct bufstack *curbs = NULL;
-	char *curfilename;
-	char *curpwd;
-
-	int newfile(char *fn);
-	int popfile(void);
 
 	int yycolumn = 1;
 #define YY_USER_ACTION \
@@ -58,9 +46,8 @@ xdigit [0-9a-fA-F]
 					int c;
     					BeginToken(yytext); 
 					while((c = input()) && c != '\n');
-
-//					yylineno++;
 //					fprintf(yyout, "file name %s\n", yytext);
+					printf("new file!\n");
 					if(newfile(yytext))
 						yyterminate();
 					BEGIN INITIAL;
@@ -73,9 +60,13 @@ xdigit [0-9a-fA-F]
 				}
 
 <<EOF>>				{
+//					if(debug)
+						printf("eof of file!\n");
     					BeginToken(yytext); 
-					if(popfile())
+					if(popfile()) {
+						printf("terminate\n");
 						yyterminate();
+					}
 				}
 
 (0|[1-9]+[0-9]*)		{ 
@@ -287,70 +278,3 @@ void lexical_init()
 	yycolumn = 1;
 }
 
-int
-newfile(char *fn)
-{
-	FILE *f;
-	struct bufstack *bs = malloc(sizeof(struct bufstack));
-	if(!bs) {
-		perror("malloc");
-		return 1;
-	}
-	if(curbs){
-		curbs->lineno = yylineno;
-		bs->filename = malloc(sizeof(char)*(strlen(fn) + strlen(curpwd)));
-		strcpy(bs->filename, curpwd);
-		strcat(bs->filename, fn);
-	}else{
-		bs->filename = malloc(sizeof(char)*(strlen(fn)));
-		strcpy(bs->filename, fn);
-	}
-	f = fopen(bs->filename, "r");
-
-	if(!f) {
-		printf("can't open %s\n", bs->filename);
-		perror(bs->filename);
-		return 1;
-	}
-
-	bs->prev = curbs;
-
-	bs->bs = yy_create_buffer(f, YY_BUF_SIZE);
-	bs->f = f;
-	yy_switch_to_buffer(bs->bs);
-	curbs = bs;
-	yylineno = 1;
-	curfilename = fn;
-	return 0;
-}
-
-int 
-popfile(void)
-{
-	struct bufstack *bs = curbs;
-	struct bufstack *prevbs;
-
-	if(!bs)
-		return 1;
-
-	fclose(bs->f);
-	free(bs->filename);
-	yy_delete_buffer(bs->bs);
-
-	prevbs = bs->prev;
-	free(bs);
-
-	if(!prevbs) {
-		return 1;
-	}
-
-	yy_switch_to_buffer(prevbs->bs);
-	curbs = prevbs;
-	yylineno = curbs->lineno;
-	curfilename = curbs->filename;
-	return 0;
-}
-FILE *getCurFile()
-{
-	return curbs->f;
-}
