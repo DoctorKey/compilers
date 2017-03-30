@@ -7,8 +7,6 @@
 #include "file.h"
 #include "syntax.tab.h"
 
-extern char *errorbuffer;
-
 extern void PrintError(char type, char *s, ...);
 
 

@@ -174,18 +174,6 @@ void DumpRow(void) {
 	else 
 		fprintf(stdout, "%6d |%.*s", curbuffer->nRow, curbuffer->lBuffer, curbuffer->buffer);
 }
-void
-cleanBuffer(void) {
-	int i;
-	errorbuffer = malloc(curbuffer->lBuffer);
-	strcpy(errorbuffer, curbuffer->buffer);
-	for(i = 0;i < curbuffer->lBuffer; i++) {
-		if(errorbuffer[i] == '\t' || errorbuffer[i] == '\r' || errorbuffer[i] == '\n') 
-			errorbuffer[i] = ' ';
-		//if(curbuffer->buffer[i] == '\t' || curbuffer->buffer[i] == '\r' || curbuffer->buffer[i] == '\n') 
-		//	curbuffer->buffer[i] = ' ';
-	}
-}
 /*--------------------------------------------------------------------
  * getNextLine
  * 

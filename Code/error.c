@@ -1,6 +1,7 @@
 #include "error.h"
 
 char *errorbuffer = NULL;
+void cleanBuffer(void);
 /*--------------------------------------------------------------------
  * MarkToken
  * 
@@ -50,4 +51,14 @@ void PrintError(char type, char *errorstring, ...) {
 	fprintf(stderr, "%s\n", errmsg + 13);
 	if(debug)
 		fprintf(stderr, "start:%d, end:%d, lBuffer:%d\n", start, end, curbuffer->lBuffer);
+}
+void
+cleanBuffer(void) {
+	int i;
+	errorbuffer = malloc(curbuffer->lBuffer);
+	strcpy(errorbuffer, curbuffer->buffer);
+	for(i = 0;i < curbuffer->lBuffer; i++) {
+		if(errorbuffer[i] == '\t' || errorbuffer[i] == '\r' || errorbuffer[i] == '\n') 
+			errorbuffer[i] = ' ';
+	}
 }

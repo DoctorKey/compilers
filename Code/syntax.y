@@ -81,7 +81,7 @@ ExtDef : Specifier ExtDecList SEMI
 	| Specifier FunDec CompSt 
 		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
 	| error SEMI 
-		{ yyerrok; }
+		{ $$ = newNode(ExtDef, 2, NULL, $2); yyerrok; }
 	;
 ExtDecList : VarDec	
 		{ $$ = newNode(ExtDecList, 1, $1); }
@@ -100,11 +100,11 @@ StructSpecifier : STRUCT OptTag LC DefList RC
 	| STRUCT Tag	
 		{ $$ = newNode(StructSpecifier, 2, $1, $2); }
 	| STRUCT OptTag LC error RC 
-		{ yyerrok; }
+		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, NULL, $5); yyerrok; }
 	| error LC DefList RC 
-		{ yyerrok; }
+		{ $$ = newNode(StructSpecifier, 4, NULL, $2, $3, $4); yyerrok; }
 	| error LC error RC 
-		{ yyerrok; }
+		{ $$ = newNode(StructSpecifier, 4, NULL, $2, NULL, $4); yyerrok; }
 	;
 OptTag : 	
 		{ $$ = NULL; }
@@ -126,11 +126,11 @@ FunDec : ID LP VarList RP
 	| ID LP RP 
 		{ $$ = newNode(FunDec, 3, $1, $2, $3); }
 	| error LP VarList RP 
-		{ yyerrok; }
+		{ $$ = newNode(FunDec, 4, NULL, $2, $3, $4); yyerrok; }
 	| error LP error RP 
-		{ yyerrok; }
+		{ $$ = newNode(FunDec, 4, NULL, $2, NULL, $4); yyerrok; }
 	| ID LP error RP
-		{ yyerrok; }
+		{ $$ = newNode(FunDec, 4, $1, $2, NULL, $4); yyerrok; }
 	;
 VarList : ParamDec COMMA VarList	
 		{ $$ = newNode(VarList, 3, $1, $2, $3); }
@@ -145,7 +145,7 @@ ParamDec : Specifier VarDec
 CompSt : LC DefList StmtList RC 
 		{ $$ = newNode(CompSt, 4, $1, $2, $3, $4); }
 	| LC error RC 
-		{  yyerrok; }
+		{ $$ = newNode(CompSt, 3, $1, NULL, $3); yyerrok; }
 	;
 StmtList : 	
 		{ $$ = NULL; }
@@ -165,13 +165,13 @@ Stmt : Exp SEMI
 	| WHILE LP Exp RP Stmt
 		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
 	| error SEMI 
-		{ yyerrok; } 
+		{ $$ = newNode(Stmt, 2, NULL, $2); yyerrok; }
 	| IF LP error RP Stmt %prec LOWER_THAN_ELSE 
-		{ yyerrok; }
+		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $5); yyerrok; }
 	| IF LP error RP Stmt ELSE Stmt
-		{ yyerrok; }
+		{ $$ = newNode(Stmt, 7, $1, $2, NULL, $4, $5, $6, $7); yyerrok; }
 	| WHILE LP error RP Stmt
-		{ yyerrok; }
+		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $5); yyerrok; }
 	;
 
 // Local Definitions 
@@ -183,7 +183,7 @@ DefList :
 Def : Specifier DecList SEMI 
 		{ $$ = newNode(Def, 3, $1, $2, $3); }
 	| error SEMI 
-		{ yyerrok; } 
+		{ $$ = newNode(Def, 2, NULL, $2); yyerrok; }
 	;
 DecList : Dec	
 		{ $$ = newNode(DecList, 1, $1); }

@@ -39,6 +39,5 @@ void DumpRow(void);
 int getNextLine();
 int GetNextChar(char *b, int maxBuffer);
 void BeginToken(char*);
-void cleanBuffer(void);
 
 #endif
