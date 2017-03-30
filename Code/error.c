@@ -1,5 +1,6 @@
 #include "error.h"
 
+void printfErrorRow(char *errmsg, int start, int end); 
 void initerrorBuffer(char *);
 /*--------------------------------------------------------------------
  * MarkToken
@@ -10,15 +11,37 @@ extern
 void PrintError(char type, char *errorstring, ...) {
 	static char errmsg[10000];
 	va_list args;
+	int start=curbuffer->nTokenStart;
+	int end=start + curbuffer->nTokenLength - 1;
 
 	initerrorBuffer(errmsg);
 
-	int start=curbuffer->nTokenStart;
-	int end=start + curbuffer->nTokenLength - 1;
-	int i;
 	if(type == 'A') {
+
 		fprintf(stderr, "Mysterious characters "); 
+		printfErrorRow(errmsg, start, end); 
+		fprintf(stderr, "\n");
+
+	}else if(type == 'B') {
+
+		printfErrorRow(errmsg, start, end); 
+		/*================================================================*/
+		/* print it using variable arguments -----------------------------*/
+		va_start(args, errorstring);
+		vsprintf(errmsg, errorstring, args);
+		va_end(args);
+		fprintf(stderr, "%s\n", errmsg + 13);
+
+	}else {
+		fprintf(stderr, "unknow error type\n");
 	}
+
+	if(debug)
+		fprintf(stderr, "start:%d, end:%d, lBuffer:%d\n", start, end, curbuffer->lBuffer);
+	return;
+}
+void 
+printfErrorRow(char *errmsg, int start, int end) {
 	/*================================================================*/
 	/* a bit more complicate version ---------------------------------*/
 	fprintf(stderr, "\"%.*s", start - 1, errmsg);
@@ -27,16 +50,7 @@ void PrintError(char type, char *errorstring, ...) {
 	fprintf(stderr, "\033[0m");
 	//lBuffer - end - 1 need -1 and don't printf \n
 	fprintf(stderr, "%.*s\"", curbuffer->lBuffer - end , errmsg + end);
-
-	/*================================================================*/
-	/* print it using variable arguments -----------------------------*/
-	va_start(args, errorstring);
-	vsprintf(errmsg, errorstring, args);
-	va_end(args);
-
-	fprintf(stderr, "%s\n", errmsg + 13);
-	if(debug)
-		fprintf(stderr, "start:%d, end:%d, lBuffer:%d\n", start, end, curbuffer->lBuffer);
+	return;	
 }
 void
 initerrorBuffer(char *errorbuffer) {
@@ -46,4 +60,5 @@ initerrorBuffer(char *errorbuffer) {
 		if(errorbuffer[i] == '\t' || errorbuffer[i] == '\r' || errorbuffer[i] == '\n') 
 			errorbuffer[i] = ' ';
 	}
+	return;
 }

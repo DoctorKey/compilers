@@ -3,7 +3,6 @@
 %option nodefault
 %option noyywrap
 /* %option location */
-%x IFILE
 
 %{
 	#include "main.h"
@@ -26,9 +25,10 @@
 	result = GetNextChar(buf, max_size); \
 	if (  result <= 0  ) \
 	result = YY_NULL; \
-}
+	}
 
 %}
+
 digit [0-9]
 letter [_a-zA-Z]
 space [ \t\n]
@@ -36,37 +36,11 @@ xdigit [0-9a-fA-F]
 
 %%
 
-"#include"[ \t]*[\"<]		{	
-//					fprintf(yyout, "begin include\n");
-    					BeginToken(yytext); 
-					BEGIN IFILE; 
-				}
-
-<IFILE>[^ \t\n\">]+		{
-					int c;
-    					BeginToken(yytext); 
-					while((c = input()) && c != '\n');
-//					fprintf(yyout, "file name %s\n", yytext);
-					if(debug)
-						printf("begin file!\n");
-					if(newfile(yytext))
-						return 0;
-					BEGIN INITIAL;
-				}
-
-<IFILE>.|\n			{
-    					BeginToken(yytext); 
-					fprintf(stderr, "%4d bad include line\n", yylineno);
-					return 0;
-				}
-
 <<EOF>>				{
 					if(debug)
 						printf("eof of file!\n");
     					BeginToken(yytext); 
-					if(popfile()) {
-						return 0;
-					}
+					return 0;
 				}
 
 (0|[1-9]+[0-9]*)		{ 
@@ -90,8 +64,6 @@ xdigit [0-9a-fA-F]
 
 [1-9]*[0-9]"."[0-9]* 		{ 
     					BeginToken(yytext); 
-//					yylval.type_float = atof(yytext);
-//					printf("FLOAT(%f) ", yylval.type_float);
 					yylval.type_node = newtokenNode(FLOAT);
 					yylval.type_node->nodevalue.FLOAT = atof(yytext);
 					return FLOAT;
@@ -99,62 +71,53 @@ xdigit [0-9a-fA-F]
 
 ";"				{ 
     					BeginToken(yytext); 
-//					printf("SEMI  ");
 					yylval.type_node = newtokenNode(SEMI);
 					return SEMI;	
 				}
 
 ","				{ 
     					BeginToken(yytext); 
-//					printf("COMMA  "); 
 					yylval.type_node = newtokenNode(COMMA);
 					return COMMA;
 				}
 
 (>|<|>=|<=|==|!=)		{ 	
     					BeginToken(yytext); 
-//					printf("RELOP  "); 
 					yylval.type_node = newtokenNode(RELOP);
 					return RELOP;
 				}
 
 "="				{ 
     					BeginToken(yytext); 
-//					printf("ASSIGNOP  "); 
 					yylval.type_node = newtokenNode(ASSIGNOP);
 					return ASSIGNOP;
 				}
 
 "+"				{ 
     					BeginToken(yytext); 
-//					printf("PLUS  "); 
 					yylval.type_node = newtokenNode(PLUS);
 					return PLUS;
 				}
 
 "-"				{ 
     					BeginToken(yytext); 
-//					printf("MINUS  "); 
 					yylval.type_node = newtokenNode(MINUS);
 					return MINUS;
 				}
 
 "*"				{ 
     					BeginToken(yytext); 
-//					printf("STAR  "); 
 					yylval.type_node = newtokenNode(STAR);
 					return STAR;
 				}
 
 "/"				{ 
     					BeginToken(yytext); 
-//					printf("DIV  "); 
 					yylval.type_node = newtokenNode(DIV);
 					return DIV;
 				}
 "&&"				{ 
     					BeginToken(yytext); 
-//					printf("AND  "); 
 					yylval.type_node = newtokenNode(AND);
 					return AND;
 				}
@@ -191,54 +154,43 @@ xdigit [0-9a-fA-F]
 					return RP;}
 "["				{ 
     					BeginToken(yytext); 
-//					printf("LB  "); 
 					yylval.type_node = newtokenNode(LB);
 					return LB;}
 "]"				{ 
     					BeginToken(yytext); 
-//					printf("RB  "); 
 					yylval.type_node = newtokenNode(RB);
 					return RB;}
 "{"				{ 
     					BeginToken(yytext); 
-//					printf("LC  "); 
 					yylval.type_node = newtokenNode(LC);
 					return LC;}
 "}"				{ 
     					BeginToken(yytext); 
-//					printf("RC  "); 
 					yylval.type_node = newtokenNode(RC);
 					return RC;}
 "struct"			{ 
     					BeginToken(yytext); 
-//					printf("STRUCT  "); 
 					yylval.type_node = newtokenNode(STRUCT);
 					return STRUCT;}
 "return"			{ 
     					BeginToken(yytext); 
-//					printf("RETURN  "); 
 					yylval.type_node = newtokenNode(RETURN);
 					return RETURN;}
 "if"				{ 
     					BeginToken(yytext); 
-//					printf("IF  "); 
 					yylval.type_node = newtokenNode(IF);
 					return IF;}
 "else"				{ 
     					BeginToken(yytext); 
-//					printf("ELSE  "); 
 					yylval.type_node = newtokenNode(ELSE);
 					return ELSE;}
 "while"				{ 
     					BeginToken(yytext); 
-//					printf("WHILE  "); 
 					yylval.type_node = newtokenNode(WHILE);
 					return WHILE;}
 {letter}+({digit}|{letter})*	{ 
     					BeginToken(yytext); 
-//					printf("ID  "); 
 					yylval.type_node = newtokenNode(ID);
-					//strdup need to free
 					yylval.type_node->nodevalue.str = strdup(yytext);
 					return ID;}
 [ \t\r]				{ 
@@ -247,11 +199,9 @@ xdigit [0-9a-fA-F]
 
 \n				{
     					BeginToken(yytext); 
-					//may be can not detect \n I don't know why
 					if(debug)
 						fprintf(stderr, "new line\n");
 					yycolumn = 1;
-//					ECHO; 
 				}
 
 . 				{ 
@@ -268,8 +218,6 @@ xdigit [0-9a-fA-F]
 void lexical_init()
 {
 	lexical_isError = 0;
-	curfile = NULL;
-	curbuffer = NULL;
 	yycolumn = 1;
 }
 

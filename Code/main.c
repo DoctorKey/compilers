@@ -33,9 +33,6 @@ int main(int argc, char** argv)
 			lexical_init();
 			syntax_init();
 
-			curpwd = malloc(sizeof(char)*strlen(argv[i]));
-			getpwd(curpwd, argv[i]);
-
 			if(newfile(argv[i])) {
 				fprintf(stderr, "newfile(%s) error!\n", argv[i]);
 			}else {
@@ -43,9 +40,7 @@ int main(int argc, char** argv)
 					yyparse();
 			}
 
-			freecur();
-			free(curpwd);
-			curpwd = NULL;
+			closefile();
 		}
 	}
 	return 0;

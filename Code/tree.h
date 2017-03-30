@@ -18,6 +18,8 @@ struct node {
 	struct node *children[CHILD_NUM];
 };
 
+extern int nodeCount;
+
 struct node *newNode(int type,int num, ...);
 struct node *newtokenNode(int type);
 void clearTree(struct node *node);

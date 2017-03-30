@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int nodeCount = 0;
 extern int yylineno;
 void updateChildDepth(struct node *node)
 {
@@ -27,6 +28,7 @@ struct node *newNode(int type,int num, ...)
 		printf("out of space");
 		exit(0);
 	}
+	nodeCount++;
 	temp->nodetype = type;
 	temp->depth = 0;
 	for(i = 0;i < num;i++, argc++) {
@@ -50,6 +52,7 @@ struct node *newtokenNode(int type)
 		printf("out of space");
 		exit(0);
 	}
+	nodeCount++;
 	temp->nodetype = type;
 	temp->lineno = yylineno;
 	temp->depth = 0;
@@ -74,6 +77,7 @@ void clearTree(struct node *node)
 		node->nodevalue.str = NULL;
 	}
 	free(node);
+	nodeCount--;
 	node = NULL;
 }
 void showTree(struct node *node)

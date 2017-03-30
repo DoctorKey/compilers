@@ -6,10 +6,10 @@
 #include "error.h"
 #include "syntax.tab.h"
 
-struct Filestack *curfile = NULL;
 struct Buffer *curbuffer = NULL;
-char *curfilename;
-char *curpwd;
+FILE *curFile = NULL;
+char *curfilename = NULL;
+
 extern int yylineno;
 extern int yycolumn;
 
@@ -18,102 +18,34 @@ int lMaxBuffer = 1000;
 int
 newfile(char *fn)
 {
-	FILE *f;
-	struct Filestack *filestack = malloc(sizeof(struct Filestack));
-	if(!filestack) {
-		fprintf(stderr, "malloc filestack failed!\n");
-		return 1;
-	}
-	if(curfile){
-		curfile->lineno = yylineno;
-		filestack->filename = malloc(sizeof(char)*(strlen(fn) + strlen(curpwd)));
-		strcpy(filestack->filename, curpwd);
-		strcat(filestack->filename, fn);
-	}else{
-		filestack->filename = malloc(sizeof(char)*(strlen(fn)));
-		strcpy(filestack->filename, fn);
-	}
-	f = fopen(filestack->filename, "r");
-
-	if(!f) {
-		fprintf(stderr, "can't open %s\n", filestack->filename);
-		return 1;
-	}
-	filestack->f = f;
 	curfilename = fn;
+	curFile = fopen(curfilename, "r");
 
-	filestack->prev = curfile;
-	curfile = filestack;
+	if(!curFile) {
+		fprintf(stderr, "can't open %s\n",curfilename);
+		return 1;
+	}
 
-	filestack->buffer = init_buffer();
-	//yy_switch_to_buffer(filestack->buffer);
-	curbuffer = filestack->buffer;
+	curbuffer = init_buffer();
 	yylineno = 1;
 	return 0;
 }
 
 int 
-popfile(void)
+closefile(void)
 {
-	struct Filestack *filestack = curfile;
-	struct Filestack *prevfilestack;
-
-	if(!filestack)
+	if(!curFile)
 		return 1;
-	prevfilestack = filestack->prev;
-	if(!prevfilestack) {
-		return 1;
-	}
+	else
+		fclose(curFile);
 
-	fclose(filestack->f);
-	free(filestack->filename);
-	free_buffer(filestack->buffer);
+	free_buffer(curbuffer);
 
-	free(filestack);
-
-	curfile = NULL;
+	curfilename = NULL;
+	curFile = NULL;
 	curbuffer = NULL;
 
-//	yy_switch_to_buffer(prevfilestack->buffer);
-	curfile = prevfilestack;
-	curbuffer = curfile->buffer;
-	yylineno = curfile->lineno;
-	curfilename = curfile->filename;
 	return 0;
-}
-void freecur()
-{
-	if(curbuffer) {
-		free(curbuffer->buffer);
-		free(curbuffer);
-		curbuffer = NULL;
-	}
-	if(curfile != NULL) {
-		fclose(curfile->f);
-		free(curfile->filename);
-		free(curfile);
-		curfile = NULL;
-	}	
-}
-
-char* 
-getpwd(char *dest, char *str)
-{
-	int i = strlen(str);
-	while(i >= 0) {
-		if(str[i] == '/')
-			break;
-		i--;
-	}
-	return strncpy(dest, str, i + 1);
-}
-
-FILE *getCurFile()
-{
-	if(curfile)
-		return curfile->f;
-	else
-		return NULL;
 }
 
 struct Buffer*
@@ -208,7 +140,7 @@ int getNextLine() {
 	curbuffer->nTokenNextStart = 1;
 	curbuffer->eof = false;
 
-	f = getCurFile();
+	f = curFile;
 	if(f == NULL)
 		return 1;
 	/*================================================================*/
@@ -271,7 +203,6 @@ void BeginToken(char *t) {
 	/* remember last read token --------------------------------------*/
 	curbuffer->nTokenStart = curbuffer->nTokenNextStart;
 	curbuffer->nTokenLength = strlen(t);
-	//  nTokenNextStart = nBuffer; // + 1;
 	curbuffer->nTokenNextStart = yylloc.last_column + 1; 
 
 	/*================================================================*/

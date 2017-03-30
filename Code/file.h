@@ -15,24 +15,13 @@ struct Buffer {
 	int nTokenLength;
 	int nTokenNextStart;
 };
-struct Filestack { 
-	struct Filestack *prev;
-	struct Buffer *buffer;
-	int lineno;
-	char *filename;
-	FILE *f;
-};
 
-extern struct Filestack *curfile;
 extern struct Buffer *curbuffer;
+extern FILE *curFile;
 extern char *curfilename;
-extern char *curpwd;
 
 int newfile(char *fn);
-int popfile(void);
-void freecur(void);
-char *getpwd(char *dest, char *str);
-FILE *getCurFile(void);
+int closefile(void);
 struct Buffer *init_buffer(void);
 void free_buffer(struct Buffer *buffer);
 

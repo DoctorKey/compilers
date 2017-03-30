@@ -66,7 +66,9 @@ Program : ExtDefList
 			$$ = newNode(Program, 1, $1); 
 			if(isError == 0 && lexical_isError == 0)
 				showTree($$); 
+//			fprintf(stdout, "nodeCount :%d\n", nodeCount);
 			clearTree($$); 
+//			fprintf(stdout, "nodeCount :%d\n", nodeCount);
 			$$ = NULL;
 		}
 	;
