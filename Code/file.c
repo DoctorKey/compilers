@@ -60,19 +60,19 @@ popfile(void)
 
 	if(!filestack)
 		return 1;
+	prevfilestack = filestack->prev;
+	if(!prevfilestack) {
+		return 1;
+	}
 
 	fclose(filestack->f);
 	free(filestack->filename);
 	free_buffer(filestack->buffer);
-	curfile = NULL;
-	curbuffer = NULL;
 
-	prevfilestack = filestack->prev;
 	free(filestack);
 
-	if(!prevfilestack) {
-		return 1;
-	}
+	curfile = NULL;
+	curbuffer = NULL;
 
 //	yy_switch_to_buffer(prevfilestack->buffer);
 	curfile = prevfilestack;
@@ -80,6 +80,20 @@ popfile(void)
 	yylineno = curfile->lineno;
 	curfilename = curfile->filename;
 	return 0;
+}
+void freecur()
+{
+	if(curbuffer) {
+		free(curbuffer->buffer);
+		free(curbuffer);
+		curbuffer = NULL;
+	}
+	if(curfile != NULL) {
+		fclose(curfile->f);
+		free(curfile->filename);
+		free(curfile);
+		curfile = NULL;
+	}	
 }
 
 char* 

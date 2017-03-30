@@ -50,14 +50,14 @@ xdigit [0-9a-fA-F]
 					if(debug)
 						printf("begin file!\n");
 					if(newfile(yytext))
-						yyterminate();
+						return 0;
 					BEGIN INITIAL;
 				}
 
 <IFILE>.|\n			{
     					BeginToken(yytext); 
 					fprintf(stderr, "%4d bad include line\n", yylineno);
-					yyterminate();
+					return 0;
 				}
 
 <<EOF>>				{
@@ -65,7 +65,7 @@ xdigit [0-9a-fA-F]
 						printf("eof of file!\n");
     					BeginToken(yytext); 
 					if(popfile()) {
-						yyterminate();
+						return 0;
 					}
 				}
 
@@ -160,25 +160,21 @@ xdigit [0-9a-fA-F]
 				}
 "||"				{ 
     					BeginToken(yytext); 
-//					printf("OR  "); 
 					yylval.type_node = newtokenNode(OR);
 					return OR;
 				}
 "."				{ 
     					BeginToken(yytext); 
-//					printf("DOT  "); 
 					yylval.type_node = newtokenNode(DOT);
 					return DOT;
 				}
 "!"				{ 
     					BeginToken(yytext); 
-//					printf("NOT  "); 
 					yylval.type_node = newtokenNode(NOT);
 					return NOT;
 				}
 "int"|"float"			{ 
     					BeginToken(yytext); 
-//					printf("TYPE  "); 
 					yylval.type_node = newtokenNode(TYPE);
 					//strdup need to free
 					yylval.type_node->nodevalue.str = strdup(yytext);
@@ -186,13 +182,11 @@ xdigit [0-9a-fA-F]
 				}
 "("				{ 
     					BeginToken(yytext); 
-//					printf("LP  "); 
 					yylval.type_node = newtokenNode(LP);
 					return LP;
 				}
 ")"				{ 
     					BeginToken(yytext); 
-//					printf("RP  "); 
 					yylval.type_node = newtokenNode(RP);
 					return RP;}
 "["				{ 

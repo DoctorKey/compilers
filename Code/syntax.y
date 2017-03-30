@@ -58,6 +58,7 @@
 			clearTree($$);
 			$$ = NULL;
 		} <type_node>
+
 %%
 /* high-level Definitions */
 Program : ExtDefList	

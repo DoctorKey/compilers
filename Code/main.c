@@ -1,6 +1,7 @@
 #include "main.h"
 #include "syntax.tab.h"
 #include "error.h"
+#include "file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,8 +9,6 @@
 //extern void yyrestart  (FILE * input_file );
 extern int yyparse ();
 extern int yydebug;
-extern int newfile(char *fn);
-extern char *curpwd;
 extern void lexical_init();
 extern void syntax_init();
 
@@ -44,6 +43,7 @@ int main(int argc, char** argv)
 					yyparse();
 			}
 
+			freecur();
 			free(curpwd);
 			curpwd = NULL;
 		}

@@ -30,6 +30,7 @@ extern char *curpwd;
 
 int newfile(char *fn);
 int popfile(void);
+void freecur(void);
 char *getpwd(char *dest, char *str);
 FILE *getCurFile(void);
 struct Buffer *init_buffer(void);
