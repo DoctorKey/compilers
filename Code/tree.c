@@ -1,6 +1,8 @@
 #include "tree.h"
+#include "main.h"
 #include "syntax.tab.h" 
 #include "name.h"
+#include "semantic.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -40,6 +42,9 @@ struct node *newNode(int type,int num, ...)
 	for(;i != CHILD_NUM; i++) {
 		temp->children[i] = NULL;
 	}
+#if 	LAB_2 == true
+	semanticAnalyze(temp, num);
+#endif
 	return temp;
 }
 struct node *newtokenNode(int type)

@@ -157,7 +157,8 @@ void getHashTableInfo(void) {
 	fprintf(stdout, "\tallocTimes:%d", hashTableInfo.allocTimes);
 	fprintf(stdout, "\tfreeTimes:%d\n", hashTableInfo.freeTimes);
 	fprintf(stdout, "\tsymbolNum:%d", hashTableInfo.symbolNum);
-	fprintf(stdout, "\tindexNum:%d\n\tindex: ", hashTableInfo.indexNum);
+	fprintf(stdout, "\tindexNum:%d\n", hashTableInfo.indexNum);
+	fprintf(stdout, "\tindex: ");
 	for (i = 0; i != hashTableInfo.indexNum; i++) {
 		fprintf(stdout, "%d ", hashTableInfo.usedIndex[i]);
 	}
@@ -166,6 +167,7 @@ void getHashTableInfo(void) {
 int test(void) {
 	char *name = "test", *name2 = "test2";
 	struct SymNode *symNode = NULL, *result = NULL;
+
 	symNode = createSymNode(1, name);
 	getHashTableInfo();
 	if (symNode == NULL) {
@@ -175,6 +177,7 @@ int test(void) {
 	fprintf(stdout, "symbol name %s\n", symNode->name);
 	fprintf(stdout, "list %d\n", insert(symNode));
 	getHashTableInfo();
+
 	symNode = createSymNode(1, name2);
 	getHashTableInfo();
 	if (symNode == NULL) {
@@ -184,6 +187,7 @@ int test(void) {
 	fprintf(stdout, "symbol name %s\n", symNode->name);
 	fprintf(stdout, "list %d\n", insert(symNode));
 	getHashTableInfo();
+
 	result = lookup(name);
 	if (result == NULL) {
 		fprintf(stderr, "lookup fails\n");

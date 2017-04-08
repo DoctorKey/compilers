@@ -34,10 +34,12 @@ ExtDefList	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__
 ExtDefList	Code/syntax.y	/^ExtDefList : 	$/;"	l
 FLEX	Code/Makefile	/^FLEX = flex$/;"	m
 FLOAT	Code/tree.h	/^	float FLOAT;$/;"	m	union:value
-Filestack	Code/file.h	/^struct Filestack { $/;"	s
 FunDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon1
 FunDec	Code/syntax.y	/^FunDec : ID LP VarList RP $/;"	l
 GetNextChar	Code/file.c	/^int GetNextChar(char *b, int maxBuffer) {$/;"	f
+HASHSIZE	Code/symtable.h	14;"	d
+HashNode	Code/symtable.h	/^struct HashNode {$/;"	s
+HashTableInfo	Code/symtable.h	/^struct HashTableInfo {$/;"	s
 ID_index	Code/tree.h	/^	int ID_index;$/;"	m	union:value
 INT	Code/tree.h	/^	int INT;$/;"	m	union:value
 LFC	Code/Makefile	/^LFC = $(shell find .\/ -name "*.l" | sed s\/[^\/]*\\\\.l\/lex.yy.c\/)$/;"	m
@@ -51,6 +53,7 @@ ParamDec	Code/syntax.y	/^ParamDec : Specifier VarDec	$/;"	l
 PrintError	Code/error.c	/^void PrintError(char type, char *errorstring, ...) {$/;"	f
 Program	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon1
 Program	Code/syntax.y	/^Program : ExtDefList	$/;"	l
+SYMBOLMAX	Code/symtable.h	13;"	d
 Specifier	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon1
 Specifier	Code/syntax.y	/^Specifier : TYPE $/;"	l
 Stmt	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon1
@@ -59,6 +62,7 @@ StmtList	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon1
 StmtList	Code/syntax.y	/^StmtList : 	$/;"	l
 StructSpecifier	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon1
 StructSpecifier	Code/syntax.y	/^StructSpecifier : STRUCT OptTag LC DefList RC	$/;"	l
+SymNode	Code/symtable.h	/^struct SymNode {$/;"	s
 Tag	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon1
 Tag	Code/syntax.y	/^Tag : ID	$/;"	l
 VarDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon1
@@ -72,34 +76,42 @@ __ERROR_H_	Code/error.h	2;"	d
 __FILE_H_	Code/file.h	2;"	d
 __MAIN_H_	Code/main.h	2;"	d
 __NAME_H_	Code/name.h	2;"	d
+__SYMTABLE_H_	Code/symtable.h	2;"	d
 __TREE_H_	Code/tree.h	2;"	d
+allocTimes	Code/symtable.h	/^	int allocTimes;$/;"	m	struct:HashTableInfo
 buffer	Code/file.h	/^	char *buffer;$/;"	m	struct:Buffer
-buffer	Code/file.h	/^	struct Buffer *buffer;$/;"	m	struct:Filestack	typeref:struct:Filestack::Buffer
 children	Code/tree.h	/^	struct node *children[CHILD_NUM];$/;"	m	struct:node	typeref:struct:node::node
-cleanBuffer	Code/file.c	/^cleanBuffer(void) {$/;"	f
+cleanHashTable	Code/symtable.c	/^int cleanHashTable(void) {$/;"	f
+cleanSymList	Code/symtable.c	/^int cleanSymList(struct SymNode *head) {$/;"	f
 clearTree	Code/tree.c	/^void clearTree(struct node *node)$/;"	f
+closefile	Code/file.c	/^closefile(void)$/;"	f
+createSymNode	Code/symtable.c	/^struct SymNode *createSymNode(int type, ...) {$/;"	f
+curFile	Code/file.c	/^FILE *curFile = NULL;$/;"	v
 curbuffer	Code/file.c	/^struct Buffer *curbuffer = NULL;$/;"	v	typeref:struct:Buffer
-curfile	Code/file.c	/^struct Filestack *curfile = NULL;$/;"	v	typeref:struct:Filestack
-curfilename	Code/file.c	/^char *curfilename;$/;"	v
-curpwd	Code/file.c	/^char *curpwd;$/;"	v
+curfilename	Code/file.c	/^char *curfilename = NULL;$/;"	v
 debug	Code/main.c	/^int debug = 0;$/;"	v
+debug2	Code/main.c	/^int debug2 = 1;$/;"	v
 depth	Code/tree.h	/^	int depth;$/;"	m	struct:node
 dumpChar	Code/file.c	/^char dumpChar(char c) {$/;"	f	file:
 dumpString	Code/file.c	/^char *dumpString(char *s) {$/;"	f	file:
 eof	Code/file.h	/^	int eof;$/;"	m	struct:Buffer
-f	Code/file.h	/^	FILE *f;$/;"	m	struct:Filestack
 false	Code/main.h	5;"	d
-filename	Code/file.h	/^	char *filename;$/;"	m	struct:Filestack
+freeSymNode	Code/symtable.c	/^int freeSymNode(struct SymNode *symNode) {$/;"	f
+freeTimes	Code/symtable.h	/^	int freeTimes;$/;"	m	struct:HashTableInfo
 free_buffer	Code/file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
-getCurFile	Code/file.c	/^FILE *getCurFile()$/;"	f
+getHashTableInfo	Code/symtable.c	/^void getHashTableInfo(void) {$/;"	f
 getName	Code/name.c	/^const char *getName(int type)$/;"	f
 getNextLine	Code/file.c	/^int getNextLine() {$/;"	f
-getpwd	Code/file.c	/^getpwd(char *dest, char *str)$/;"	f
+hashTableInfo	Code/symtable.c	/^struct HashTableInfo hashTableInfo;$/;"	v	typeref:struct:HashTableInfo
+hash_pjw	Code/symtable.c	/^unsigned int hash_pjw(char *name) {$/;"	f
+indexNum	Code/symtable.h	/^	int indexNum;$/;"	m	struct:HashTableInfo
 init_buffer	Code/file.c	/^init_buffer(){$/;"	f
+initerrorBuffer	Code/error.c	/^initerrorBuffer(char *errorbuffer) {$/;"	f
+insert	Code/symtable.c	/^int insert(struct SymNode *symNode) {$/;"	f
 lBuffer	Code/file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	Code/file.c	/^int lMaxBuffer = 1000;$/;"	v
-lineno	Code/file.h	/^	int lineno;$/;"	m	struct:Filestack
 lineno	Code/tree.h	/^	int lineno;$/;"	m	struct:node
+lookup	Code/symtable.c	/^struct SymNode *lookup(char *name) {$/;"	f
 main	Code/main.c	/^int main(int argc, char** argv)$/;"	f
 main	Test/compare.c	/^int main(int argc, char** argv)$/;"	f
 nBuffer	Code/file.h	/^	int nBuffer;$/;"	m	struct:Buffer
@@ -108,17 +120,25 @@ nTokenLength	Code/file.h	/^	int nTokenLength;$/;"	m	struct:Buffer
 nTokenNextStart	Code/file.h	/^	int nTokenNextStart;$/;"	m	struct:Buffer
 nTokenStart	Code/file.h	/^	int nTokenStart;$/;"	m	struct:Buffer
 name	Code/name.c	/^const char *name[] = {$/;"	v
+name	Code/symtable.h	/^	char *name;$/;"	m	struct:SymNode
 newNode	Code/tree.c	/^struct node *newNode(int type,int num, ...)$/;"	f
 newfile	Code/file.c	/^newfile(char *fn)$/;"	f
 newtokenNode	Code/tree.c	/^struct node *newtokenNode(int type)$/;"	f
+next	Code/symtable.h	/^	struct SymNode *next;$/;"	m	struct:SymNode	typeref:struct:SymNode::SymNode
 node	Code/tree.h	/^struct node {$/;"	s
 nodetype	Code/tree.h	/^	int nodetype;$/;"	m	struct:node
 nodevalue	Code/tree.h	/^	union value nodevalue;$/;"	m	struct:node	typeref:union:node::value
-popfile	Code/file.c	/^popfile(void)$/;"	f
-prev	Code/file.h	/^	struct Filestack *prev;$/;"	m	struct:Filestack	typeref:struct:Filestack::Filestack
+num	Code/symtable.h	/^	int num;$/;"	m	struct:HashNode
+printfErrorRow	Code/error.c	/^printfErrorRow(char *errmsg, int start, int end) {$/;"	f
 showTree	Code/tree.c	/^void showTree(struct node *node)$/;"	f
 str	Code/tree.h	/^	char *str;$/;"	m	union:value
+symNode	Code/symtable.h	/^	struct SymNode *symNode;$/;"	m	struct:HashNode	typeref:struct:HashNode::SymNode
+symTable	Code/symtable.c	/^struct HashNode symTable[HASHSIZE];$/;"	v	typeref:struct:HashNode
+symbolNum	Code/symtable.h	/^	int symbolNum;$/;"	m	struct:HashTableInfo
+test	Code/symtable.c	/^int test(void) {$/;"	f
 tokenName	Code/name.c	/^const char *tokenName[] = {$/;"	v
 true	Code/main.h	4;"	d
+type	Code/symtable.h	/^	int type;$/;"	m	struct:SymNode
 updateChildDepth	Code/tree.c	/^void updateChildDepth(struct node *node)$/;"	f
+usedIndex	Code/symtable.h	/^	int usedIndex[SYMBOLMAX];$/;"	m	struct:HashTableInfo
 value	Code/tree.h	/^union value {$/;"	u
