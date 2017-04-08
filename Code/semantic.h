@@ -15,7 +15,7 @@ struct Type_ {
 			int size;
 		}array;
 		FieldList structure;
-	}u;
+	};
 };
 struct FieldList_ {
 	char *name;
@@ -23,4 +23,8 @@ struct FieldList_ {
 	FieldList tail;
 };
 void semanticAnalyze(struct node *parent, int num); 
+void showType(Type type); 
+void freeType(Type type); 
+void showFieldList(FieldList fieldList); 
+void freeFieldList(FieldList fieldList); 
 #endif
