@@ -5,4 +5,5 @@
 #define false 0
 
 extern int debug;
+extern int debug2;
 #endif
