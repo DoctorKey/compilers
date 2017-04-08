@@ -27,10 +27,16 @@ struct HashNode {
 	struct SymNode *symNode;
 };
 struct HashTableInfo {
+	// alloc symbols times
+	int allocTimes;
+	// free symbols times
+	int freeTimes;
+	//num of symbol in table, every insert plus 1
+	int symbolNum;
 	// num of used index
-	int num;
+	int indexNum;
 	//all used index
-	int symindex[SYMBOLMAX];
+	int usedIndex[SYMBOLMAX];
 };
 extern struct HashNode symTable[HASHSIZE];
 
@@ -39,6 +45,7 @@ int freeSymNode(struct SymNode *symNode);
 int insert(struct SymNode *symNode); 
 struct SymNode *lookup(char *name);
 int cleanHashTable(void); 
+void getHashTableInfo(void); 
 int test(void);
 
 

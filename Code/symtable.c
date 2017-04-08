@@ -29,6 +29,8 @@ struct SymNode *createSymNode(int type, ...) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
 	}
+	hashTableInfo.allocTimes++;
+
 	symNode->type = type;
 	symNode->name = malloc(sizeof(char) * strlen(*argc));
 	strcpy(symNode->name, (char *)*argc);
@@ -61,6 +63,7 @@ int freeSymNode(struct SymNode *symNode) {
 		break;
 	}
 	free(symNode);
+	hashTableInfo.freeTimes++;
 	return 0;
 }
 /*
@@ -76,11 +79,15 @@ int insert(struct SymNode *symNode) {
 	if (list == NULL) {
 		symTable[index].symNode = symNode;
 		symTable[index].num++;
- 		hashTableInfo.num++;
-		if (hashTableInfo.num > SYMBOLMAX) {
+
+		hashTableInfo.usedIndex[hashTableInfo.indexNum] = index;
+ 		hashTableInfo.indexNum++;
+		if (hashTableInfo.indexNum > SYMBOLMAX) {
 			fprintf(stderr, "too many symbols\n");
 			exit(0);
 		}
+		hashTableInfo.symbolNum++;
+
 		return symTable[index].num;
 	}
 	while (list->next != NULL) {
@@ -88,6 +95,7 @@ int insert(struct SymNode *symNode) {
 	}
 	list->next = symNode;
 	symTable[index].num++;
+	hashTableInfo.symbolNum++;
 	return symTable[index].num;
 }
 
@@ -123,6 +131,7 @@ int cleanSymList(struct SymNode *head) {
 		next = head->next;
 		head->next = NULL;
 		freeSymNode(head);
+		hashTableInfo.symbolNum--;
 		head = next;
 	}
 	return 0;
@@ -132,23 +141,49 @@ int cleanSymList(struct SymNode *head) {
 	free all hashnode
 */
 int cleanHashTable(void) {
-	int i;
-	for(i = hashTableInfo.num; i != 0; i--) {
-		cleanSymList(symTable[i].symNode);
-		hashTableInfo.num--;		
+	int i,index;
+	for(i = hashTableInfo.indexNum - 1; i >= 0; i--) {
+		index = hashTableInfo.usedIndex[i];
+		cleanSymList(symTable[index].symNode);
+		hashTableInfo.usedIndex[i] = 0;
+		hashTableInfo.indexNum--;		
 	}
 	return 0;
 }
+void getHashTableInfo(void) {
+	int i;
+	fprintf(stdout, "--------------------------------------\n");
+	fprintf(stdout, "hashTableInfo:\n");
+	fprintf(stdout, "\tallocTimes:%d", hashTableInfo.allocTimes);
+	fprintf(stdout, "\tfreeTimes:%d\n", hashTableInfo.freeTimes);
+	fprintf(stdout, "\tsymbolNum:%d", hashTableInfo.symbolNum);
+	fprintf(stdout, "\tindexNum:%d\n\tindex: ", hashTableInfo.indexNum);
+	for (i = 0; i != hashTableInfo.indexNum; i++) {
+		fprintf(stdout, "%d ", hashTableInfo.usedIndex[i]);
+	}
+	fprintf(stdout, "\n--------------------------------------\n");
+}
 int test(void) {
-	char *name = "test";
+	char *name = "test", *name2 = "test2";
 	struct SymNode *symNode = NULL, *result = NULL;
 	symNode = createSymNode(1, name);
+	getHashTableInfo();
 	if (symNode == NULL) {
 		fprintf(stderr, "creat fails\n");
 		return 1;
 	}
 	fprintf(stdout, "symbol name %s\n", symNode->name);
 	fprintf(stdout, "list %d\n", insert(symNode));
+	getHashTableInfo();
+	symNode = createSymNode(1, name2);
+	getHashTableInfo();
+	if (symNode == NULL) {
+		fprintf(stderr, "creat fails\n");
+		return 1;
+	}
+	fprintf(stdout, "symbol name %s\n", symNode->name);
+	fprintf(stdout, "list %d\n", insert(symNode));
+	getHashTableInfo();
 	result = lookup(name);
 	if (result == NULL) {
 		fprintf(stderr, "lookup fails\n");
@@ -156,5 +191,7 @@ int test(void) {
 	}
 	else
 		fprintf(stdout, "name is %s\n", result->name);
+	cleanHashTable();
+	getHashTableInfo();
 	return 0;
 }
