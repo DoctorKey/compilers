@@ -47,7 +47,7 @@ struct Var {
 struct Func {
 	Type Return;
 	int argc;
-	Type *argtype;
+	FieldList argtype;
 };
 struct SymNode {
 	int type;

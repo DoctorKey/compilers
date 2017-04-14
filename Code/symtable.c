@@ -25,15 +25,15 @@ void showType(Type type) {
 		return;
 	switch (type->kind) {
 	case BASIC:
-		fprintf(stdout, "basic: %d", type->basic);
+		fprintf(stdout, " basic: %d ", type->basic);
 		break;
 	case ARRAY:
-		fprintf(stdout, "array ");
+		fprintf(stdout, " array ");
 		showType(type->array.elem);
-		fprintf(stdout, "size: %d", type->array.size);
+		fprintf(stdout, " size: %d ", type->array.size);
 		break;
 	case STRUCTURE:
-		fprintf(stdout, "structure ");
+		fprintf(stdout, " structure ");
 		showFieldList(type->structure);
 		break;
 	}
