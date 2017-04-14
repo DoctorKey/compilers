@@ -19,7 +19,7 @@ typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
 
 struct Type_ {
-	enum {BASIC, ARRAY, STRUCTURE} kind;
+	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;
 	union {
 		int basic;
 		struct {
@@ -55,7 +55,7 @@ struct SymNode {
 	union {
 		struct Var *var;
 		struct Func *func;
-		Type type;
+		Type specifier;
 	};
 	struct SymNode *next;
 };
@@ -97,6 +97,9 @@ void showAllSymbol(void);
 
 int insert(struct SymNode *symNode); 
 struct SymNode *lookup(char *name);
+Type getSymType(struct SymNode *symNode);
+Type getIDType(int type, char *name); 
+
 int cleanHashTable(void); 
 void getHashTableInfo(void); 
 int test(void);

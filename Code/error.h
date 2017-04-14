@@ -7,6 +7,7 @@
 #include "file.h"
 #include "syntax.tab.h"
 
+void SemanticError(int type); 
 extern void PrintError(char type, char *s, ...);
 
 

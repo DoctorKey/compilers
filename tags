@@ -6,34 +6,39 @@
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 AND	Code/syntax.tab.c	/^     AND = 269,$/;"	e	enum:yytokentype	file:
 AND	Code/syntax.tab.h	/^     AND = 269,$/;"	e	enum:yytokentype
-ARRAY	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	e	enum:Type_::__anon1
+ARRAY	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	e	enum:Type_::__anon1
 ASSIGNOP	Code/syntax.tab.c	/^     ASSIGNOP = 263,$/;"	e	enum:yytokentype	file:
 ASSIGNOP	Code/syntax.tab.h	/^     ASSIGNOP = 263,$/;"	e	enum:yytokentype
 Args	Code/name.h	/^	Exp, Args$/;"	e	enum:__anon7
 Args	Code/syntax.y	/^Args : Exp COMMA Args	$/;"	l
-BASIC	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	e	enum:Type_::__anon1
+ArgsAnalyze	Code/semantic.c	/^void ArgsAnalyze(struct node *parent, int num) {$/;"	f
+BASIC	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	e	enum:Type_::__anon1
 BEGIN	Code/lex.yy.c	126;"	d	file:
 BISON	Code/Makefile	/^BISON = bison$/;"	m
 BeginToken	Code/file.c	/^void BeginToken(char *t) {$/;"	f
 Buffer	Code/file.h	/^struct Buffer {$/;"	s
 CC	Code/Makefile	/^CC = gcc$/;"	m
 CFILES	Code/Makefile	/^CFILES = $(shell find .\/ -name "*.c")$/;"	m
-CFLAGS	Code/Makefile	/^CFLAGS = -std=c99$/;"	m
+CFLAGS	Code/Makefile	/^CFLAGS =-g -std=c99$/;"	m
 CHILD_NUM	Code/tree.h	7;"	d
 COMMA	Code/syntax.tab.c	/^     COMMA = 262,$/;"	e	enum:yytokentype	file:
 COMMA	Code/syntax.tab.h	/^     COMMA = 262,$/;"	e	enum:yytokentype
 CompSt	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon7
 CompSt	Code/syntax.y	/^CompSt : LC DefList StmtList RC $/;"	l
+CompStAnalyze	Code/semantic.c	/^void CompStAnalyze(struct node *parent, int num) {$/;"	f
 DIV	Code/syntax.tab.c	/^     DIV = 268,$/;"	e	enum:yytokentype	file:
 DIV	Code/syntax.tab.h	/^     DIV = 268,$/;"	e	enum:yytokentype
 DOT	Code/syntax.tab.c	/^     DOT = 271,$/;"	e	enum:yytokentype	file:
 DOT	Code/syntax.tab.h	/^     DOT = 271,$/;"	e	enum:yytokentype
 Dec	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 Dec	Code/syntax.y	/^Dec : VarDec	$/;"	l
+DecAnalyze	Code/semantic.c	/^void DecAnalyze(struct node *parent, int num) {$/;"	f
 DecList	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 DecList	Code/syntax.y	/^DecList : Dec	$/;"	l
+DecListAnalyze	Code/semantic.c	/^void DecListAnalyze(struct node *parent, int num) {$/;"	f
 Def	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 Def	Code/syntax.y	/^Def : Specifier DecList SEMI $/;"	l
+DefAnalyze	Code/semantic.c	/^void DefAnalyze(struct node *parent, int num) {$/;"	f
 DefList	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 DefList	Code/syntax.y	/^DefList :	$/;"	l
 DefListAnalyze	Code/semantic.c	/^void DefListAnalyze(struct node *parent, int num) {$/;"	f
@@ -44,17 +49,21 @@ ELSE	Code/syntax.tab.h	/^     ELSE = 283,$/;"	e	enum:yytokentype
 EOB_ACT_CONTINUE_SCAN	Code/lex.yy.c	169;"	d	file:
 EOB_ACT_END_OF_FILE	Code/lex.yy.c	170;"	d	file:
 EOB_ACT_LAST_MATCH	Code/lex.yy.c	171;"	d	file:
+ERROR	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	e	enum:Type_::__anon1
 EXIT_SUCCESS	Code/syntax.tab.c	291;"	d	file:
 EXIT_SUCCESS	Code/syntax.tab.c	319;"	d	file:
 Exp	Code/name.h	/^	Exp, Args$/;"	e	enum:__anon7
 Exp	Code/syntax.y	/^Exp : Exp ASSIGNOP Exp $/;"	l
+ExpAnalyze	Code/semantic.c	/^void ExpAnalyze(struct node *parent, int num) {$/;"	f
 ExtDecList	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon7
 ExtDecList	Code/syntax.y	/^ExtDecList : VarDec	$/;"	l
+ExtDecListAnalyze	Code/semantic.c	/^void ExtDecListAnalyze(struct node *parent, int num) {$/;"	f
 ExtDef	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon7
 ExtDef	Code/syntax.y	/^ExtDef : Specifier ExtDecList SEMI $/;"	l
 ExtDefAnalyze	Code/semantic.c	/^void ExtDefAnalyze(struct node *parent, int num) {$/;"	f
 ExtDefList	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon7
 ExtDefList	Code/syntax.y	/^ExtDefList : 	$/;"	l
+ExtDefListAnalyze	Code/semantic.c	/^void ExtDefListAnalyze(struct node *parent, int num) {$/;"	f
 FLEX	Code/Makefile	/^FLEX = flex$/;"	m
 FLEXINT_H	Code/lex.yy.c	30;"	d	file:
 FLEX_BETA	Code/lex.yy.c	14;"	d	file:
@@ -66,6 +75,7 @@ FieldList	Code/symtable.h	/^typedef struct FieldList_* FieldList;$/;"	t	typeref:
 FieldList_	Code/symtable.h	/^struct FieldList_ {$/;"	s
 FunDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 FunDec	Code/syntax.y	/^FunDec : ID LP VarList RP $/;"	l
+FunDecAnalyze	Code/semantic.c	/^void FunDecAnalyze(struct node *parent, int num) {$/;"	f
 Func	Code/symtable.h	/^enum {Var, Func, NewType};$/;"	e	enum:__anon4
 Func	Code/symtable.h	/^struct Func {$/;"	s
 GetNextChar	Code/file.c	/^int GetNextChar(char *b, int maxBuffer) {$/;"	f
@@ -77,6 +87,7 @@ ID	Code/syntax.tab.h	/^     ID = 260,$/;"	e	enum:yytokentype
 ID_index	Code/tree.h	/^	int ID_index;$/;"	m	union:value
 IF	Code/syntax.tab.c	/^     IF = 282,$/;"	e	enum:yytokentype	file:
 IF	Code/syntax.tab.h	/^     IF = 282,$/;"	e	enum:yytokentype
+INIT	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	e	enum:Type_::__anon1
 INITIAL	Code/lex.yy.c	570;"	d	file:
 INT	Code/syntax.tab.c	/^     INT = 258,$/;"	e	enum:yytokentype	file:
 INT	Code/syntax.tab.h	/^     INT = 258,$/;"	e	enum:yytokentype
@@ -87,7 +98,8 @@ INT32_MAX	Code/lex.yy.c	75;"	d	file:
 INT32_MIN	Code/lex.yy.c	66;"	d	file:
 INT8_MAX	Code/lex.yy.c	69;"	d	file:
 INT8_MIN	Code/lex.yy.c	60;"	d	file:
-LAB_2	Code/main.h	8;"	d
+LAB_1	Code/main.h	8;"	d
+LAB_2	Code/main.h	9;"	d
 LB	Code/syntax.tab.c	/^     LB = 276,$/;"	e	enum:yytokentype	file:
 LB	Code/syntax.tab.h	/^     LB = 276,$/;"	e	enum:yytokentype
 LC	Code/syntax.tab.c	/^     LC = 278,$/;"	e	enum:yytokentype	file:
@@ -114,9 +126,11 @@ PLUS	Code/syntax.tab.c	/^     PLUS = 265,$/;"	e	enum:yytokentype	file:
 PLUS	Code/syntax.tab.h	/^     PLUS = 265,$/;"	e	enum:yytokentype
 ParamDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 ParamDec	Code/syntax.y	/^ParamDec : Specifier VarDec	$/;"	l
+ParamDecAnalyze	Code/semantic.c	/^void ParamDecAnalyze(struct node *parent, int num) {$/;"	f
 PrintError	Code/error.c	/^void PrintError(char type, char *errorstring, ...) {$/;"	f
 Program	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon7
 Program	Code/syntax.y	/^Program : ExtDefList	$/;"	l
+ProgramAnalyze	Code/semantic.c	/^void ProgramAnalyze(struct node *parent, int num) {$/;"	f
 RB	Code/syntax.tab.c	/^     RB = 277,$/;"	e	enum:yytokentype	file:
 RB	Code/syntax.tab.h	/^     RB = 277,$/;"	e	enum:yytokentype
 RC	Code/syntax.tab.c	/^     RC = 279,$/;"	e	enum:yytokentype	file:
@@ -135,15 +149,20 @@ STAR	Code/syntax.tab.c	/^     STAR = 267,$/;"	e	enum:yytokentype	file:
 STAR	Code/syntax.tab.h	/^     STAR = 267,$/;"	e	enum:yytokentype
 STRUCT	Code/syntax.tab.c	/^     STRUCT = 280,$/;"	e	enum:yytokentype	file:
 STRUCT	Code/syntax.tab.h	/^     STRUCT = 280,$/;"	e	enum:yytokentype
-STRUCTURE	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	e	enum:Type_::__anon1
+STRUCTURE	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	e	enum:Type_::__anon1
 SYMBOLMAX	Code/symtable.h	15;"	d
+SemanticError	Code/error.c	/^void SemanticError(int type) {$/;"	f
+SetFieldListSpecifier	Code/semantic.c	/^void SetFieldListSpecifier(Type Specifier, FieldList *fieldList) {$/;"	f
+SetSpecifier	Code/semantic.c	/^void SetSpecifier(Type Specifier, Type *type) {$/;"	f
 Specifier	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon7
 Specifier	Code/syntax.y	/^Specifier : TYPE $/;"	l
 SpecifierAnalyze	Code/semantic.c	/^void SpecifierAnalyze(struct node *parent, int num) {$/;"	f
 Stmt	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon7
 Stmt	Code/syntax.y	/^Stmt : Exp SEMI	$/;"	l
+StmtAnalyze	Code/semantic.c	/^void StmtAnalyze(struct node *parent, int num) {$/;"	f
 StmtList	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon7
 StmtList	Code/syntax.y	/^StmtList : 	$/;"	l
+StmtListAnalyze	Code/semantic.c	/^void StmtListAnalyze(struct node *parent, int num) {$/;"	f
 StructSpecifier	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon7
 StructSpecifier	Code/syntax.y	/^StructSpecifier : STRUCT OptTag LC DefList RC	$/;"	l
 StructSpecifierAnalyze	Code/semantic.c	/^void StructSpecifierAnalyze(struct node *parent, int num) {$/;"	f
@@ -164,8 +183,10 @@ Var	Code/symtable.h	/^enum {Var, Func, NewType};$/;"	e	enum:__anon4
 Var	Code/symtable.h	/^struct Var {$/;"	s
 VarDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 VarDec	Code/syntax.y	/^VarDec : ID	$/;"	l
+VarDecAnalyze	Code/semantic.c	/^void VarDecAnalyze(struct node *parent, int num) {$/;"	f
 VarList	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 VarList	Code/syntax.y	/^VarList : ParamDec COMMA VarList	$/;"	l
+VarListAnalyze	Code/semantic.c	/^void VarListAnalyze(struct node *parent, int num) {$/;"	f
 WHILE	Code/syntax.tab.c	/^     WHILE = 284,$/;"	e	enum:yytokentype	file:
 WHILE	Code/syntax.tab.h	/^     WHILE = 284,$/;"	e	enum:yytokentype
 YFC	Code/Makefile	/^YFC = $(shell find .\/ -name "*.y" | sed s\/[^\/]*\\\\.y\/syntax.tab.c\/)$/;"	m
@@ -341,6 +362,8 @@ cleanHashTable	Code/symtable.c	/^int cleanHashTable(void) {$/;"	f
 cleanSymList	Code/symtable.c	/^int cleanSymList(struct SymNode *head) {$/;"	f
 clearTree	Code/tree.c	/^void clearTree(struct node *node)$/;"	f
 closefile	Code/file.c	/^closefile(void)$/;"	f
+cmpFieldList	Code/semantic.c	/^int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {$/;"	f
+cmpType	Code/semantic.c	/^int cmpType(Type type1, Type type2) {$/;"	f
 createSymNode	Code/symtable.c	/^struct SymNode *createSymNode(int type, char *name) {$/;"	f
 curFile	Code/file.c	/^FILE *curFile = NULL;$/;"	v
 curbuffer	Code/file.c	/^struct Buffer *curbuffer = NULL;$/;"	v	typeref:struct:Buffer
@@ -380,8 +403,10 @@ freeVar	Code/symtable.c	/^void freeVar(struct Var *var) {$/;"	f
 free_buffer	Code/file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
 func	Code/symtable.h	/^		struct Func *func;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Func
 getHashTableInfo	Code/symtable.c	/^void getHashTableInfo(void) {$/;"	f
+getIDType	Code/symtable.c	/^Type getIDType(int type, char *name) {$/;"	f
 getName	Code/name.c	/^const char *getName(int type)$/;"	f
 getNextLine	Code/file.c	/^int getNextLine() {$/;"	f
+getSymType	Code/symtable.c	/^Type getSymType(struct SymNode *symNode) {$/;"	f
 hashTableInfo	Code/symtable.c	/^struct HashTableInfo hashTableInfo;$/;"	v	typeref:struct:HashTableInfo
 hash_pjw	Code/symtable.c	/^unsigned int hash_pjw(char *name) {$/;"	f
 indexNum	Code/symtable.h	/^	int indexNum;$/;"	m	struct:HashTableInfo
@@ -390,7 +415,7 @@ initerrorBuffer	Code/error.c	/^initerrorBuffer(char *errorbuffer) {$/;"	f
 insert	Code/symtable.c	/^int insert(struct SymNode *symNode) {$/;"	f
 intValue	Code/symtable.h	/^		int intValue;$/;"	m	union:Var::__anon5
 isError	Code/syntax.tab.c	/^	int isError = 0;$/;"	v
-kind	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	m	struct:Type_	typeref:enum:Type_::__anon1
+kind	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;$/;"	m	struct:Type_	typeref:enum:Type_::__anon1
 lBuffer	Code/file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	Code/file.c	/^int lMaxBuffer = 1000;$/;"	v
 last_column	Code/syntax.tab.c	/^  int last_column;$/;"	m	struct:YYLTYPE	file:
@@ -411,6 +436,7 @@ nTokenStart	Code/file.h	/^	int nTokenStart;$/;"	m	struct:Buffer
 name	Code/name.c	/^const char *name[] = {$/;"	v
 name	Code/symtable.h	/^	char *name;$/;"	m	struct:FieldList_
 name	Code/symtable.h	/^	char *name;$/;"	m	struct:SymNode
+newFieldList	Code/symtable.c	/^FieldList newFieldList(char *name, Type type, FieldList tail) {$/;"	f
 newFunc	Code/symtable.c	/^struct SymNode *newFunc(char *name, Type Return, int argc, ...) {$/;"	f
 newNewType	Code/symtable.c	/^struct SymNode *newNewType(char *name, Type type) {$/;"	f
 newNode	Code/tree.c	/^struct node *newNode(int type,int num, ...)$/;"	f
@@ -435,6 +461,7 @@ showTree	Code/tree.c	/^void showTree(struct node *node)$/;"	f
 showType	Code/symtable.c	/^void showType(Type type) {$/;"	f
 showVar	Code/symtable.c	/^void showVar(struct Var *var) {$/;"	f
 size	Code/symtable.h	/^			int size;$/;"	m	struct:Type_::__anon2::__anon3
+specifier	Code/symtable.h	/^		Type specifier;$/;"	m	union:SymNode::__anon6
 str	Code/tree.h	/^	char *str;$/;"	m	union:value
 structure	Code/symtable.h	/^		FieldList structure;$/;"	m	union:Type_::__anon2
 symNode	Code/symtable.h	/^	struct SymNode *symNode;\/\/the head of list$/;"	m	struct:HashNode	typeref:struct:HashNode::SymNode
@@ -446,7 +473,6 @@ tail	Code/symtable.h	/^	FieldList tail;$/;"	m	struct:FieldList_
 test	Code/symtable.c	/^int test(void) {$/;"	f
 tokenName	Code/name.c	/^const char *tokenName[] = {$/;"	v
 true	Code/main.h	5;"	d
-type	Code/symtable.h	/^		Type type;$/;"	m	union:SymNode::__anon6
 type	Code/symtable.h	/^	Type type;$/;"	m	struct:FieldList_
 type	Code/symtable.h	/^	Type type;$/;"	m	struct:Var
 type	Code/symtable.h	/^	int type;$/;"	m	struct:SymNode

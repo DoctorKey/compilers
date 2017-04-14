@@ -5,6 +5,7 @@
 #define true 1
 #define false 0
 
+#define LAB_1 false
 #define LAB_2 true
 
 extern int debug;

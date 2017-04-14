@@ -64,8 +64,12 @@
 Program : ExtDefList	
 		{ 
 			$$ = newNode(Program, 1, $1); 
+			#if	LAB_1 == true
 			if(isError == 0 && lexical_isError == 0)
-				showTree($$); 
+				showTree($$);
+			#endif
+			showAllSymbol();
+			getHashTableInfo();
 			clearTree($$); 
 			$$ = NULL;
 		}

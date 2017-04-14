@@ -2,6 +2,18 @@
 
 void printfErrorRow(char *errmsg, int start, int end); 
 void initerrorBuffer(char *);
+/*-------------------------------------------------------------------
+	Semantic analyze error
+
+*--------------------------------------------------------------------
+*/
+void SemanticError(int type) {
+	fprintf(stderr, "\033[31m\033[1m");
+	fprintf(stderr, "Error ");
+	fprintf(stderr, "\033[0m");
+	fprintf(stderr, "type %d at Line : ", type);
+		
+}
 /*--------------------------------------------------------------------
  * MarkToken
  * 

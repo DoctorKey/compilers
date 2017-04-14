@@ -1,5 +1,6 @@
 #include "symtable.h"
 #include "main.h"
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,7 +81,7 @@ void freeFieldList(FieldList fieldList) {
 	if (fieldList == NULL)
 		return;
 	if (fieldList->name != NULL) {
-		free(name);
+		free(fieldList->name);
 		fieldList->name = NULL;
 	}
 	if (fieldList->type != NULL) {
@@ -118,7 +119,7 @@ struct SymNode *newNewType(char *name, Type type) {
 	struct SymNode *symNode = NULL;
 //	newType = newType();
  	symNode = createSymNode(NewType, name);
-	symNode->type = type;
+	symNode->specifier = type;
 	return symNode;
 }
 struct SymNode *newVar(char *name, Type type) {
@@ -217,7 +218,7 @@ int freeSymNode(struct SymNode *symNode) {
 		freeFunc(symNode->func);
 		break;
 	case NewType:
-		freeType(symNode->type);
+		freeType(symNode->specifier);
 		break;
 	default:
 		fprintf(stderr, "error type\n");
@@ -245,14 +246,45 @@ void showSymbol(struct SymNode *symNode) {
 	case NewType:
 		fprintf(stdout, "NewType: ");
 		fprintf(stdout, "%s\n", symNode->name);
-		showType(symNode->type);
+		showType(symNode->specifier);
 		break;
 	default:
 		fprintf(stderr, "error type\n");
 		break;
 	}
 }
- 
+// when get func type, just get return type
+Type getSymType(struct SymNode *symNode) {
+	if(symNode == NULL)
+		return NULL;
+	switch(symNode->type) {
+	case NewType:
+		return symNode->specifier;
+		break;
+	case Var:
+		return symNode->var->type;
+		break;
+	case Func:
+		return symNode->func->Return;
+		break;
+	}
+} 
+Type getIDType(int type, char *name) {
+	struct SymNode *symNode = NULL;
+	Type result = NULL;
+	symNode = lookup(name);
+	if (symNode == NULL) {
+		if (type == Var)
+			SemanticError(1);
+		if (type == Func)
+			SemanticError(2);
+		result = newType();
+		result->kind = ERROR;
+		return result;
+	}
+	result = getSymType(symNode);
+	return result;
+}
 /*
 	hash table
 */

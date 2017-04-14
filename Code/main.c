@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 			yydebug = 1;
 		}else if( strcmp(argv[i], "-debug2") == 0  ) {
 			printf("debug2 activated\n");
-			test();
+//			test();
 			debug2 = 1;
 		}
 		else {
