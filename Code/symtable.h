@@ -11,15 +11,38 @@
 
 	to show some infomation you need call showSymbol or showAllSymbol or getHashTableInfo
 */
-#include "semantic.h"
 
 #define SYMBOLMAX 100
 #define HASHSIZE 0x3fff
 
-enum {Var, Func};
+typedef struct Type_* Type;
+typedef struct FieldList_* FieldList;
+
+struct Type_ {
+	enum {BASIC, ARRAY, STRUCTURE} kind;
+	union {
+		int basic;
+		struct {
+			Type elem;
+			int size;
+		}array;
+		FieldList structure;
+	};
+};
+struct FieldList_ {
+	char *name;
+	Type type;
+	FieldList tail;
+};
+
+enum {Var, Func, NewType};
 
 struct Var {
 	Type type;
+	union {
+		int intValue;
+		float floatValue;
+	};
 };
 struct Func {
 	Type Return;
@@ -32,6 +55,7 @@ struct SymNode {
 	union {
 		struct Var *var;
 		struct Func *func;
+		Type type;
 	};
 	struct SymNode *next;
 };
@@ -54,11 +78,20 @@ struct HashTableInfo {
 };
 extern struct HashNode symTable[HASHSIZE];
 
+Type newType(); 
+void showType(Type type); 
+void showFieldList(FieldList fieldList); 
+
+FieldList newFieldList(char *name, Type type, FieldList tail); 
+void freeType(Type type); 
+void freeFieldList(FieldList fieldList); 
+
+struct SymNode *newNewType(char *name, Type type); 
 struct SymNode *newVar(char *name, Type type); 
-void showVar(struct Var *var); 
 struct SymNode *newFunc(char *name, Type Return, int argc, ...); 
-void showFunc(struct Func *func);
+
 int freeSymNode(struct SymNode *symNode); 
+
 void showSymbol(struct SymNode *symNode);
 void showAllSymbol(void);
 

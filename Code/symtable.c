@@ -7,6 +7,97 @@
 struct HashNode symTable[HASHSIZE];
 struct HashTableInfo hashTableInfo;
 
+/*
+	type
+*/
+Type newType() {
+	Type type = NULL;
+	type = malloc(sizeof(Type));
+	if(!type) {
+		fprintf(stderr, "out of space\n");
+		exit(0);
+	}
+	return type;
+}
+void showType(Type type) {
+	if (type == NULL)
+		return;
+	switch (type->kind) {
+	case BASIC:
+		fprintf(stdout, "basic: %d", type->basic);
+		break;
+	case ARRAY:
+		fprintf(stdout, "array ");
+		showType(type->array.elem);
+		fprintf(stdout, "size: %d", type->array.size);
+		break;
+	case STRUCTURE:
+		fprintf(stdout, "structure ");
+		showFieldList(type->structure);
+		break;
+	}
+}
+void freeType(Type type) {
+	if (type == NULL)
+		return;
+	switch (type->kind) {
+	case BASIC:
+		break;
+	case ARRAY:
+		freeType(type->array.elem);
+		type->array.elem = NULL;
+		break;
+	case STRUCTURE:
+		freeFieldList(type->structure);
+		type->structure = NULL;
+		break;
+	}
+	free(type);
+	type = NULL;
+}
+
+FieldList newFieldList(char *name, Type type, FieldList tail) {
+	FieldList fieldList = NULL;
+	fieldList = malloc(sizeof(FieldList));
+	if(!fieldList) {
+		fprintf(stderr, "out of space\n");
+		exit(0);
+	}
+	fieldList->name = malloc(sizeof(char) * strlen(name));
+	strcpy(fieldList->name, name);
+	fieldList->type = type;
+	fieldList->tail = tail;
+	return fieldList;
+}
+void showFieldList(FieldList fieldList) {
+	if (fieldList == NULL)
+		return;
+	fprintf(stdout, "name: ", fieldList->name);
+	showType(fieldList->type);
+	showFieldList(fieldList->tail);
+}
+void freeFieldList(FieldList fieldList) {
+	if (fieldList == NULL)
+		return;
+	if (fieldList->name != NULL) {
+		free(name);
+		fieldList->name = NULL;
+	}
+	if (fieldList->type != NULL) {
+		freeType(fieldList->type);
+		fieldList->type = NULL;
+	}
+	if (fieldList->tail != NULL) {
+		freeFieldList(fieldList->tail);
+		fieldList->tail = NULL;
+	}
+	free(fieldList);
+	fieldList = NULL;
+}
+
+/*
+	symbol node
+*/
 struct SymNode *createSymNode(int type, char *name) {
 	struct SymNode *symNode;
 	symNode = malloc(sizeof(struct SymNode));
@@ -20,6 +111,14 @@ struct SymNode *createSymNode(int type, char *name) {
 	symNode->name = malloc(sizeof(char) * strlen(name));
 	strcpy(symNode->name, name);
 	symNode->next = NULL;
+	return symNode;
+}
+struct SymNode *newNewType(char *name, Type type) {
+//	Type newType = NULL;
+	struct SymNode *symNode = NULL;
+//	newType = newType();
+ 	symNode = createSymNode(NewType, name);
+	symNode->type = type;
 	return symNode;
 }
 struct SymNode *newVar(char *name, Type type) {
@@ -117,6 +216,9 @@ int freeSymNode(struct SymNode *symNode) {
 	case Func:
 		freeFunc(symNode->func);
 		break;
+	case NewType:
+		freeType(symNode->type);
+		break;
 	default:
 		fprintf(stderr, "error type\n");
 		break;
@@ -140,11 +242,20 @@ void showSymbol(struct SymNode *symNode) {
 		fprintf(stdout, "%s\n", symNode->name);
 		showFunc(symNode->func);
 		break;
+	case NewType:
+		fprintf(stdout, "NewType: ");
+		fprintf(stdout, "%s\n", symNode->name);
+		showType(symNode->type);
+		break;
 	default:
 		fprintf(stderr, "error type\n");
 		break;
 	}
 }
+ 
+/*
+	hash table
+*/
 unsigned int hash_pjw(char *name) {
 	unsigned int val = 0, i;
 	char *temp = name;

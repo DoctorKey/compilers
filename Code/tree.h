@@ -2,8 +2,10 @@
 #define __TREE_H_
 
 //#include "name.h"
+#include "symtable.h"
 
 #define CHILD_NUM 7
+
 union value {
 	int INT;
 	float FLOAT;
@@ -12,6 +14,9 @@ union value {
 };
 struct node {
 	int nodetype;
+	Type type;
+	FieldList fieldList;
+	struct SymNode *symNode;
 	union value nodevalue;
 	int depth;
 	int lineno;
