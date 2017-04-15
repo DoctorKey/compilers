@@ -11,6 +11,7 @@
 */
 Type Gspecifier = NULL;
 Type GFuncReturn = NULL;
+int structnum = 0;
 
 int cmpType(Type type1, Type type2); 
 void SetSpecifier(Type Specifier, Type *type); 
@@ -44,6 +45,8 @@ int cmpType(Type type1, Type type2) {
 	if(type1->kind == BASIC && type2->kind == BASIC) {
 		if(type1->basic == type2->basic)
 			return 0;
+		else
+			return 1;
 	}
 	if(type1->kind == ARRAY && type2->kind == ARRAY) {
 		//don't compare the array size
@@ -55,52 +58,13 @@ int cmpType(Type type1, Type type2) {
 	}
 }
 /*
-void SetFieldListSpecifier(Type Specifier, FieldList *fieldList) {
-	if(fieldList == NULL) {
-		return;
-	}
-	SetSpecifier(Specifier, &((*fieldList)->type));
-	SetFieldListSpecifier(Specifier, &((*fieldList)->tail));
-}
-*/
-/*
-	SetSpecifier
-	for
-	ParamDec -> Specifier VarDec
-	Def	-> Specifier DecList SEMI   
-*/
-/*
-void SetSpecifier(Type Specifier, Type *type) {
-	if(type == NULL) {
-		fprintf(stderr, "error at SetSpecifier, type is NULL\n");
-		return;
-	}	
-	if(*type == NULL) {
-		*type = Specifier;
-		return;
-	}
-	if((*type)->kind == BASIC) {
-		if(Specifier->kind != BASIC) {
-			//Maybe error
-			SemanticError(5, 0);			
-		}
-	}
-	if((*type)->kind == STRUCTURE) {
-		SetFieldListSpecifier(Specifier, &((*type)->structure));
-	}
-	if((*type)->kind == ARRAY) {
-		
-	}
-}
-*/
-/*
 	High-level Definitions
 */
 void ProgramAnalyze(struct node *parent, int num) {
 }
 void ExtDefListAnalyze(struct node *parent, int num) {
 }
-// update parent->type. add symbol, update Gspecifier = NULL;
+// update Gspecifier = NULL;GFuncReturn = NULL;
 void ExtDefAnalyze(struct node *parent, int num) {
 	struct node *specifier = NULL;
 	struct node *midchild = NULL;
@@ -110,86 +74,46 @@ void ExtDefAnalyze(struct node *parent, int num) {
 	specifier = parent->children[0];
 	if (specifier == NULL) {
 		fprintf(stderr, "ExtDef's child Specifier is NULL\n");
-		return;
+		goto ExtDefDebug;
 	}
-	parent->type = specifier->type;
-	if (num == 3) {
-		midchild = parent->children[1];
-		if (midchild == NULL) {
-			fprintf(stderr, "ExtDef's child is NULL\n");
-			return;
-		}
-		if (parent->children[2]->nodetype == SEMI) {
-			//Specifier ExtDecList SEMI
-			parent->fieldList = midchild->fieldList;
-
-			// update all the fieldList
-			fieldList = parent->fieldList;
-			while (fieldList != NULL) {
-				//TODO: fieldList->type is array should update
-				symNode = newVar(fieldList->name, fieldList->type);
-				if (!lookup(fieldList->name)) {
-					SemanticError(3, parent->lineno);
-				}else {
-					insert(symNode);
-				}
-				if (debug2) {
-					fprintf(stdout, "ExtDef add new symbol : \n");
-					showSymbol(symNode);
-					fprintf(stdout, "\n");
-				}
-				fieldList = fieldList->tail;
-			}
-		}else{
-			// Specifier FunDec CompSt
-			symNode = newFunc(midchild->nodevalue.str, parent->type, midchild->fieldList);
-			if(debug2) {
-				fprintf(stdout, "ExtDef add new symbol : \n");
-			}
-			if (lookup(symNode->name)) {
-				SemanticError(3, parent->lineno);
-			}else {
-				insert(symNode);
-			}
-			if (debug2) {
-				showSymbol(symNode);
-				fprintf(stdout, "\n");
-			}
-		}
+	midchild = parent->children[1];
+	if (midchild == NULL) {
+		fprintf(stderr, "ExtDef's child is NULL\n");
+		goto ExtDefDebug;
+	}
+	//Specifier ExtDecList SEMI
+	if (midchild->nodetype == ExtDecList) {
+	}
+	//Specifier FunDec SEMI
+	if (midchild->nodetype == FunDec) {
+		GFuncReturn = NULL;
 	}
 	Gspecifier = NULL;
 ExtDefDebug:
 	if(debug2) {
-		fprintf(stdout, "ExtDef->type: \n");
-		showType(parent->type);
-		fprintf(stdout, "\n");
 	}
 }
-// update parent->fieldList
+// update add symbol
 void ExtDecListAnalyze(struct node *parent, int num) {
 	struct node *vardec = NULL;
-	struct node *extdeclist = NULL;
-	FieldList fieldList = NULL;
+	struct SymNode *symNode = NULL;
 
 	vardec = parent->children[0];
 	if (vardec == NULL) {
 		fprintf(stderr, "ExtDecList's child VarDec is NULL\n");
-		return;
+		goto ExtDecListDebug;
 	}
-	if (num == 1) {
-		fieldList = NULL;
+	symNode = lookup(vardec->nodevalue.str);
+	if (symNode) {
+		SemanticError(3, parent->lineno);
 	}else {
-		extdeclist = parent->children[2];
-		if (extdeclist == NULL) {
-			fprintf(stderr, "ExtDecList's child ExtDecList is NULL\n");
-			return;
-		}
-		fieldList = extdeclist->fieldList;
+		symNode = newVar(vardec->nodevalue.str, Gspecifier);
+		insert(symNode);
 	}
-	parent->fieldList = newFieldList(vardec->nodevalue.str, vardec->type, fieldList);
+ExtDecListDebug:
 	if(debug2) {
-		fprintf(stdout, "ExtDecList->fieldList: \n");
-		showFieldList(parent->fieldList);
+		fprintf(stdout, "ExtDecList add new symbol: \n");
+		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
 }
@@ -237,12 +161,13 @@ SpecifierDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// new struct type; add to symTable; update parent->type, parent->nodevalue.str
+// new struct type; add to symTable; update parent->type, parent->nodevalue.str, structnum--
 void StructSpecifierAnalyze(struct node *parent, int num) {
 	struct node *tag = NULL;
 	struct node *deflist = NULL;
 	struct SymNode *symNode = NULL;
 
+	structnum--;
 	tag = parent->children[1];
 	if (tag == NULL) {
 		parent->nodevalue.str = NULL;
@@ -264,7 +189,7 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 		if (parent->nodevalue.str != NULL) {
 			symNode = lookup(parent->nodevalue.str);
 			if (symNode != NULL) {
-				SemanticError(16, parent->lineno);
+//				SemanticError(16, parent->lineno);
 				goto StructSpecifierDebug;
 			}
 			symNode = newNewType(parent->nodevalue.str, parent->type);
@@ -272,10 +197,8 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 				fprintf(stderr, "can't create symNode\n");
 				goto StructSpecifierDebug;
 			}
-			if (insert(symNode)) {
-				fprintf(stderr, "insert symNode error\n");
-				goto StructSpecifierDebug;
-			}
+			insert(symNode);
+			goto StructSpecifierDebug;
 		}
 	}
 	// STRUCT Tag
@@ -299,11 +222,12 @@ StructSpecifierDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->nodevalue.str
+// update parent->nodevalue.str, structnum++
 void OptTagAnalyze(struct node *parent, int num) {
 	// only when OptTag -> ID , call this function
 	struct node *child = parent->children[0];
 	struct SymNode *symNode = NULL;
+	structnum++;
 	if (child == NULL) {
 		fprintf(stderr, "OptTag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -373,9 +297,11 @@ void VarDecAnalyze(struct node *parent, int num) {
 			parent->nodevalue.str = NULL;
 		}else {
 			parent->nodevalue.str = id->nodevalue.str;	
-			symNode = lookup(parent->nodevalue.str);
-			if(symNode) {
-				SemanticError(3, parent->lineno);
+			if(structnum == 0) {
+				symNode = lookup(parent->nodevalue.str);
+				if(symNode) {
+					SemanticError(3, parent->lineno);
+				}
 			}
 		}
 		// inh the specifier
@@ -415,7 +341,7 @@ VarDecDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->fieldList, parent->nodevalue.str, GFuncReturn
+// update GFuncReturn
 void FunDecAnalyze(struct node *parent, int num) {
 	struct node *id = NULL;
 	struct node *varlist = NULL;
@@ -427,10 +353,6 @@ void FunDecAnalyze(struct node *parent, int num) {
 		parent->nodevalue.str = NULL;
 	}else {
 		parent->nodevalue.str = id->nodevalue.str;
-	}
-	symNode = lookup(parent->nodevalue.str);
-	if(symNode) {
-		SemanticError(4, parent->lineno);
 	}
 
 	if (num == 3) {
@@ -446,15 +368,18 @@ void FunDecAnalyze(struct node *parent, int num) {
 	}
 
 	GFuncReturn = Gspecifier;
+	symNode = lookup(parent->nodevalue.str);
+	if(symNode) {
+		SemanticError(4, parent->lineno);
+	}else {
+		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList);
+		insert(symNode);
+	}
 
 FunDecDebug:
 	if(debug2) {
-		fprintf(stdout, "FunDec->nodevalue.str = %s \n", parent->nodevalue.str);
-		fprintf(stdout, "FunDec->fieldList : \n");
-		showFieldList(parent->fieldList);
-		fprintf(stdout, "\n");
-		fprintf(stdout, "GFuncReturn : \n");
-		showType(GFuncReturn);
+		fprintf(stdout, "FunDec add new func symbol: \n");
+		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
 }
@@ -579,14 +504,14 @@ void DefListAnalyze(struct node *parent, int num) {
 	def = parent->children[0];	// Def
 	if (def == NULL) {
 		fprintf(stderr, "DefList's child Def is NULL\n");
-		return;
+		goto DefListDebug;
 	}
 	parent->fieldList = def->fieldList;
 	
 	fieldList = parent->fieldList;
 	if (fieldList == NULL) {
 		fprintf(stderr, "DefList's child Def's fieldList is NULL\n");
-		return;
+		goto DefListDebug;
 	}
 	while(fieldList->tail != NULL) {
 		fieldList = fieldList->tail;
@@ -599,13 +524,14 @@ void DefListAnalyze(struct node *parent, int num) {
 		// just link Def->tail = DefList
 		fieldList->tail = deflist->fieldList;
 	}
+DefListDebug:
 	if (debug2) {
 		fprintf(stdout, "DefList->fieldList : \n");
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->type, parent->fieldList, add new symbol
+// update parent->type, parent->fieldList, Gspecifier = NULL
 void DefAnalyze(struct node *parent, int num) {
 	// Specifier DefList SEMI
 	struct node *specifier = NULL;	
@@ -613,39 +539,22 @@ void DefAnalyze(struct node *parent, int num) {
 	FieldList fieldList = NULL;
 	struct SymNode *symNode = NULL;
 	
+	Gspecifier = NULL;
 	specifier = parent->children[0];	// Specifier
 	if (specifier == NULL) {
 		fprintf(stderr, "Def's child Specifier is NULL\n");
-		return;
+		goto DefDebug;
 	}
 	parent->type = specifier->type;
 
 	declist = parent->children[1];	// DecList
 	if (declist == NULL) {
 		fprintf(stderr, "Def's child DecList is NULL\n");
-		return;
+		goto DefDebug;
 	}
 	parent->fieldList = declist->fieldList;
 
-	if (debug2) {
-		fprintf(stdout, "Def add new symbol : \n");
-	}
-	// update all the fieldList
-	fieldList = parent->fieldList;
-	while (fieldList != NULL) {
-		//TODO: fieldList->type is array should update
-		symNode = newVar(fieldList->name, fieldList->type);
-		if (lookup(fieldList->name)) {
-			SemanticError(3, parent->lineno);
-		}else {
-			insert(symNode);
-		}
-		if (debug2) {
-			showSymbol(symNode);
-			fprintf(stdout, "\n");
-		}
-		fieldList = fieldList->tail;
-	}
+DefDebug:
 	if (debug2) {
 		fprintf(stdout, "Def->type : \n");
 		showType(parent->type);
@@ -663,7 +572,7 @@ void DecListAnalyze(struct node *parent, int num) {
 	dec = parent->children[0];	//Dec
 	if (dec == NULL) {
 		fprintf(stderr, "DecList's child Dec is NULL\n");
-		return;
+		goto DecListDebug;
 	}
 	// Dec
 	if (num == 1) {
@@ -674,52 +583,65 @@ void DecListAnalyze(struct node *parent, int num) {
 		declist = parent->children[2];	// DecList
 		if (declist == NULL) {
 			fprintf(stderr, "DecList's child DecList is NULL\n");
-			return;
+			goto DecListDebug;
 		}
 		fieldList = declist->fieldList;
 	}
 	parent->fieldList = newFieldList(dec->nodevalue.str, dec->type, fieldList);	
-
+DecListDebug:
 	if (debug2) {
 		fprintf(stdout, "DecList->fieldList :\n");
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->nodevalue.str, parent->type
+// update parent->nodevalue.str, parent->type, add symbol
 void DecAnalyze(struct node *parent, int num) {
-	struct node *child = NULL;
+	struct node *vardec = NULL;
 	struct node *exp = NULL;
+	struct SymNode *symNode = NULL;
 
 	// VarDec
-	child = parent->children[0];	//VarDec
-	if (child == NULL) {
+	vardec = parent->children[0];	//VarDec
+	if (vardec == NULL) {
 		fprintf(stderr, "Dec's child VarDef is NULL\n");
-		return;
+		goto DecDebug;
 	}
-	parent->nodevalue.str = child->nodevalue.str;
-	parent->type = child->type;
+	parent->nodevalue.str = vardec->nodevalue.str;
+	parent->type = vardec->type;
+
+	symNode = lookup(parent->nodevalue.str);
+	if (symNode) {
+		if (structnum > 0)
+			SemanticError(15, parent->lineno);
+		else
+			SemanticError(3, parent->lineno);
+	}else {
+		symNode = newVar(parent->nodevalue.str, parent->type);
+		insert(symNode);
+	}
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {
-		//TODO: check VarDec type and Exp type
-		//	but don't know VarDec type..
-		//	can let VarDec type = Exp type temp. let Def to exam the type
-		exp = parent->children[2];	//Exp
+		if (structnum > 0) {
+			SemanticError(15, parent->lineno);
+			goto DecDebug;
+		}
+		exp = parent->children[2];
 		if (exp == NULL) {
 			fprintf(stderr, "Dec's child Exp is NULL\n");
-			return;
+			goto DecDebug;
 		}
-		/*
-		if (cmpType(parent->type, exp->type)) {
+		if (cmpType(vardec->type, exp->type)) {
 			SemanticError(5, parent->lineno);
 		}
-		*/
-		//TODO: error 6 check VarDec can have value;
 	}
+DecDebug:
 	if (debug2) {
 		fprintf(stdout, "Dec->nodevalue.str = %s\n", parent->nodevalue.str);
 		fprintf(stdout, "Dec->type : \n");
 		showType(parent->type);
+		fprintf(stdout, "\nDec add new Var symbol: \n");
+		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
 }
@@ -729,7 +651,7 @@ void DecAnalyze(struct node *parent, int num) {
 */
 // update parent->nodevalue.str, parent->type
 void ExpAnalyze(struct node *parent, int num) {
-	struct node *childleft, *childright;
+	struct node *childleft, *childright, *childmid;
 	struct SymNode *symNode = NULL;
 	childleft = parent->children[0];
 	if (childleft == NULL) {
@@ -771,6 +693,11 @@ void ExpAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "Exp's child Exp is NULL\n");
 		return;
 	}
+	childmid = parent->children[1];
+	if (childmid == NULL) {
+		fprintf(stderr, "Exp's child mid is NULL\n");
+		return;
+	}
 	if (num == 3) {
 		// LP Exp RP
 		if (childleft->nodetype == LP && childright->nodetype == RP) {
@@ -803,6 +730,14 @@ void ExpAnalyze(struct node *parent, int num) {
 				parent->type = newType();
 				parent->type->kind = ERROR;
 			}
+			goto ExpDebug;
+		}
+		// Exp ASSIGNOP Exp
+		if (childmid->nodetype == ASSIGNOP) {
+			if(cmpType(childleft->type, childright->type))
+				SemanticError(5, parent->lineno);
+			if(!childleft->nodevalue.str)
+				SemanticError(6, parent->lineno);
 			goto ExpDebug;
 		}
 		// other Exp
@@ -841,6 +776,7 @@ void ExpAnalyze(struct node *parent, int num) {
 			SemanticError(12, parent->lineno);
 		}
 		parent->type = childleft->type->array.elem;
+		parent->nodevalue.str = childleft->nodevalue.str;
 		goto ExpDebug;
 	}
 ExpDebug:
@@ -874,7 +810,8 @@ void ArgsAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "Args's child Exp is NULL\n");
 		parent->fieldList = fieldList;
 	}else {
-		parent->fieldList = newFieldList(exp->nodevalue.str, exp->type, fieldList);	
+		//parent->fieldList = newFieldList(exp->nodevalue.str, exp->type, fieldList);	
+		parent->fieldList = newFieldList(" ", exp->type, fieldList);	
 	}
 ArgsDebug:
 	if (debug2) {

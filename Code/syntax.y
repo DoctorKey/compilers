@@ -65,10 +65,12 @@ Program : ExtDefList
 			if(isError == 0 && lexical_isError == 0)
 				showTree($$);
 			#endif
-			showAllSymbol();
-			getHashTableInfo();
+			if(debug2){
+				showAllSymbol();
+				getHashTableInfo();
+			}
 			cleanHashTable();
-			getHashTableInfo();
+			//getHashTableInfo();
 			clearTree($$); 
 			$$ = NULL;
 		}
