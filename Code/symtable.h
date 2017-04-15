@@ -88,7 +88,7 @@ void freeFieldList(FieldList fieldList);
 
 struct SymNode *newNewType(char *name, Type type); 
 struct SymNode *newVar(char *name, Type type); 
-struct SymNode *newFunc(char *name, Type Return, int argc, ...); 
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype; 
 
 int freeSymNode(struct SymNode *symNode); 
 

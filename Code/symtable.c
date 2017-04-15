@@ -149,26 +149,19 @@ void showVar(struct Var *var) {
 	showType(var->type);	
 	fprintf(stdout, "\n");
 }
-struct SymNode *newFunc(char *name, Type Return, int argc, ...) {
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype) {
 	int i;
 	struct Func *func = NULL;
 	struct SymNode *symNode = NULL;
-	void **argv = (void **)&argc + 1;
+//	void **argv = (void **)&argc + 1;
 	func = malloc(sizeof(struct Func));
 	if(!func) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
 	}
-	func->argtype = malloc(sizeof(Type) * argc);	
-	if(!func->argtype) {
-		fprintf(stderr, "out of space\n");
-		exit(0);
-	}
 	func->Return = Return;
 	func->argc = argc;
-	for (i = 0; i != argc; i++, argv++) {
-		func->argtype[i] = (Type) *argv;
-	}
+	func->argtype = argtype;
  	symNode = createSymNode(Func, name);
 	return symNode;
 }
@@ -176,12 +169,12 @@ void freeFunc(struct Func *func) {
 	int i;
 	if (func == NULL)
 		return;
-	for (i = 0; i != func->argc; i++) {
-		freeType(func->argtype[i]);
-		func->argtype[i] = NULL;
-	}
-	free(func->argtype);
+	if (func->argtype != NULL)
+		freeFieldList(func->argtype);
 	func->argtype = NULL;
+	if (func->Return != NULL)
+		freeType(func->Return);
+	func->Return = NULL;
 	free(func);
 	func = NULL;
 	return;
@@ -193,10 +186,7 @@ void showFunc(struct Func *func) {
 	fprintf(stdout, "\n");
 	fprintf(stdout, "func argc: %d\n", func->argc);
 	fprintf(stdout, "func args type: ");
-	for (i = 0; i != func->argc; i++) {
-		showType(func->argtype[i]);	
-		fprintf(stdout, " ");
-	}
+	showFieldList(func->argtype);
 	fprintf(stdout, "\n");
 }
 
