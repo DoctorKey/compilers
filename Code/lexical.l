@@ -5,13 +5,13 @@
 /* %option location */
 
 %{
-	#include "main.h"
-	#include "syntax.tab.h"
-	#include "tree.h"
-	#include "file.h"
 	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
+	#include "syntax.tab.h"
+	#include "file.h"
+	#include "main.h"
+	#include "tree.h"
 	int lexical_isError = 0;
 
 	int yycolumn = 1;

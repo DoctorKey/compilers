@@ -14,7 +14,7 @@ extern void lexical_init();
 extern void syntax_init();
 
 int debug = 0;
-int debug2 = 1;
+int debug2 = 0;
 
 int main(int argc, char** argv)
 {

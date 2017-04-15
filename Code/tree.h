@@ -1,7 +1,6 @@
 #ifndef __TREE_H_
 #define __TREE_H_
 
-//#include "name.h"
 #include "symtable.h"
 
 #define CHILD_NUM 7
@@ -15,6 +14,7 @@ union value {
 struct node {
 	int nodetype;
 	Type type;
+	Type returntype;
 	FieldList fieldList;
 	struct SymNode *symNode;
 	union value nodevalue;

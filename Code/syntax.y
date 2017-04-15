@@ -1,9 +1,9 @@
 %locations
 %{
 	#include <stdio.h>
+	#include "lex.yy.c"
 	#include "tree.h"
 	#include "name.h"
-	#include "lex.yy.c"
 	#define YYERROR_VERBOSE 1
 	#define YYDEBUG 1
 	/* indicate grammar analyze is error or not*/
@@ -13,9 +13,6 @@
 
 /* declared types */
 %union {
-//	int type_int;
-//	float type_float;
-//	char* type_str;
 	struct node* type_node;
 }
 
@@ -69,6 +66,8 @@ Program : ExtDefList
 				showTree($$);
 			#endif
 			showAllSymbol();
+			getHashTableInfo();
+			cleanHashTable();
 			getHashTableInfo();
 			clearTree($$); 
 			$$ = NULL;

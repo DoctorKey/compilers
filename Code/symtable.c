@@ -25,7 +25,11 @@ void showType(Type type) {
 		return;
 	switch (type->kind) {
 	case BASIC:
-		fprintf(stdout, " basic: %d ", type->basic);
+		fprintf(stdout, " basic: ");
+		if (type->basic == INT) 
+			fprintf(stdout, "INT ");
+		if (type->basic == FLOAT) 
+			fprintf(stdout, "FLOAT ");
 		break;
 	case ARRAY:
 		fprintf(stdout, " array ");
@@ -73,8 +77,10 @@ FieldList newFieldList(char *name, Type type, FieldList tail) {
 void showFieldList(FieldList fieldList) {
 	if (fieldList == NULL)
 		return;
-	fprintf(stdout, "name: ", fieldList->name);
+	fprintf(stdout, "fieldList name: %s \n", fieldList->name);
+	fprintf(stdout, "fieldList type: ");
 	showType(fieldList->type);
+	fprintf(stdout, "\n");
 	showFieldList(fieldList->tail);
 }
 void freeFieldList(FieldList fieldList) {
@@ -94,6 +100,14 @@ void freeFieldList(FieldList fieldList) {
 	}
 	free(fieldList);
 	fieldList = NULL;
+}
+Type lookupFieldListElem(FieldList fieldList, char *name) {
+	while (fieldList != NULL) {
+		if (!strcmp(name, fieldList->name))
+			return fieldList->type;
+		fieldList = fieldList->tail;
+	}
+	return NULL;
 }
 
 /*
@@ -153,16 +167,15 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype) {
 	int i;
 	struct Func *func = NULL;
 	struct SymNode *symNode = NULL;
-//	void **argv = (void **)&argc + 1;
 	func = malloc(sizeof(struct Func));
 	if(!func) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
 	}
 	func->Return = Return;
-	func->argc = argc;
 	func->argtype = argtype;
  	symNode = createSymNode(Func, name);
+	symNode->func = func;
 	return symNode;
 }
 void freeFunc(struct Func *func) {
@@ -180,7 +193,6 @@ void freeFunc(struct Func *func) {
 	return;
 }
 void showFunc(struct Func *func) {
-	int i;
 	fprintf(stdout, "func return type: ");
 	showType(func->Return);	
 	fprintf(stdout, "\n");
@@ -265,9 +277,9 @@ Type getIDType(int type, char *name) {
 	symNode = lookup(name);
 	if (symNode == NULL) {
 		if (type == Var)
-			SemanticError(1);
+			SemanticError(1, 0);
 		if (type == Func)
-			SemanticError(2);
+			SemanticError(2, 0);
 		result = newType();
 		result->kind = ERROR;
 		return result;
@@ -286,8 +298,8 @@ unsigned int hash_pjw(char *name) {
 		if (i = val & ~HASHSIZE)
 			val = (val ^ (i >> 12)) & HASHSIZE;
 	}
-	if (debug2 == 1) {
-		fprintf(stdout, "%s hash val %d\n", temp, val);
+	if (debug2) {
+//		fprintf(stdout, "%s hash val %d\n", temp, val);
 	}
 	return val;
 }

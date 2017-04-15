@@ -88,7 +88,7 @@ void freeFieldList(FieldList fieldList);
 
 struct SymNode *newNewType(char *name, Type type); 
 struct SymNode *newVar(char *name, Type type); 
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype; 
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype); 
 
 int freeSymNode(struct SymNode *symNode); 
 
@@ -97,6 +97,7 @@ void showAllSymbol(void);
 
 int insert(struct SymNode *symNode); 
 struct SymNode *lookup(char *name);
+Type lookupFieldListElem(FieldList fieldList, char *name);
 Type getSymType(struct SymNode *symNode);
 Type getIDType(int type, char *name); 
 
