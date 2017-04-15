@@ -19,7 +19,7 @@ typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
 
 struct Type_ {
-	enum {BASIC, ARRAY, STRUCTURE, ERROR, INIT} kind;
+	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;
 	union {
 		int basic;
 		struct {

@@ -129,9 +129,7 @@ struct SymNode *createSymNode(int type, char *name) {
 	return symNode;
 }
 struct SymNode *newNewType(char *name, Type type) {
-//	Type newType = NULL;
 	struct SymNode *symNode = NULL;
-//	newType = newType();
  	symNode = createSymNode(NewType, name);
 	symNode->specifier = type;
 	return symNode;
