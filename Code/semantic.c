@@ -11,14 +11,13 @@
 */
 Type Gspecifier = NULL;
 Type GFuncReturn = NULL;
-extern struct ErrorInfo *GerrorInfo;
-extern struct ErrorInfoStack *ErrorInfoStackHead;
-int structnum = 0;
+extern struct ErrorInfoStack *IdErrorInfoStackHead;
+extern struct ErrorInfoStack *NumErrorInfoStackHead;
+int structdefnum = 0;
 int argsnum = 0;
 int varlistnum = 0;
 
 int cmpType(Type type1, Type type2); 
-void SetSpecifier(Type Specifier, Type *type); 
 
 /*
 	compare two FieldList
@@ -30,8 +29,9 @@ int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {
 		return 0;
 	if(fieldList1 == NULL || fieldList2 == NULL)
 		return 1;
-	if(!strcmp(fieldList1->name, fieldList2->name))
-		return 1;
+	//TODO: no need to compare the name?
+//	if(!strcmp(fieldList1->name, fieldList2->name))
+//		return 1;
 	if(!cmpType(fieldList1->type, fieldList2->type))
 		return 1;
 	return cmpFieldList(fieldList1->tail, fieldList2->tail);
@@ -60,6 +60,8 @@ int cmpType(Type type1, Type type2) {
 	if(type1->kind == STRUCTURE && type2->kind == STRUCTURE) {
 		return cmpFieldList(type1->structure, type2->structure);
 	}
+	//type1->kind != type2->kind
+	return 1;
 }
 /*
 	High-level Definitions
@@ -158,21 +160,21 @@ void SpecifierAnalyze(struct node *parent, int num) {
 	Gspecifier = parent->type;
 SpecifierDebug:
 	if(debug2) {
-		fprintf(stdout, "Specifier->type : \n");
+		fprintf(stdout, "Specifier->type : ");
 		showType(parent->type);
 		fprintf(stdout, "\n");
-		fprintf(stdout, "Gspecifier: \n");
+		fprintf(stdout, "Gspecifier: ");
 		showType(Gspecifier);
 		fprintf(stdout, "\n");
 	}
 }
-// new struct type; add to symTable; update parent->type, parent->nodevalue.str, structnum--
+// new struct type; add to symTable; update parent->type, parent->nodevalue.str, structdefnum--
 void StructSpecifierAnalyze(struct node *parent, int num) {
 	struct node *tag = NULL;
 	struct node *deflist = NULL;
 	struct SymNode *symNode = NULL;
-
-	structnum--;
+	//finish define
+	structdefnum--;
 	tag = parent->children[1];
 	if (tag == NULL) {
 		parent->nodevalue.str = NULL;
@@ -183,7 +185,7 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 	if (num == 5) {
 		parent->type = newType();
 		parent->type->kind = STRUCTURE;
-		deflist = parent->children[3];	// DefList
+		deflist = parent->children[3];	
 		if (deflist == NULL) {
 			// DefList can be NULL!
 			parent->type->structure = NULL;
@@ -192,19 +194,12 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 		}
 		//only when OptTag has name,add it to symTable 
 		if (parent->nodevalue.str != NULL) {
-			symNode = lookup(parent->nodevalue.str);
-			if (symNode != NULL) {
-//				SemanticError(16, parent->errorInfo);
-				goto StructSpecifierDebug;
-			}
 			symNode = newNewType(parent->nodevalue.str, parent->type, tag->errorInfo);
 			if (symNode == NULL) {
 				fprintf(stderr, "can't create symNode\n");
 				goto StructSpecifierDebug;
 			}
 			insert(symNode);
-			freeErrorInfoStack(ErrorInfoStackHead);
-			ErrorInfoStackHead = NULL;
 			goto StructSpecifierDebug;
 		}
 	}
@@ -218,8 +213,6 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 			goto StructSpecifierDebug;
 		}
 		parent->type = tag->type;
-		freeErrorInfoStack(ErrorInfoStackHead);
-		ErrorInfoStackHead = NULL;
 	}
 StructSpecifierDebug:
 	if(debug2) {
@@ -231,13 +224,13 @@ StructSpecifierDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->nodevalue.str, structnum++, parent->errorInfo
+// update parent->nodevalue.str, parent->errorInfo
 void OptTagAnalyze(struct node *parent, int num) {
 	// only when OptTag -> ID , call this function
 	struct node *child = parent->children[0];
 	struct SymNode *symNode = NULL;
-	structnum++;
-	parent->errorInfo = GerrorInfo;
+	int totalErrorInfo = GetTotalErrorInfo();
+	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 	if (child == NULL) {
 		fprintf(stderr, "OptTag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -259,7 +252,9 @@ void TagAnalyze(struct node *parent, int num) {
 	// ID
 	struct node *child = parent->children[0];
 	struct SymNode *symNode = NULL;
-	struct ErrorInfo *idErrorInfo = NULL;
+	int totalErrorInfo = GetTotalErrorInfo();
+	// not define
+	structdefnum--;
 	if (child == NULL) {
 		fprintf(stderr, "Tag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -267,11 +262,8 @@ void TagAnalyze(struct node *parent, int num) {
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
-	idErrorInfo = GetFirstErrorInfo(ErrorInfoStackHead);
-	freeErrorInfoStack(ErrorInfoStackHead);
-	ErrorInfoStackHead = NULL;
-//	parent->errorInfo = GerrorInfo;
-	parent->errorInfo = idErrorInfo;
+	//TODO: just -1 may error
+	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - 1);
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode == NULL) {
@@ -304,22 +296,16 @@ void VarDecAnalyze(struct node *parent, int num) {
 	struct node *id = NULL;
 	struct node *vardec = NULL;
 	struct node *index = NULL;
-	struct SymNode *symNode = NULL;
+	int totalErrorInfo = GetTotalErrorInfo();
 	// ID
 	if (num == 1) {
-		parent->errorInfo = GerrorInfo;
+		parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 		id = parent->children[0];	// ID
 		if (id == NULL) {
 			fprintf(stderr, "VarDec's child ID is NULL\n");
 			parent->nodevalue.str = NULL;
 		}else {
 			parent->nodevalue.str = id->nodevalue.str;	
-			if(structnum == 0) {
-				symNode = lookup(parent->nodevalue.str);
-				if(symNode) {
-//					SemanticError(3, parent->errorInfo);
-				}
-			}
 		}
 		// inh the specifier
 		parent->type = Gspecifier;
@@ -340,12 +326,10 @@ void VarDecAnalyze(struct node *parent, int num) {
 		}
 		parent->errorInfo = vardec->errorInfo;
 
-		index = parent->children[2];	// INT
+		// Error type B check it is INT
+		index = parent->children[2];
 		if (index == NULL) {
 			fprintf(stderr, "VarDec's child INT is NULL\n");
-			parent->type->array.size = 0;
-		}else if(index->nodetype != INT) {
-			SemanticError(12, parent->errorInfo);
 			parent->type->array.size = 0;
 		}else{
 			parent->type->array.size = index->nodevalue.INT;
@@ -365,8 +349,9 @@ void FunDecAnalyze(struct node *parent, int num) {
 	struct node *varlist = NULL;
 	struct SymNode *symNode = NULL;
 	struct ErrorInfo *idErrorInfo = NULL;
+	int totalErrorInfo = GetTotalErrorInfo();
 
-	parent->errorInfo = GerrorInfo;
+	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - varlistnum);
 	id = parent->children[0];
 	if (id == NULL) {
 		fprintf(stderr, "FunDec's child ID is NULL\n");
@@ -388,11 +373,10 @@ void FunDecAnalyze(struct node *parent, int num) {
 	}
 
 	GFuncReturn = Gspecifier;
-	idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, varlistnum);
+	idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - varlistnum);
 	varlistnum = 0;
 	symNode = lookup(parent->nodevalue.str);
 	if(symNode) {
-//		SemanticError(4, parent->errorInfo);
 		SemanticError(4, idErrorInfo);
 	}else {
 		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
@@ -563,8 +547,8 @@ void DefAnalyze(struct node *parent, int num) {
 	FieldList fieldList = NULL;
 	struct SymNode *symNode = NULL;
 	
-//	freeErrorInfoStack(ErrorInfoStackHead);
-//	ErrorInfoStackHead = NULL;
+//	freeErrorInfoStack(IdErrorInfoStackHead);
+//	IdErrorInfoStackHead = NULL;
 	Gspecifier = NULL;
 	specifier = parent->children[0];	// Specifier
 	if (specifier == NULL) {
@@ -640,7 +624,7 @@ void DecAnalyze(struct node *parent, int num) {
 
 	symNode = lookup(parent->nodevalue.str);
 	if (symNode) {
-		if (structnum > 0)
+		if (structdefnum > 0)
 			SemanticError(15, parent->errorInfo);
 		else
 			SemanticError(3, parent->errorInfo);
@@ -650,7 +634,7 @@ void DecAnalyze(struct node *parent, int num) {
 	}
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {
-		if (structnum > 0) {
+		if (structdefnum > 0) {
 			SemanticError(15, parent->errorInfo);
 			goto DecDebug;
 		}
@@ -682,6 +666,7 @@ void ExpAnalyze(struct node *parent, int num) {
 	struct node *childleft, *childright, *childmid;
 	struct SymNode *symNode = NULL;
 	struct ErrorInfo *idErrorInfo = NULL;
+	int totalErrorInfo = GetTotalErrorInfo();
 	childleft = parent->children[0];
 	if (childleft == NULL) {
 		fprintf(stderr, "Exp's child Exp is NULL\n");
@@ -692,7 +677,7 @@ void ExpAnalyze(struct node *parent, int num) {
 		switch(childleft->nodetype) {
 		case ID:
 			symNode = lookup(childleft->nodevalue.str);
-			parent->errorInfo = GerrorInfo;
+			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 			if (symNode == NULL) {
 				SemanticError(1, parent->errorInfo);
 				parent->type = newType();
@@ -703,13 +688,13 @@ void ExpAnalyze(struct node *parent, int num) {
 			parent->nodevalue.str = childleft->nodevalue.str;
 			break;
 		case INT:
-			parent->errorInfo = initError();
+			parent->errorInfo = GetErrorInfoByNum(NumErrorInfoStackHead, totalErrorInfo);
 			parent->type = newType();
 			parent->type->kind = BASIC;
 			parent->type->basic = INT;
 			break;
 		case FLOAT:
-			parent->errorInfo = initError();
+			parent->errorInfo = GetErrorInfoByNum(NumErrorInfoStackHead, totalErrorInfo);
 			parent->type = newType();
 			parent->type->kind = BASIC;
 			parent->type->basic = FLOAT;
@@ -747,7 +732,7 @@ void ExpAnalyze(struct node *parent, int num) {
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
-			idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, argsnum);
+			idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
 			argsnum = 0;
 			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
@@ -769,7 +754,7 @@ void ExpAnalyze(struct node *parent, int num) {
 				parent->type->kind = ERROR;
 				goto ExpDebug;
 			}
-			parent->errorInfo = GerrorInfo;
+			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
 			if (parent->type == NULL) {
 			//	parent->errorInfo = GerrorInfo;
@@ -802,7 +787,7 @@ void ExpAnalyze(struct node *parent, int num) {
 	if (num == 4) {
 		// ID LP Args RP
 		if(childleft->nodetype == ID) {
-			idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, argsnum);
+			idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
 			argsnum = 0;
 			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
@@ -846,9 +831,10 @@ void ArgsAnalyze(struct node *parent, int num) {
 	struct node *exp = NULL;
 	struct node *args = NULL;
 	FieldList fieldList = NULL;
+	int totalErrorInfo = GetTotalErrorInfo();
 
 	argsnum++;
-	parent->errorInfo = GerrorInfo;
+	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 	// Exp
 	if (num == 1) {
 		fieldList = NULL;

@@ -13,8 +13,8 @@
 	#include "main.h"
 	#include "tree.h"
 	int lexical_isError = 0;
-	extern struct ErrorInfo *GerrorInfo;
 
+	extern int structdefnum;
 	int yycolumn = 1;
 #define YY_USER_ACTION \
 	yylloc.first_line = yylloc.last_line = yylineno; \
@@ -48,18 +48,21 @@ xdigit [0-9a-fA-F]
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = atoi(yytext);
+					initError(INT);
 					return INT;
 				}
 (0+[1-7]+[0-7]*)		{
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = strtol(yytext, NULL, 8);
+					initError(INT);
 					return INT;
 				}
 0[Xx]{xdigit}*			{
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(INT);
 					yylval.type_node->nodevalue.INT = strtol(yytext, NULL, 16);
+					initError(INT);
 					return INT;
 				}
 
@@ -67,6 +70,7 @@ xdigit [0-9a-fA-F]
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(FLOAT);
 					yylval.type_node->nodevalue.FLOAT = atof(yytext);
+					initError(FLOAT);
 					return FLOAT;
 				}
 
@@ -172,6 +176,8 @@ xdigit [0-9a-fA-F]
 "struct"			{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(STRUCT);
+					//define or use
+					structdefnum++;
 					return STRUCT;}
 "return"			{ 
     					BeginToken(yytext); 
@@ -193,7 +199,8 @@ xdigit [0-9a-fA-F]
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(ID);
 					yylval.type_node->nodevalue.str = strdup(yytext);
-					GerrorInfo = initError();
+					//for semantic error show
+					initError(ID);
 					return ID;
 				}
 [ \t\r]				{ 

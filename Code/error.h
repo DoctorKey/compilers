@@ -10,26 +10,24 @@
 struct ErrorInfo {
 	int ErrorLine;
 	char *ErrorLineStr;
-	int ErrorStart;
-	int ErrorEnd;
 };
 extern void PrintError(char type, char *s, ...);
-void SaveLine(); 
 
 void SemanticError(int type, struct ErrorInfo *errorInfo); 
-struct ErrorInfo *initError();
+struct ErrorInfo *initError(int type);
 void FreeErrorInfo(struct ErrorInfo *errorInfo); 
 void ShowErrorInfo(struct ErrorInfo *errorInfo); 
 
 struct ErrorInfoStack {
+	int num;
 	struct ErrorInfo *errorInfo;
 	struct ErrorInfoStack *last;
 };
 
-int pushErrorInfo(struct ErrorInfo *errorInfo); 
+int GetTotalErrorInfo(); 
+int pushErrorInfo(struct ErrorInfo *errorInfo, int type); 
 void freeErrorInfoStack(struct ErrorInfoStack *head); 
 struct ErrorInfo *GetErrorInfoByNum(struct ErrorInfoStack *head, int num); 
-struct ErrorInfo *GetFirstErrorInfo(struct ErrorInfoStack *head); 
 void ShowErrorInfoStack(struct ErrorInfoStack *head); 
 
 #endif /*__ERROR_H_*/
