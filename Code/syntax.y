@@ -9,6 +9,7 @@
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
 	extern int lexical_isError;
+	extern struct ErrorInfoStack *ErrorInfoStackHead;
 %}
 
 /* declared types */
@@ -68,6 +69,7 @@ Program : ExtDefList
 			if(debug2){
 				showAllSymbol();
 				getHashTableInfo();
+				ShowErrorInfoStack(ErrorInfoStackHead);
 			}
 			cleanHashTable();
 			//getHashTableInfo();

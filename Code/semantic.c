@@ -11,7 +11,11 @@
 */
 Type Gspecifier = NULL;
 Type GFuncReturn = NULL;
+extern struct ErrorInfo *GerrorInfo;
+extern struct ErrorInfoStack *ErrorInfoStackHead;
 int structnum = 0;
+int argsnum = 0;
+int varlistnum = 0;
 
 int cmpType(Type type1, Type type2); 
 void SetSpecifier(Type Specifier, Type *type); 
@@ -103,11 +107,12 @@ void ExtDecListAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "ExtDecList's child VarDec is NULL\n");
 		goto ExtDecListDebug;
 	}
+	parent->errorInfo = vardec->errorInfo;
 	symNode = lookup(vardec->nodevalue.str);
 	if (symNode) {
-		SemanticError(3, parent->lineno);
+		SemanticError(3, parent->errorInfo);
 	}else {
-		symNode = newVar(vardec->nodevalue.str, Gspecifier);
+		symNode = newVar(vardec->nodevalue.str, Gspecifier, parent->errorInfo);
 		insert(symNode);
 	}
 ExtDecListDebug:
@@ -189,15 +194,17 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 		if (parent->nodevalue.str != NULL) {
 			symNode = lookup(parent->nodevalue.str);
 			if (symNode != NULL) {
-//				SemanticError(16, parent->lineno);
+//				SemanticError(16, parent->errorInfo);
 				goto StructSpecifierDebug;
 			}
-			symNode = newNewType(parent->nodevalue.str, parent->type);
+			symNode = newNewType(parent->nodevalue.str, parent->type, tag->errorInfo);
 			if (symNode == NULL) {
 				fprintf(stderr, "can't create symNode\n");
 				goto StructSpecifierDebug;
 			}
 			insert(symNode);
+			freeErrorInfoStack(ErrorInfoStackHead);
+			ErrorInfoStackHead = NULL;
 			goto StructSpecifierDebug;
 		}
 	}
@@ -211,6 +218,8 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 			goto StructSpecifierDebug;
 		}
 		parent->type = tag->type;
+		freeErrorInfoStack(ErrorInfoStackHead);
+		ErrorInfoStackHead = NULL;
 	}
 StructSpecifierDebug:
 	if(debug2) {
@@ -222,12 +231,13 @@ StructSpecifierDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// update parent->nodevalue.str, structnum++
+// update parent->nodevalue.str, structnum++, parent->errorInfo
 void OptTagAnalyze(struct node *parent, int num) {
 	// only when OptTag -> ID , call this function
 	struct node *child = parent->children[0];
 	struct SymNode *symNode = NULL;
 	structnum++;
+	parent->errorInfo = GerrorInfo;
 	if (child == NULL) {
 		fprintf(stderr, "OptTag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -236,7 +246,7 @@ void OptTagAnalyze(struct node *parent, int num) {
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode != NULL) {
-		SemanticError(16, parent->lineno);
+		SemanticError(16, parent->errorInfo);
 		goto OptTagDebug;
 	}
 OptTagDebug:
@@ -244,11 +254,12 @@ OptTagDebug:
 		fprintf(stdout, "OptTag->nodevalue.str = %s\n", parent->nodevalue.str);
 	}
 }
-//update parent->nodevalue.str, parent->type
+//update parent->nodevalue.str, parent->type, parent->errorInfo
 void TagAnalyze(struct node *parent, int num) {
 	// ID
 	struct node *child = parent->children[0];
 	struct SymNode *symNode = NULL;
+	struct ErrorInfo *idErrorInfo = NULL;
 	if (child == NULL) {
 		fprintf(stderr, "Tag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -256,16 +267,21 @@ void TagAnalyze(struct node *parent, int num) {
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
+	idErrorInfo = GetFirstErrorInfo(ErrorInfoStackHead);
+	freeErrorInfoStack(ErrorInfoStackHead);
+	ErrorInfoStackHead = NULL;
+//	parent->errorInfo = GerrorInfo;
+	parent->errorInfo = idErrorInfo;
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode == NULL) {
-		SemanticError(17, parent->lineno);
+		SemanticError(17, parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
 	if (symNode->type != NewType) {
-		SemanticError(16, parent->lineno);
+		SemanticError(16, parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
@@ -291,6 +307,7 @@ void VarDecAnalyze(struct node *parent, int num) {
 	struct SymNode *symNode = NULL;
 	// ID
 	if (num == 1) {
+		parent->errorInfo = GerrorInfo;
 		id = parent->children[0];	// ID
 		if (id == NULL) {
 			fprintf(stderr, "VarDec's child ID is NULL\n");
@@ -300,7 +317,7 @@ void VarDecAnalyze(struct node *parent, int num) {
 			if(structnum == 0) {
 				symNode = lookup(parent->nodevalue.str);
 				if(symNode) {
-					SemanticError(3, parent->lineno);
+//					SemanticError(3, parent->errorInfo);
 				}
 			}
 		}
@@ -321,13 +338,14 @@ void VarDecAnalyze(struct node *parent, int num) {
 			parent->nodevalue.str = vardec->nodevalue.str;	
 			parent->type->array.elem = vardec->type;
 		}
+		parent->errorInfo = vardec->errorInfo;
 
 		index = parent->children[2];	// INT
 		if (index == NULL) {
 			fprintf(stderr, "VarDec's child INT is NULL\n");
 			parent->type->array.size = 0;
 		}else if(index->nodetype != INT) {
-			SemanticError(12, parent->lineno);
+			SemanticError(12, parent->errorInfo);
 			parent->type->array.size = 0;
 		}else{
 			parent->type->array.size = index->nodevalue.INT;
@@ -346,7 +364,9 @@ void FunDecAnalyze(struct node *parent, int num) {
 	struct node *id = NULL;
 	struct node *varlist = NULL;
 	struct SymNode *symNode = NULL;
+	struct ErrorInfo *idErrorInfo = NULL;
 
+	parent->errorInfo = GerrorInfo;
 	id = parent->children[0];
 	if (id == NULL) {
 		fprintf(stderr, "FunDec's child ID is NULL\n");
@@ -368,11 +388,14 @@ void FunDecAnalyze(struct node *parent, int num) {
 	}
 
 	GFuncReturn = Gspecifier;
+	idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, varlistnum);
+	varlistnum = 0;
 	symNode = lookup(parent->nodevalue.str);
 	if(symNode) {
-		SemanticError(4, parent->lineno);
+//		SemanticError(4, parent->errorInfo);
+		SemanticError(4, idErrorInfo);
 	}else {
-		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList);
+		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
 		insert(symNode);
 	}
 
@@ -389,6 +412,7 @@ void VarListAnalyze(struct node *parent, int num) {
 	struct node *varlist = NULL;
 	FieldList fieldList = NULL;
 
+	varlistnum++;
 	paramdec = parent->children[0];
 	if (paramdec == NULL) {
 		fprintf(stderr, "VarList's child ParamDec is NULL\n");
@@ -430,17 +454,16 @@ void ParamDecAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "ParamDec's child VarDec is NULL\n");
 		goto ParamDecDebug;
 	}
+	parent->errorInfo = varDec->errorInfo;
 
 	parent->type = varDec->type;
 	parent->nodevalue.str = varDec->nodevalue.str;
 
 	if(lookup(parent->nodevalue.str)) {
-		SemanticError(3, parent->lineno);
+		SemanticError(3, parent->errorInfo);
 	}else {
-		symNode = newVar(parent->nodevalue.str, parent->type);
-		if (insert(symNode)) {
-			fprintf(stderr, "can't insert symNode\n");
-		}
+		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
+		insert(symNode);
 	}
 ParamDecDebug:
 	if (debug2) {
@@ -475,8 +498,9 @@ void StmtAnalyze(struct node *parent, int num) {
 			fprintf(stderr, "Stmt's child Exp is NULL\n");
 			return;
 		}
+		parent->errorInfo = exp->errorInfo;
 		if (cmpType(GFuncReturn, exp->type)) {
-			SemanticError(8, parent->lineno);
+			SemanticError(8, parent->errorInfo);
 		}
 	}
 	// if; while
@@ -487,7 +511,7 @@ void StmtAnalyze(struct node *parent, int num) {
 			return;
 		}
 		if (exp->type->kind != BASIC || exp->type->basic != INT) {
-			fprintf(stderr, "assumption 2\n");
+			//fprintf(stderr, "assumption 2\n");
 		}
 	}
 }
@@ -539,6 +563,8 @@ void DefAnalyze(struct node *parent, int num) {
 	FieldList fieldList = NULL;
 	struct SymNode *symNode = NULL;
 	
+//	freeErrorInfoStack(ErrorInfoStackHead);
+//	ErrorInfoStackHead = NULL;
 	Gspecifier = NULL;
 	specifier = parent->children[0];	// Specifier
 	if (specifier == NULL) {
@@ -607,23 +633,25 @@ void DecAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "Dec's child VarDef is NULL\n");
 		goto DecDebug;
 	}
+	parent->errorInfo = vardec->errorInfo;
+
 	parent->nodevalue.str = vardec->nodevalue.str;
 	parent->type = vardec->type;
 
 	symNode = lookup(parent->nodevalue.str);
 	if (symNode) {
 		if (structnum > 0)
-			SemanticError(15, parent->lineno);
+			SemanticError(15, parent->errorInfo);
 		else
-			SemanticError(3, parent->lineno);
+			SemanticError(3, parent->errorInfo);
 	}else {
-		symNode = newVar(parent->nodevalue.str, parent->type);
+		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
 		insert(symNode);
 	}
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {
 		if (structnum > 0) {
-			SemanticError(15, parent->lineno);
+			SemanticError(15, parent->errorInfo);
 			goto DecDebug;
 		}
 		exp = parent->children[2];
@@ -632,7 +660,7 @@ void DecAnalyze(struct node *parent, int num) {
 			goto DecDebug;
 		}
 		if (cmpType(vardec->type, exp->type)) {
-			SemanticError(5, parent->lineno);
+			SemanticError(5, parent->errorInfo);
 		}
 	}
 DecDebug:
@@ -653,6 +681,7 @@ DecDebug:
 void ExpAnalyze(struct node *parent, int num) {
 	struct node *childleft, *childright, *childmid;
 	struct SymNode *symNode = NULL;
+	struct ErrorInfo *idErrorInfo = NULL;
 	childleft = parent->children[0];
 	if (childleft == NULL) {
 		fprintf(stderr, "Exp's child Exp is NULL\n");
@@ -662,15 +691,25 @@ void ExpAnalyze(struct node *parent, int num) {
 	if (num == 1) {
 		switch(childleft->nodetype) {
 		case ID:
-			parent->type = getIDType(Var, childleft->nodevalue.str);
+			symNode = lookup(childleft->nodevalue.str);
+			parent->errorInfo = GerrorInfo;
+			if (symNode == NULL) {
+				SemanticError(1, parent->errorInfo);
+				parent->type = newType();
+				parent->type->kind = ERROR;
+			}else {
+				parent->type = getSymType(symNode);
+			}
 			parent->nodevalue.str = childleft->nodevalue.str;
 			break;
 		case INT:
+			parent->errorInfo = initError();
 			parent->type = newType();
 			parent->type->kind = BASIC;
 			parent->type->basic = INT;
 			break;
 		case FLOAT:
+			parent->errorInfo = initError();
 			parent->type = newType();
 			parent->type->kind = BASIC;
 			parent->type->basic = FLOAT;
@@ -685,6 +724,7 @@ void ExpAnalyze(struct node *parent, int num) {
 			fprintf(stderr, "Exp's child Exp is NULL\n");
 			return;
 		}
+		parent->errorInfo = childleft->errorInfo;
 		parent->type = childleft->type;
 		goto ExpDebug;
 	}
@@ -701,32 +741,39 @@ void ExpAnalyze(struct node *parent, int num) {
 	if (num == 3) {
 		// LP Exp RP
 		if (childleft->nodetype == LP && childright->nodetype == RP) {
-			parent->type = parent->children[1]->type;
+			parent->errorInfo = childmid->errorInfo;
+			parent->type = childmid->type;
 			goto ExpDebug;
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
+			idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, argsnum);
+			argsnum = 0;
+			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
 			if (symNode == NULL || symNode->type != Func) {
-				SemanticError(2, parent->lineno);
+				SemanticError(2, parent->errorInfo);
 			}
 			if (cmpFieldList(symNode->func->argtype, NULL)) {
-				SemanticError(9, parent->lineno);
+				SemanticError(9, parent->errorInfo);
 			}
 			parent->type = symNode->func->Return;
 			goto ExpDebug;
 		}
 		// Exp DOT ID
 		if (childright->nodetype == ID) {
+			parent->errorInfo = childleft->errorInfo;
 			if(childleft->type->kind != STRUCTURE){
-				SemanticError(13, parent->lineno);
+				SemanticError(13, parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
 				goto ExpDebug;
 			}
+			parent->errorInfo = GerrorInfo;
 			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
 			if (parent->type == NULL) {
-				SemanticError(14, parent->lineno);
+			//	parent->errorInfo = GerrorInfo;
+				SemanticError(14, parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
 			}
@@ -734,15 +781,19 @@ void ExpAnalyze(struct node *parent, int num) {
 		}
 		// Exp ASSIGNOP Exp
 		if (childmid->nodetype == ASSIGNOP) {
+			parent->errorInfo = childleft->errorInfo;
+			if (childleft->type->kind == ERROR)
+				goto ExpDebug;
 			if(cmpType(childleft->type, childright->type))
-				SemanticError(5, parent->lineno);
+				SemanticError(5, parent->errorInfo);
 			if(!childleft->nodevalue.str)
-				SemanticError(6, parent->lineno);
+				SemanticError(6, parent->errorInfo);
 			goto ExpDebug;
 		}
 		// other Exp
+		parent->errorInfo = childleft->errorInfo;
 		if(cmpType(childleft->type, childright->type))
-			SemanticError(7, parent->lineno);
+			SemanticError(7, parent->errorInfo);
 		//TODO: just take left type maybe error
 		parent->type = childleft->type;
 		goto ExpDebug;
@@ -751,29 +802,33 @@ void ExpAnalyze(struct node *parent, int num) {
 	if (num == 4) {
 		// ID LP Args RP
 		if(childleft->nodetype == ID) {
+			idErrorInfo = GetErrorInfoByNum(ErrorInfoStackHead, argsnum);
+			argsnum = 0;
+			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
 			if (symNode == NULL) {
-				SemanticError(2, parent->lineno);
+				SemanticError(2, parent->errorInfo);
 				goto ExpDebug;
 			}
 			if (symNode->type != Func) {
-				SemanticError(11, parent->lineno);
+				SemanticError(11, parent->errorInfo);
 				goto ExpDebug;
 			}
 			if (cmpFieldList(symNode->func->argtype, childright->fieldList)) {
-				SemanticError(9, parent->lineno);
+				SemanticError(9, parent->errorInfo);
 			}
 			parent->type = symNode->func->Return;
 			goto ExpDebug;
 		}	
 		// Exp LB Exp RB
+		parent->errorInfo = childleft->errorInfo;
 		if(childleft->type->kind != ARRAY){
-			SemanticError(10, parent->lineno);
+			SemanticError(10, parent->errorInfo);
 			parent->type = childleft->type;
 			goto ExpDebug;
 		}
 		if(childright->type->kind != BASIC || childright->type->basic != INT) {
-			SemanticError(12, parent->lineno);
+			SemanticError(12, childright->errorInfo);
 		}
 		parent->type = childleft->type->array.elem;
 		parent->nodevalue.str = childleft->nodevalue.str;
@@ -792,6 +847,8 @@ void ArgsAnalyze(struct node *parent, int num) {
 	struct node *args = NULL;
 	FieldList fieldList = NULL;
 
+	argsnum++;
+	parent->errorInfo = GerrorInfo;
 	// Exp
 	if (num == 1) {
 		fieldList = NULL;

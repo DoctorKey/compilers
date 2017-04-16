@@ -2,21 +2,21 @@
 #define __TREE_H_
 
 #include "symtable.h"
+#include "error.h"
 
 #define CHILD_NUM 7
 
 union value {
 	int INT;
 	float FLOAT;
-	int ID_index;
+	//int ID_index;
 	char *str;
 };
 struct node {
 	int nodetype;
 	Type type;
-	Type returntype;
 	FieldList fieldList;
-	struct SymNode *symNode;
+	struct ErrorInfo *errorInfo;
 	union value nodevalue;
 	int depth;
 	int lineno;

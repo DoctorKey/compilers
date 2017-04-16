@@ -13,6 +13,7 @@
 	#include "main.h"
 	#include "tree.h"
 	int lexical_isError = 0;
+	extern struct ErrorInfo *GerrorInfo;
 
 	int yycolumn = 1;
 #define YY_USER_ACTION \
@@ -192,7 +193,9 @@ xdigit [0-9a-fA-F]
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(ID);
 					yylval.type_node->nodevalue.str = strdup(yytext);
-					return ID;}
+					GerrorInfo = initError();
+					return ID;
+				}
 [ \t\r]				{ 
     					BeginToken(yytext); 
 				}

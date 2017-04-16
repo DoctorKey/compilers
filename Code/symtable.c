@@ -113,7 +113,7 @@ Type lookupFieldListElem(FieldList fieldList, char *name) {
 /*
 	symbol node
 */
-struct SymNode *createSymNode(int type, char *name) {
+struct SymNode *createSymNode(int type, char *name, struct ErrorInfo *errorInfo) {
 	struct SymNode *symNode;
 	symNode = malloc(sizeof(struct SymNode));
 	if(!symNode) {
@@ -125,16 +125,17 @@ struct SymNode *createSymNode(int type, char *name) {
 	symNode->type = type;
 	symNode->name = malloc(sizeof(char) * strlen(name));
 	strcpy(symNode->name, name);
+	symNode->errorInfo = errorInfo;
 	symNode->next = NULL;
 	return symNode;
 }
-struct SymNode *newNewType(char *name, Type type) {
+struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo) {
 	struct SymNode *symNode = NULL;
- 	symNode = createSymNode(NewType, name);
+ 	symNode = createSymNode(NewType, name, errorInfo);
 	symNode->specifier = type;
 	return symNode;
 }
-struct SymNode *newVar(char *name, Type type) {
+struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo) {
 	struct Var *var = NULL;
 	struct SymNode *symNode = NULL;
 	var = malloc(sizeof(struct Var));
@@ -143,7 +144,7 @@ struct SymNode *newVar(char *name, Type type) {
 		exit(0);
 	}
 	var->type = type;
- 	symNode = createSymNode(Var, name);
+ 	symNode = createSymNode(Var, name, errorInfo);
 	symNode->var = var;
 	return symNode;
 }
@@ -161,7 +162,7 @@ void showVar(struct Var *var) {
 	showType(var->type);	
 	fprintf(stdout, "\n");
 }
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype) {
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {
 	int i;
 	struct Func *func = NULL;
 	struct SymNode *symNode = NULL;
@@ -172,7 +173,7 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype) {
 	}
 	func->Return = Return;
 	func->argtype = argtype;
- 	symNode = createSymNode(Func, name);
+ 	symNode = createSymNode(Func, name, errorInfo);
 	symNode->func = func;
 	return symNode;
 }
@@ -210,6 +211,8 @@ int freeSymNode(struct SymNode *symNode) {
 	}
 	free(symNode->name);
 	symNode->name = NULL;
+	FreeErrorInfo(symNode->errorInfo);
+	symNode->errorInfo = NULL;
 	switch (symNode->type) {
 	case Var:
 		freeVar(symNode->var);
@@ -232,26 +235,31 @@ int freeSymNode(struct SymNode *symNode) {
 void showSymbol(struct SymNode *symNode) {
 	if (symNode == NULL)
 		return;
+	fprintf(stdout, "----------------Symbol---------------\n");
 	switch (symNode->type) {
 	case Var:
 		fprintf(stdout, "Var: ");
 		fprintf(stdout, "%s\n", symNode->name);
 		showVar(symNode->var);
+		ShowErrorInfo(symNode->errorInfo);
 		break;
 	case Func:
 		fprintf(stdout, "Func: ");
 		fprintf(stdout, "%s\n", symNode->name);
 		showFunc(symNode->func);
+		ShowErrorInfo(symNode->errorInfo);
 		break;
 	case NewType:
 		fprintf(stdout, "NewType: ");
 		fprintf(stdout, "%s\n", symNode->name);
 		showType(symNode->specifier);
+		ShowErrorInfo(symNode->errorInfo);
 		break;
 	default:
 		fprintf(stderr, "error type\n");
 		break;
 	}
+	fprintf(stdout, "-------------------------------------\n");
 }
 // when get func type, just get return type
 Type getSymType(struct SymNode *symNode) {
@@ -269,22 +277,6 @@ Type getSymType(struct SymNode *symNode) {
 		break;
 	}
 } 
-Type getIDType(int type, char *name) {
-	struct SymNode *symNode = NULL;
-	Type result = NULL;
-	symNode = lookup(name);
-	if (symNode == NULL) {
-		if (type == Var)
-			SemanticError(1, 0);
-		if (type == Func)
-			SemanticError(2, 0);
-		result = newType();
-		result->kind = ERROR;
-		return result;
-	}
-	result = getSymType(symNode);
-	return result;
-}
 /*
 	hash table
 */
@@ -416,6 +408,9 @@ void getHashTableInfo(void) {
 	fprintf(stdout, "\n--------------------------------------\n");
 }
 int test(void) {
+}
+/*
+int test(void) {
 	char *name = "test", *name2 = "test2";
 	struct SymNode *symNode = NULL, *result = NULL;
 	Type type;
@@ -459,3 +454,4 @@ int test(void) {
 	getHashTableInfo();
 	return 0;
 }
+*/

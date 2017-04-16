@@ -12,6 +12,8 @@
 	to show some infomation you need call showSymbol or showAllSymbol or getHashTableInfo
 */
 
+#include "error.h"
+
 #define SYMBOLMAX 100
 #define HASHSIZE 0x3fff
 
@@ -57,6 +59,7 @@ struct SymNode {
 		struct Func *func;
 		Type specifier;
 	};
+	struct ErrorInfo *errorInfo;
 	struct SymNode *next;
 };
 
@@ -86,9 +89,9 @@ FieldList newFieldList(char *name, Type type, FieldList tail);
 void freeType(Type type); 
 void freeFieldList(FieldList fieldList); 
 
-struct SymNode *newNewType(char *name, Type type); 
-struct SymNode *newVar(char *name, Type type); 
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype); 
+struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo); 
+struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo); 
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
 
 int freeSymNode(struct SymNode *symNode); 
 
@@ -99,7 +102,6 @@ int insert(struct SymNode *symNode);
 struct SymNode *lookup(char *name);
 Type lookupFieldListElem(FieldList fieldList, char *name);
 Type getSymType(struct SymNode *symNode);
-Type getIDType(int type, char *name); 
 
 int cleanHashTable(void); 
 void getHashTableInfo(void); 
