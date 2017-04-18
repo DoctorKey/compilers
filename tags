@@ -4,11 +4,16 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AND	Code/syntax.tab.c	/^     AND = 269,$/;"	e	enum:yytokentype	file:
+AND	Code/syntax.tab.h	/^     AND = 269,$/;"	e	enum:yytokentype
 ARRAY	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	e	enum:Type_::__anon1
+ASSIGNOP	Code/syntax.tab.c	/^     ASSIGNOP = 263,$/;"	e	enum:yytokentype	file:
+ASSIGNOP	Code/syntax.tab.h	/^     ASSIGNOP = 263,$/;"	e	enum:yytokentype
 Args	Code/name.h	/^	Exp, Args$/;"	e	enum:__anon7
 Args	Code/syntax.y	/^Args : Exp COMMA Args	$/;"	l
 ArgsAnalyze	Code/semantic.c	/^void ArgsAnalyze(struct node *parent, int num) {$/;"	f
 BASIC	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	e	enum:Type_::__anon1
+BEGIN	Code/lex.yy.c	126;"	d	file:
 BISON	Code/Makefile	/^BISON = bison$/;"	m
 BeginToken	Code/file.c	/^void BeginToken(char *t) {$/;"	f
 Buffer	Code/file.h	/^struct Buffer {$/;"	s
@@ -16,27 +21,44 @@ CC	Code/Makefile	/^CC = gcc$/;"	m
 CFILES	Code/Makefile	/^CFILES = $(shell find .\/ -name "*.c")$/;"	m
 CFLAGS	Code/Makefile	/^CFLAGS =-g -std=c99$/;"	m
 CHILD_NUM	Code/tree.h	7;"	d
+COMMA	Code/syntax.tab.c	/^     COMMA = 262,$/;"	e	enum:yytokentype	file:
+COMMA	Code/syntax.tab.h	/^     COMMA = 262,$/;"	e	enum:yytokentype
 CompSt	Code/name.h	/^	CompSt, StmtList, Stmt, $/;"	e	enum:__anon7
 CompSt	Code/syntax.y	/^CompSt : LC DefList StmtList RC $/;"	l
 CompStAnalyze	Code/semantic.c	/^void CompStAnalyze(struct node *parent, int num) {$/;"	f
+DIV	Code/syntax.tab.c	/^     DIV = 268,$/;"	e	enum:yytokentype	file:
+DIV	Code/syntax.tab.h	/^     DIV = 268,$/;"	e	enum:yytokentype
+DOT	Code/syntax.tab.c	/^     DOT = 271,$/;"	e	enum:yytokentype	file:
+DOT	Code/syntax.tab.h	/^     DOT = 271,$/;"	e	enum:yytokentype
 Dec	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 Dec	Code/syntax.y	/^Dec : VarDec	$/;"	l
 DecAnalyze	Code/semantic.c	/^void DecAnalyze(struct node *parent, int num) {$/;"	f
+DecFuncList	Code/symtable.c	/^struct FuncList *DecFuncList = NULL;$/;"	v	typeref:struct:FuncList
 DecList	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 DecList	Code/syntax.y	/^DecList : Dec	$/;"	l
 DecListAnalyze	Code/semantic.c	/^void DecListAnalyze(struct node *parent, int num) {$/;"	f
 Def	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 Def	Code/syntax.y	/^Def : Specifier DecList SEMI $/;"	l
 DefAnalyze	Code/semantic.c	/^void DefAnalyze(struct node *parent, int num) {$/;"	f
+DefFuncList	Code/symtable.c	/^struct FuncList *DefFuncList = NULL;$/;"	v	typeref:struct:FuncList
 DefList	Code/name.h	/^	DefList, Def, DecList, Dec,$/;"	e	enum:__anon7
 DefList	Code/syntax.y	/^DefList :	$/;"	l
 DefListAnalyze	Code/semantic.c	/^void DefListAnalyze(struct node *parent, int num) {$/;"	f
 DumpRow	Code/file.c	/^void DumpRow(void) {$/;"	f
+ECHO	Code/lex.yy.c	663;"	d	file:
+ELSE	Code/syntax.tab.c	/^     ELSE = 283,$/;"	e	enum:yytokentype	file:
+ELSE	Code/syntax.tab.h	/^     ELSE = 283,$/;"	e	enum:yytokentype
+EOB_ACT_CONTINUE_SCAN	Code/lex.yy.c	169;"	d	file:
+EOB_ACT_END_OF_FILE	Code/lex.yy.c	170;"	d	file:
+EOB_ACT_LAST_MATCH	Code/lex.yy.c	171;"	d	file:
 ERROR	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	e	enum:Type_::__anon1
+EXIT_SUCCESS	Code/syntax.tab.c	290;"	d	file:
+EXIT_SUCCESS	Code/syntax.tab.c	318;"	d	file:
 ErrorInfo	Code/error.h	/^struct ErrorInfo {$/;"	s
 ErrorInfoStack	Code/error.h	/^struct ErrorInfoStack {$/;"	s
 ErrorLine	Code/error.h	/^	int ErrorLine;$/;"	m	struct:ErrorInfo
 ErrorLineStr	Code/error.h	/^	char *ErrorLineStr;$/;"	m	struct:ErrorInfo
+ErrorType	Code/error.h	/^	int ErrorType;$/;"	m	struct:ErrorInfo
 Exp	Code/name.h	/^	Exp, Args$/;"	e	enum:__anon7
 Exp	Code/syntax.y	/^Exp : Exp ASSIGNOP Exp $/;"	l
 ExpAnalyze	Code/semantic.c	/^void ExpAnalyze(struct node *parent, int num) {$/;"	f
@@ -50,6 +72,11 @@ ExtDefList	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__
 ExtDefList	Code/syntax.y	/^ExtDefList : 	$/;"	l
 ExtDefListAnalyze	Code/semantic.c	/^void ExtDefListAnalyze(struct node *parent, int num) {$/;"	f
 FLEX	Code/Makefile	/^FLEX = flex$/;"	m
+FLEXINT_H	Code/lex.yy.c	30;"	d	file:
+FLEX_BETA	Code/lex.yy.c	14;"	d	file:
+FLEX_SCANNER	Code/lex.yy.c	9;"	d	file:
+FLOAT	Code/syntax.tab.c	/^     FLOAT = 259,$/;"	e	enum:yytokentype	file:
+FLOAT	Code/syntax.tab.h	/^     FLOAT = 259,$/;"	e	enum:yytokentype
 FLOAT	Code/tree.h	/^	float FLOAT;$/;"	m	union:value
 FieldList	Code/symtable.h	/^typedef struct FieldList_* FieldList;$/;"	t	typeref:struct:FieldList_
 FieldList_	Code/symtable.h	/^struct FieldList_ {$/;"	s
@@ -59,28 +86,63 @@ FunDec	Code/syntax.y	/^FunDec : ID LP VarList RP $/;"	l
 FunDecAnalyze	Code/semantic.c	/^void FunDecAnalyze(struct node *parent, int num) {$/;"	f
 Func	Code/symtable.h	/^enum {Var, Func, NewType};$/;"	e	enum:__anon4
 Func	Code/symtable.h	/^struct Func {$/;"	s
+FuncList	Code/symtable.h	/^struct FuncList {$/;"	s
+Funcsymbol	Code/semantic.c	/^struct SymNode *Funcsymbol = NULL;$/;"	v	typeref:struct:SymNode
 GFuncReturn	Code/semantic.c	/^Type GFuncReturn = NULL;$/;"	v
 GerrorInfo	Code/error.c	/^struct ErrorInfo *GerrorInfo = NULL;$/;"	v	typeref:struct:ErrorInfo
 GetErrorInfoByNum	Code/error.c	/^struct ErrorInfo *GetErrorInfoByNum(struct ErrorInfoStack *head, int num) {$/;"	f
 GetNextChar	Code/file.c	/^int GetNextChar(char *b, int maxBuffer) {$/;"	f
+GetSpecifierByIndex	Code/semantichelp.c	/^Type GetSpecifierByIndex(int i) {$/;"	f
 GetTotalErrorInfo	Code/error.c	/^int GetTotalErrorInfo() {$/;"	f
 Gspecifier	Code/semantic.c	/^Type Gspecifier = NULL;$/;"	v
 HASHSIZE	Code/symtable.h	18;"	d
 HashNode	Code/symtable.h	/^struct HashNode {$/;"	s
 HashTableInfo	Code/symtable.h	/^struct HashTableInfo {$/;"	s
+ID	Code/syntax.tab.c	/^     ID = 260,$/;"	e	enum:yytokentype	file:
+ID	Code/syntax.tab.h	/^     ID = 260,$/;"	e	enum:yytokentype
+IF	Code/syntax.tab.c	/^     IF = 282,$/;"	e	enum:yytokentype	file:
+IF	Code/syntax.tab.h	/^     IF = 282,$/;"	e	enum:yytokentype
+INCREASE	Code/semantichelp.h	7;"	d
+INITIAL	Code/lex.yy.c	571;"	d	file:
+INT	Code/syntax.tab.c	/^     INT = 258,$/;"	e	enum:yytokentype	file:
+INT	Code/syntax.tab.h	/^     INT = 258,$/;"	e	enum:yytokentype
 INT	Code/tree.h	/^	int INT;$/;"	m	union:value
+INT16_MAX	Code/lex.yy.c	72;"	d	file:
+INT16_MIN	Code/lex.yy.c	63;"	d	file:
+INT32_MAX	Code/lex.yy.c	75;"	d	file:
+INT32_MIN	Code/lex.yy.c	66;"	d	file:
+INT8_MAX	Code/lex.yy.c	69;"	d	file:
+INT8_MIN	Code/lex.yy.c	60;"	d	file:
 IdErrorInfoStackHead	Code/error.c	/^struct ErrorInfoStack *IdErrorInfoStackHead = NULL;$/;"	v	typeref:struct:ErrorInfoStack
+IncreaseSpecifierStack	Code/semantichelp.c	/^int IncreaseSpecifierStack() {$/;"	f
+InitSpecifierStack	Code/semantichelp.c	/^int InitSpecifierStack()$/;"	f
 LAB_1	Code/main.h	8;"	d
 LAB_2	Code/main.h	9;"	d
+LB	Code/syntax.tab.c	/^     LB = 276,$/;"	e	enum:yytokentype	file:
+LB	Code/syntax.tab.h	/^     LB = 276,$/;"	e	enum:yytokentype
+LC	Code/syntax.tab.c	/^     LC = 278,$/;"	e	enum:yytokentype	file:
+LC	Code/syntax.tab.h	/^     LC = 278,$/;"	e	enum:yytokentype
 LFC	Code/Makefile	/^LFC = $(shell find .\/ -name "*.l" | sed s\/[^\/]*\\\\.l\/lex.yy.c\/)$/;"	m
 LFILE	Code/Makefile	/^LFILE = $(shell find .\/ -name "*.l")$/;"	m
 LFO	Code/Makefile	/^LFO = $(LFC:.c=.o)$/;"	m
+LOWER_THAN_ELSE	Code/syntax.tab.c	/^     LOWER_THAN_ELSE = 286$/;"	e	enum:yytokentype	file:
+LOWER_THAN_ELSE	Code/syntax.tab.h	/^     LOWER_THAN_ELSE = 286$/;"	e	enum:yytokentype
+LP	Code/syntax.tab.c	/^     LP = 274,$/;"	e	enum:yytokentype	file:
+LP	Code/syntax.tab.h	/^     LP = 274,$/;"	e	enum:yytokentype
+MINUS	Code/syntax.tab.c	/^     MINUS = 266,$/;"	e	enum:yytokentype	file:
+MINUS	Code/syntax.tab.h	/^     MINUS = 266,$/;"	e	enum:yytokentype
+NOT	Code/syntax.tab.c	/^     NOT = 272,$/;"	e	enum:yytokentype	file:
+NOT	Code/syntax.tab.h	/^     NOT = 272,$/;"	e	enum:yytokentype
 NewType	Code/symtable.h	/^enum {Var, Func, NewType};$/;"	e	enum:__anon4
 NumErrorInfoStackHead	Code/error.c	/^struct ErrorInfoStack *NumErrorInfoStackHead = NULL;$/;"	v	typeref:struct:ErrorInfoStack
 OBJS	Code/Makefile	/^OBJS = $(CFILES:.c=.o)$/;"	m
+OR	Code/syntax.tab.c	/^     OR = 270,$/;"	e	enum:yytokentype	file:
+OR	Code/syntax.tab.h	/^     OR = 270,$/;"	e	enum:yytokentype
 OptTag	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon7
 OptTag	Code/syntax.y	/^OptTag : 	$/;"	l
 OptTagAnalyze	Code/semantic.c	/^void OptTagAnalyze(struct node *parent, int num) {$/;"	f
+PLUS	Code/syntax.tab.c	/^     PLUS = 265,$/;"	e	enum:yytokentype	file:
+PLUS	Code/syntax.tab.h	/^     PLUS = 265,$/;"	e	enum:yytokentype
 ParamDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 ParamDec	Code/syntax.y	/^ParamDec : Specifier VarDec	$/;"	l
 ParamDecAnalyze	Code/semantic.c	/^void ParamDecAnalyze(struct node *parent, int num) {$/;"	f
@@ -88,7 +150,26 @@ PrintError	Code/error.c	/^void PrintError(char type, char *errorstring, ...) {$/
 Program	Code/name.h	/^	Program, ExtDefList, ExtDef, ExtDecList,$/;"	e	enum:__anon7
 Program	Code/syntax.y	/^Program : ExtDefList	$/;"	l
 ProgramAnalyze	Code/semantic.c	/^void ProgramAnalyze(struct node *parent, int num) {$/;"	f
+PushSpecifier	Code/semantichelp.c	/^void PushSpecifier(Type type) {$/;"	f
+RB	Code/syntax.tab.c	/^     RB = 277,$/;"	e	enum:yytokentype	file:
+RB	Code/syntax.tab.h	/^     RB = 277,$/;"	e	enum:yytokentype
+RC	Code/syntax.tab.c	/^     RC = 279,$/;"	e	enum:yytokentype	file:
+RC	Code/syntax.tab.h	/^     RC = 279,$/;"	e	enum:yytokentype
+REJECT	Code/lex.yy.c	537;"	d	file:
+RELOP	Code/syntax.tab.c	/^     RELOP = 264,$/;"	e	enum:yytokentype	file:
+RELOP	Code/syntax.tab.h	/^     RELOP = 264,$/;"	e	enum:yytokentype
+RETURN	Code/syntax.tab.c	/^     RETURN = 281,$/;"	e	enum:yytokentype	file:
+RETURN	Code/syntax.tab.h	/^     RETURN = 281,$/;"	e	enum:yytokentype
+RP	Code/syntax.tab.c	/^     RP = 275,$/;"	e	enum:yytokentype	file:
+RP	Code/syntax.tab.h	/^     RP = 275,$/;"	e	enum:yytokentype
 Return	Code/symtable.h	/^	Type Return;$/;"	m	struct:Func
+SEMI	Code/syntax.tab.c	/^     SEMI = 261,$/;"	e	enum:yytokentype	file:
+SEMI	Code/syntax.tab.h	/^     SEMI = 261,$/;"	e	enum:yytokentype
+STACKSIZE	Code/semantichelp.h	6;"	d
+STAR	Code/syntax.tab.c	/^     STAR = 267,$/;"	e	enum:yytokentype	file:
+STAR	Code/syntax.tab.h	/^     STAR = 267,$/;"	e	enum:yytokentype
+STRUCT	Code/syntax.tab.c	/^     STRUCT = 280,$/;"	e	enum:yytokentype	file:
+STRUCT	Code/syntax.tab.h	/^     STRUCT = 280,$/;"	e	enum:yytokentype
 STRUCTURE	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	e	enum:Type_::__anon1
 SYMBOLMAX	Code/symtable.h	17;"	d
 SemanticError	Code/error.c	/^void SemanticError(int type, struct ErrorInfo *errorInfo) {$/;"	f
@@ -107,11 +188,18 @@ StructSpecifier	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	en
 StructSpecifier	Code/syntax.y	/^StructSpecifier : STRUCT OptTag LC DefList RC	$/;"	l
 StructSpecifierAnalyze	Code/semantic.c	/^void StructSpecifierAnalyze(struct node *parent, int num) {$/;"	f
 SymNode	Code/symtable.h	/^struct SymNode {$/;"	s
+TYPE	Code/syntax.tab.c	/^     TYPE = 273,$/;"	e	enum:yytokentype	file:
+TYPE	Code/syntax.tab.h	/^     TYPE = 273,$/;"	e	enum:yytokentype
 Tag	Code/name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon7
 Tag	Code/syntax.y	/^Tag : ID	$/;"	l
 TagAnalyze	Code/semantic.c	/^void TagAnalyze(struct node *parent, int num) {$/;"	f
 Type	Code/symtable.h	/^typedef struct Type_* Type;$/;"	t	typeref:struct:Type_
 Type_	Code/symtable.h	/^struct Type_ {$/;"	s
+UINT16_MAX	Code/lex.yy.c	81;"	d	file:
+UINT32_MAX	Code/lex.yy.c	84;"	d	file:
+UINT8_MAX	Code/lex.yy.c	78;"	d	file:
+UMINUS	Code/syntax.tab.c	/^     UMINUS = 285,$/;"	e	enum:yytokentype	file:
+UMINUS	Code/syntax.tab.h	/^     UMINUS = 285,$/;"	e	enum:yytokentype
 Var	Code/symtable.h	/^enum {Var, Func, NewType};$/;"	e	enum:__anon4
 Var	Code/symtable.h	/^struct Var {$/;"	s
 VarDec	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
@@ -120,36 +208,199 @@ VarDecAnalyze	Code/semantic.c	/^void VarDecAnalyze(struct node *parent, int num)
 VarList	Code/name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon7
 VarList	Code/syntax.y	/^VarList : ParamDec COMMA VarList	$/;"	l
 VarListAnalyze	Code/semantic.c	/^void VarListAnalyze(struct node *parent, int num) {$/;"	f
+WHILE	Code/syntax.tab.c	/^     WHILE = 284,$/;"	e	enum:yytokentype	file:
+WHILE	Code/syntax.tab.h	/^     WHILE = 284,$/;"	e	enum:yytokentype
 YFC	Code/Makefile	/^YFC = $(shell find .\/ -name "*.y" | sed s\/[^\/]*\\\\.y\/syntax.tab.c\/)$/;"	m
 YFILE	Code/Makefile	/^YFILE = $(shell find .\/ -name "*.y")$/;"	m
 YFO	Code/Makefile	/^YFO = $(YFC:.c=.o)$/;"	m
+YYABORT	Code/syntax.tab.c	747;"	d	file:
+YYACCEPT	Code/syntax.tab.c	746;"	d	file:
+YYBACKUP	Code/syntax.tab.c	768;"	d	file:
+YYBISON	Code/syntax.tab.c	44;"	d	file:
+YYBISON_VERSION	Code/syntax.tab.c	47;"	d	file:
+YYCASE_	Code/syntax.tab.c	1215;"	d	file:
+YYCASE_	Code/syntax.tab.c	1225;"	d	file:
+YYCOPY	Code/syntax.tab.c	386;"	d	file:
+YYCOPY	Code/syntax.tab.c	389;"	d	file:
+YYCOPY_NEEDED	Code/syntax.tab.c	361;"	d	file:
+YYDEBUG	Code/syntax.tab.c	76;"	d	file:
+YYDEBUG	Code/syntax.tab.c	89;"	d	file:
+YYDPRINTF	Code/syntax.tab.c	1002;"	d	file:
+YYDPRINTF	Code/syntax.tab.c	847;"	d	file:
+YYEMPTY	Code/syntax.tab.c	743;"	d	file:
+YYEOF	Code/syntax.tab.c	744;"	d	file:
+YYERRCODE	Code/syntax.tab.c	786;"	d	file:
+YYERROR	Code/syntax.tab.c	748;"	d	file:
+YYERROR_VERBOSE	Code/syntax.tab.c	75;"	d	file:
+YYERROR_VERBOSE	Code/syntax.tab.c	94;"	d	file:
+YYERROR_VERBOSE	Code/syntax.tab.c	95;"	d	file:
+YYERROR_VERBOSE	Code/syntax.tab.c	97;"	d	file:
+YYFAIL	Code/syntax.tab.c	758;"	d	file:
+YYFINAL	Code/syntax.tab.c	402;"	d	file:
+YYFPRINTF	Code/syntax.tab.c	844;"	d	file:
+YYFREE	Code/syntax.tab.c	329;"	d	file:
+YYID	Code/syntax.tab.c	/^YYID (int yyi)$/;"	f	file:
+YYID	Code/syntax.tab.c	253;"	d	file:
+YYINITDEPTH	Code/syntax.tab.c	1011;"	d	file:
+YYLAST	Code/syntax.tab.c	404;"	d	file:
+YYLEX	Code/syntax.tab.c	834;"	d	file:
+YYLEX	Code/syntax.tab.c	836;"	d	file:
+YYLLOC_DEFAULT	Code/syntax.tab.c	795;"	d	file:
+YYLSP_NEEDED	Code/syntax.tab.c	62;"	d	file:
+YYLTYPE	Code/syntax.tab.c	/^typedef struct YYLTYPE$/;"	s	file:
+YYLTYPE	Code/syntax.tab.c	/^} YYLTYPE;$/;"	t	typeref:struct:YYLTYPE	file:
+YYLTYPE	Code/syntax.tab.h	/^typedef struct YYLTYPE$/;"	s
+YYLTYPE	Code/syntax.tab.h	/^} YYLTYPE;$/;"	t	typeref:struct:YYLTYPE
+YYLTYPE_IS_DECLARED	Code/syntax.tab.c	174;"	d	file:
+YYLTYPE_IS_DECLARED	Code/syntax.tab.h	104;"	d
+YYLTYPE_IS_TRIVIAL	Code/syntax.tab.c	175;"	d	file:
+YYLTYPE_IS_TRIVIAL	Code/syntax.tab.h	105;"	d
+YYMALLOC	Code/syntax.tab.c	322;"	d	file:
+YYMAXDEPTH	Code/syntax.tab.c	1022;"	d	file:
+YYMAXUTOK	Code/syntax.tab.c	417;"	d	file:
+YYNNTS	Code/syntax.tab.c	409;"	d	file:
+YYNRULES	Code/syntax.tab.c	411;"	d	file:
+YYNSTATES	Code/syntax.tab.c	413;"	d	file:
+YYNTOKENS	Code/syntax.tab.c	407;"	d	file:
+YYPACT_NINF	Code/syntax.tab.c	602;"	d	file:
+YYPOPSTACK	Code/syntax.tab.c	2025;"	d	file:
+YYPULL	Code/syntax.tab.c	59;"	d	file:
+YYPURE	Code/syntax.tab.c	53;"	d	file:
+YYPUSH	Code/syntax.tab.c	56;"	d	file:
+YYRECOVERING	Code/syntax.tab.c	766;"	d	file:
+YYRHSLOC	Code/syntax.tab.c	793;"	d	file:
+YYSIZE_MAXIMUM	Code/syntax.tab.c	230;"	d	file:
+YYSIZE_T	Code/syntax.tab.c	218;"	d	file:
+YYSIZE_T	Code/syntax.tab.c	220;"	d	file:
+YYSIZE_T	Code/syntax.tab.c	224;"	d	file:
+YYSIZE_T	Code/syntax.tab.c	226;"	d	file:
+YYSKELETON_NAME	Code/syntax.tab.c	50;"	d	file:
+YYSTACK_ALLOC	Code/syntax.tab.c	276;"	d	file:
+YYSTACK_ALLOC	Code/syntax.tab.c	280;"	d	file:
+YYSTACK_ALLOC	Code/syntax.tab.c	285;"	d	file:
+YYSTACK_ALLOC	Code/syntax.tab.c	308;"	d	file:
+YYSTACK_ALLOC_MAXIMUM	Code/syntax.tab.c	305;"	d	file:
+YYSTACK_ALLOC_MAXIMUM	Code/syntax.tab.c	311;"	d	file:
+YYSTACK_BYTES	Code/syntax.tab.c	357;"	d	file:
+YYSTACK_FREE	Code/syntax.tab.c	299;"	d	file:
+YYSTACK_FREE	Code/syntax.tab.c	309;"	d	file:
+YYSTACK_GAP_MAXIMUM	Code/syntax.tab.c	353;"	d	file:
+YYSTACK_RELOCATE	Code/syntax.tab.c	368;"	d	file:
+YYSTATE	Code/lex.yy.c	133;"	d	file:
+YYSTYPE	Code/syntax.tab.c	/^typedef union YYSTYPE$/;"	u	file:
+YYSTYPE	Code/syntax.tab.c	/^} YYSTYPE;$/;"	t	typeref:union:YYSTYPE	file:
+YYSTYPE	Code/syntax.tab.h	/^typedef union YYSTYPE$/;"	u
+YYSTYPE	Code/syntax.tab.h	/^} YYSTYPE;$/;"	t	typeref:union:YYSTYPE
+YYSTYPE_IS_DECLARED	Code/syntax.tab.c	162;"	d	file:
+YYSTYPE_IS_DECLARED	Code/syntax.tab.h	90;"	d
+YYSTYPE_IS_TRIVIAL	Code/syntax.tab.c	160;"	d	file:
+YYSTYPE_IS_TRIVIAL	Code/syntax.tab.h	88;"	d
+YYTABLES_NAME	Code/lex.yy.c	2169;"	d	file:
+YYTABLE_NINF	Code/syntax.tab.c	633;"	d	file:
+YYTERROR	Code/syntax.tab.c	785;"	d	file:
+YYTOKENTYPE	Code/syntax.tab.c	108;"	d	file:
+YYTOKENTYPE	Code/syntax.tab.h	36;"	d
+YYTOKEN_TABLE	Code/syntax.tab.c	102;"	d	file:
+YYTRANSLATE	Code/syntax.tab.c	419;"	d	file:
+YYUNDEFTOK	Code/syntax.tab.c	416;"	d	file:
+YYUSE	Code/syntax.tab.c	246;"	d	file:
+YYUSE	Code/syntax.tab.c	248;"	d	file:
+YY_	Code/syntax.tab.c	236;"	d	file:
+YY_	Code/syntax.tab.c	240;"	d	file:
+YY_AT_BOL	Code/lex.yy.c	353;"	d	file:
+YY_BREAK	Code/lex.yy.c	742;"	d	file:
+YY_BUFFER_EOF_PENDING	Code/lex.yy.c	269;"	d	file:
+YY_BUFFER_NEW	Code/lex.yy.c	257;"	d	file:
+YY_BUFFER_NORMAL	Code/lex.yy.c	258;"	d	file:
+YY_BUFFER_STATE	Code/lex.yy.c	/^typedef struct yy_buffer_state *YY_BUFFER_STATE;$/;"	t	typeref:struct:yy_buffer_state	file:
+YY_BUF_SIZE	Code/lex.yy.c	150;"	d	file:
+YY_BUF_SIZE	Code/lex.yy.c	152;"	d	file:
+YY_CHAR	Code/lex.yy.c	/^typedef unsigned char YY_CHAR;$/;"	t	file:
+YY_CURRENT_BUFFER	Code/lex.yy.c	285;"	d	file:
+YY_CURRENT_BUFFER_LVALUE	Code/lex.yy.c	292;"	d	file:
+YY_DECL	Code/lex.yy.c	730;"	d	file:
+YY_DECL_IS_OURS	Code/lex.yy.c	726;"	d	file:
+YY_DO_BEFORE_ACTION	Code/lex.yy.c	381;"	d	file:
+YY_END_OF_BUFFER	Code/lex.yy.c	389;"	d	file:
+YY_END_OF_BUFFER_CHAR	Code/lex.yy.c	141;"	d	file:
+YY_EXIT_FAILURE	Code/lex.yy.c	1964;"	d	file:
+YY_EXTRA_TYPE	Code/lex.yy.c	582;"	d	file:
+YY_FATAL_ERROR	Code/lex.yy.c	717;"	d	file:
+YY_FLEX_MAJOR_VERSION	Code/lex.yy.c	10;"	d	file:
+YY_FLEX_MINOR_VERSION	Code/lex.yy.c	11;"	d	file:
+YY_FLEX_SUBMINOR_VERSION	Code/lex.yy.c	12;"	d	file:
+YY_FLUSH_BUFFER	Code/lex.yy.c	321;"	d	file:
+YY_INPUT	Code/lex.yy.c	563;"	d	file:
+YY_INPUT	Code/lex.yy.c	670;"	d	file:
+YY_INT_ALIGNED	Code/lex.yy.c	5;"	d	file:
+YY_LESS_LINENO	Code/lex.yy.c	180;"	d	file:
+YY_LOCATION_PRINT	Code/syntax.tab.c	821;"	d	file:
+YY_LOCATION_PRINT	Code/syntax.tab.c	826;"	d	file:
+YY_MORE_ADJ	Code/lex.yy.c	539;"	d	file:
+YY_NEW_FILE	Code/lex.yy.c	139;"	d	file:
+YY_NULL	Code/lex.yy.c	113;"	d	file:
+YY_NUM_RULES	Code/lex.yy.c	388;"	d	file:
+YY_READ_BUF_SIZE	Code/lex.yy.c	652;"	d	file:
+YY_READ_BUF_SIZE	Code/lex.yy.c	654;"	d	file:
+YY_REDUCE_PRINT	Code/syntax.tab.c	1005;"	d	file:
+YY_REDUCE_PRINT	Code/syntax.tab.c	992;"	d	file:
+YY_RESTORE_YY_MORE_OFFSET	Code/lex.yy.c	540;"	d	file:
+YY_RULE_SETUP	Code/lex.yy.c	745;"	d	file:
+YY_SC_TO_UI	Code/lex.yy.c	120;"	d	file:
+YY_SKIP_YYWRAP	Code/lex.yy.c	358;"	d	file:
+YY_STACK_PRINT	Code/syntax.tab.c	1004;"	d	file:
+YY_STACK_PRINT	Code/syntax.tab.c	953;"	d	file:
+YY_START	Code/lex.yy.c	132;"	d	file:
+YY_START_STACK_INCR	Code/lex.yy.c	712;"	d	file:
+YY_STATE_BUF_SIZE	Code/lex.yy.c	158;"	d	file:
+YY_STATE_EOF	Code/lex.yy.c	136;"	d	file:
+YY_STRUCT_YY_BUFFER_STATE	Code/lex.yy.c	210;"	d	file:
+YY_SYMBOL_PRINT	Code/syntax.tab.c	1003;"	d	file:
+YY_SYMBOL_PRINT	Code/syntax.tab.c	853;"	d	file:
+YY_TYPEDEF_YY_BUFFER_STATE	Code/lex.yy.c	161;"	d	file:
+YY_TYPEDEF_YY_SIZE_T	Code/lex.yy.c	205;"	d	file:
+YY_USER_ACTION	Code/lex.yy.c	557;"	d	file:
+YY_USER_ACTION	Code/lex.yy.c	737;"	d	file:
+YY_USE_CONST	Code/lex.yy.c	101;"	d	file:
+YY_USE_CONST	Code/lex.yy.c	94;"	d	file:
 __ERROR_H_	Code/error.h	2;"	d
 __FILE_H_	Code/file.h	2;"	d
 __MAIN_H_	Code/main.h	2;"	d
 __NAME_H_	Code/name.h	2;"	d
+__SEMANTICHELP_H_	Code/semantichelp.h	2;"	d
 __SEMANTIC_H_	Code/semantic.h	2;"	d
+__STDC_LIMIT_MACROS	Code/lex.yy.c	40;"	d	file:
 __SYMTABLE_H_	Code/symtable.h	2;"	d
 __TREE_H_	Code/tree.h	2;"	d
+addDecFunc	Code/symtable.c	/^void addDecFunc(struct SymNode *symbol) {$/;"	f
+addDefFunc	Code/symtable.c	/^void addDefFunc(struct SymNode *symbol) {$/;"	f
+addFunc	Code/symtable.c	/^void addFunc(struct FuncList *funcList, struct SymNode *symbol) {$/;"	f
 allocTimes	Code/symtable.h	/^	int allocTimes;$/;"	m	struct:HashTableInfo
+alloca	Code/syntax.tab.c	283;"	d	file:
 argc	Code/symtable.h	/^	int argc;$/;"	m	struct:Func
 argsnum	Code/semantic.c	/^int argsnum = 0;$/;"	v
 argtype	Code/symtable.h	/^	FieldList argtype;$/;"	m	struct:Func
 array	Code/symtable.h	/^		}array;$/;"	m	union:Type_::__anon2	typeref:struct:Type_::__anon2::__anon3
 basic	Code/symtable.h	/^		int basic;$/;"	m	union:Type_::__anon2
 buffer	Code/file.h	/^	char *buffer;$/;"	m	struct:Buffer
+checkDecFuncList	Code/symtable.c	/^struct FuncList *checkDecFuncList() {$/;"	f
 children	Code/tree.h	/^	struct node *children[CHILD_NUM];$/;"	m	struct:node	typeref:struct:node::node
 cleanHashTable	Code/symtable.c	/^int cleanHashTable(void) {$/;"	f
 cleanSymList	Code/symtable.c	/^int cleanSymList(struct SymNode *head) {$/;"	f
 clearTree	Code/tree.c	/^void clearTree(struct node *node)$/;"	f
 closefile	Code/file.c	/^closefile(void)$/;"	f
-cmpFieldList	Code/semantic.c	/^int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {$/;"	f
-cmpType	Code/semantic.c	/^int cmpType(Type type1, Type type2) {$/;"	f
+cmpFieldList	Code/semantichelp.c	/^int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {$/;"	f
+cmpFunc	Code/symtable.c	/^int cmpFunc(struct Func *left, struct Func *right) {$/;"	f
+cmpFuncSym	Code/symtable.c	/^int cmpFuncSym(struct SymNode *left, struct SymNode *right) {$/;"	f
+cmpFuncSymByName	Code/symtable.c	/^int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {$/;"	f
+cmpType	Code/semantichelp.c	/^int cmpType(Type type1, Type type2) {$/;"	f
 createSymNode	Code/symtable.c	/^struct SymNode *createSymNode(int type, char *name, struct ErrorInfo *errorInfo) {$/;"	f
 curFile	Code/file.c	/^FILE *curFile = NULL;$/;"	v
 curbuffer	Code/file.c	/^struct Buffer *curbuffer = NULL;$/;"	v	typeref:struct:Buffer
 curfilename	Code/file.c	/^char *curfilename = NULL;$/;"	v
 debug	Code/main.c	/^int debug = 0;$/;"	v
 debug2	Code/main.c	/^int debug2 = 0;$/;"	v
+deleteFunc	Code/symtable.c	/^void deleteFunc(struct FuncList *funcList, struct SymNode *symbol) {$/;"	f
 depth	Code/tree.h	/^	int depth;$/;"	m	struct:node
 dumpChar	Code/file.c	/^char dumpChar(char c) {$/;"	f	file:
 dumpString	Code/file.c	/^char *dumpString(char *s) {$/;"	f	file:
@@ -161,16 +412,34 @@ errorInfo	Code/symtable.h	/^	struct ErrorInfo *errorInfo;$/;"	m	struct:SymNode	t
 errorInfo	Code/tree.h	/^	struct ErrorInfo *errorInfo;$/;"	m	struct:node	typeref:struct:node::ErrorInfo
 false	Code/main.h	6;"	d
 fieldList	Code/tree.h	/^	FieldList fieldList;$/;"	m	struct:node
+first_column	Code/syntax.tab.c	/^  int first_column;$/;"	m	struct:YYLTYPE	file:
+first_column	Code/syntax.tab.h	/^  int first_column;$/;"	m	struct:YYLTYPE
+first_line	Code/syntax.tab.c	/^  int first_line;$/;"	m	struct:YYLTYPE	file:
+first_line	Code/syntax.tab.h	/^  int first_line;$/;"	m	struct:YYLTYPE
+flex_int16_t	Code/lex.yy.c	/^typedef int16_t flex_int16_t;$/;"	t	file:
+flex_int16_t	Code/lex.yy.c	/^typedef short int flex_int16_t;$/;"	t	file:
+flex_int32_t	Code/lex.yy.c	/^typedef int flex_int32_t;$/;"	t	file:
+flex_int32_t	Code/lex.yy.c	/^typedef int32_t flex_int32_t;$/;"	t	file:
+flex_int8_t	Code/lex.yy.c	/^typedef int8_t flex_int8_t;$/;"	t	file:
+flex_int8_t	Code/lex.yy.c	/^typedef signed char flex_int8_t;$/;"	t	file:
+flex_uint16_t	Code/lex.yy.c	/^typedef uint16_t flex_uint16_t;$/;"	t	file:
+flex_uint16_t	Code/lex.yy.c	/^typedef unsigned short int flex_uint16_t;$/;"	t	file:
+flex_uint32_t	Code/lex.yy.c	/^typedef uint32_t flex_uint32_t;$/;"	t	file:
+flex_uint32_t	Code/lex.yy.c	/^typedef unsigned int flex_uint32_t;$/;"	t	file:
+flex_uint8_t	Code/lex.yy.c	/^typedef uint8_t flex_uint8_t;$/;"	t	file:
+flex_uint8_t	Code/lex.yy.c	/^typedef unsigned char flex_uint8_t; $/;"	t	file:
 floatValue	Code/symtable.h	/^		float floatValue;$/;"	m	union:Var::__anon5
 freeErrorInfoStack	Code/error.c	/^void freeErrorInfoStack(struct ErrorInfoStack *head) {$/;"	f
 freeFieldList	Code/symtable.c	/^void freeFieldList(FieldList fieldList) {$/;"	f
 freeFunc	Code/symtable.c	/^void freeFunc(struct Func *func) {$/;"	f
+freeFuncListNode	Code/symtable.c	/^void freeFuncListNode(struct FuncList *funcList) {$/;"	f
 freeSymNode	Code/symtable.c	/^int freeSymNode(struct SymNode *symNode) {$/;"	f
 freeTimes	Code/symtable.h	/^	int freeTimes;$/;"	m	struct:HashTableInfo
 freeType	Code/symtable.c	/^void freeType(Type type) {$/;"	f
 freeVar	Code/symtable.c	/^void freeVar(struct Var *var) {$/;"	f
 free_buffer	Code/file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
 func	Code/symtable.h	/^		struct Func *func;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Func
+funcSymbol	Code/symtable.h	/^	struct SymNode *funcSymbol;$/;"	m	struct:FuncList	typeref:struct:FuncList::SymNode
 getErrorEnd	Code/error.c	/^extern int getErrorEnd() {$/;"	f
 getErrorLine	Code/error.c	/^extern int getErrorLine() {$/;"	f
 getErrorStart	Code/error.c	/^extern int getErrorStart() {$/;"	f
@@ -180,19 +449,35 @@ getNextLine	Code/file.c	/^int getNextLine() {$/;"	f
 getSymType	Code/symtable.c	/^Type getSymType(struct SymNode *symNode) {$/;"	f
 hashTableInfo	Code/symtable.c	/^struct HashTableInfo hashTableInfo;$/;"	v	typeref:struct:HashTableInfo
 hash_pjw	Code/symtable.c	/^unsigned int hash_pjw(char *name) {$/;"	f
+index	Code/semantichelp.c	/^int index = 0;$/;"	v
 indexNum	Code/symtable.h	/^	int indexNum;$/;"	m	struct:HashTableInfo
 initError	Code/error.c	/^struct ErrorInfo *initError(int type) {$/;"	f
 init_buffer	Code/file.c	/^init_buffer(){$/;"	f
 initerrorBuffer	Code/error.c	/^initerrorBuffer(char *errorbuffer) {$/;"	f
 insert	Code/symtable.c	/^int insert(struct SymNode *symNode) {$/;"	f
 intValue	Code/symtable.h	/^		int intValue;$/;"	m	union:Var::__anon5
+isDeclare	Code/symtable.h	/^	int isDeclare;$/;"	m	struct:Func
+isDefine	Code/symtable.h	/^	int isDefine;$/;"	m	struct:Func
+isError	Code/syntax.tab.c	/^	int isError = 0;$/;"	v
 kind	Code/symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	m	struct:Type_	typeref:enum:Type_::__anon1
 lBuffer	Code/file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	Code/file.c	/^int lMaxBuffer = 1000;$/;"	v
 last	Code/error.h	/^	struct ErrorInfoStack *last;$/;"	m	struct:ErrorInfoStack	typeref:struct:ErrorInfoStack::ErrorInfoStack
+last_column	Code/syntax.tab.c	/^  int last_column;$/;"	m	struct:YYLTYPE	file:
+last_column	Code/syntax.tab.h	/^  int last_column;$/;"	m	struct:YYLTYPE
+last_line	Code/syntax.tab.c	/^  int last_line;$/;"	m	struct:YYLTYPE	file:
+last_line	Code/syntax.tab.h	/^  int last_line;$/;"	m	struct:YYLTYPE
+lexical_init	Code/lex.yy.c	/^void lexical_init()$/;"	f
+lexical_isError	Code/lex.yy.c	/^	int lexical_isError = 0;$/;"	v
 lineno	Code/tree.h	/^	int lineno;$/;"	m	struct:node
 lookup	Code/symtable.c	/^struct SymNode *lookup(char *name) {$/;"	f
+lookupDecFunc	Code/symtable.c	/^int lookupDecFunc(struct SymNode *symbol) {$/;"	f
+lookupDecFuncByName	Code/symtable.c	/^int lookupDecFuncByName(struct SymNode *symbol) {$/;"	f
+lookupDefFunc	Code/symtable.c	/^int lookupDefFunc(struct SymNode *symbol) {$/;"	f
+lookupDefFuncByName	Code/symtable.c	/^int lookupDefFuncByName(struct SymNode *symbol) {$/;"	f
 lookupFieldListElem	Code/symtable.c	/^Type lookupFieldListElem(FieldList fieldList, char *name) {$/;"	f
+lookupFunc	Code/symtable.c	/^int lookupFunc(struct FuncList *funcList, struct SymNode *symbol) {$/;"	f
+lookupFuncByName	Code/symtable.c	/^int lookupFuncByName(struct FuncList *funcList, struct SymNode *symbol) {$/;"	f
 main	Code/main.c	/^int main(int argc, char** argv)$/;"	f
 main	Test/compare.c	/^int main(int argc, char** argv)$/;"	f
 nBuffer	Code/file.h	/^	int nBuffer;$/;"	m	struct:Buffer
@@ -203,6 +488,8 @@ nTokenStart	Code/file.h	/^	int nTokenStart;$/;"	m	struct:Buffer
 name	Code/name.c	/^const char *name[] = {$/;"	v
 name	Code/symtable.h	/^	char *name;$/;"	m	struct:FieldList_
 name	Code/symtable.h	/^	char *name;$/;"	m	struct:SymNode
+newDecFunc	Code/symtable.c	/^struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) { $/;"	f
+newDefFunc	Code/symtable.c	/^struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {$/;"	f
 newFieldList	Code/symtable.c	/^FieldList newFieldList(char *name, Type type, FieldList tail) {$/;"	f
 newFunc	Code/symtable.c	/^struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {$/;"	f
 newNewType	Code/symtable.c	/^struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo) {$/;"	f
@@ -211,6 +498,7 @@ newType	Code/symtable.c	/^Type newType() {$/;"	f
 newVar	Code/symtable.c	/^struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo) {$/;"	f
 newfile	Code/file.c	/^newfile(char *fn)$/;"	f
 newtokenNode	Code/tree.c	/^struct node *newtokenNode(int type)$/;"	f
+next	Code/symtable.h	/^	struct FuncList *next;$/;"	m	struct:FuncList	typeref:struct:FuncList::FuncList
 next	Code/symtable.h	/^	struct SymNode *next;$/;"	m	struct:SymNode	typeref:struct:SymNode::SymNode
 node	Code/tree.h	/^struct node {$/;"	s
 nodetype	Code/tree.h	/^	int nodetype;$/;"	m	struct:node
@@ -220,6 +508,7 @@ num	Code/symtable.h	/^	int num;	\/\/num of this hash node$/;"	m	struct:HashNode
 printfErrorRow	Code/error.c	/^printfErrorRow(char *errmsg, int start, int end) {$/;"	f
 pushErrorInfo	Code/error.c	/^int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {$/;"	f
 semanticAnalyze	Code/semantic.c	/^void semanticAnalyze(struct node *parent, int num) {$/;"	f
+short	Code/syntax.tab.c	186;"	d	file:
 showAllSymbol	Code/symtable.c	/^void showAllSymbol(void) {$/;"	f
 showFieldList	Code/symtable.c	/^void showFieldList(FieldList fieldList) {$/;"	f
 showFunc	Code/symtable.c	/^void showFunc(struct Func *func) {$/;"	f
@@ -230,12 +519,16 @@ showType	Code/symtable.c	/^void showType(Type type) {$/;"	f
 showVar	Code/symtable.c	/^void showVar(struct Var *var) {$/;"	f
 size	Code/symtable.h	/^			int size;$/;"	m	struct:Type_::__anon2::__anon3
 specifier	Code/symtable.h	/^		Type specifier;$/;"	m	union:SymNode::__anon6
+specifierLock	Code/semantic.c	/^int specifierLock = 0;$/;"	v
+specifierstack	Code/semantichelp.c	/^Type *specifierstack = NULL;$/;"	v
+specifierstacksize	Code/semantichelp.c	/^int specifierstacksize = 0;$/;"	v
 str	Code/tree.h	/^	char *str;$/;"	m	union:value
 structdefnum	Code/semantic.c	/^int structdefnum = 0;$/;"	v
 structure	Code/symtable.h	/^		FieldList structure;$/;"	m	union:Type_::__anon2
 symNode	Code/symtable.h	/^	struct SymNode *symNode;\/\/the head of list$/;"	m	struct:HashNode	typeref:struct:HashNode::SymNode
 symTable	Code/symtable.c	/^struct HashNode symTable[HASHSIZE];$/;"	v	typeref:struct:HashNode
 symbolNum	Code/symtable.h	/^	int symbolNum;$/;"	m	struct:HashTableInfo
+syntax_init	Code/syntax.tab.c	/^void syntax_init()$/;"	f
 tail	Code/symtable.h	/^	FieldList tail;$/;"	m	struct:FieldList_
 test	Code/symtable.c	/^int test(void) {$/;"	f
 tokenName	Code/name.c	/^const char *tokenName[] = {$/;"	v
@@ -245,8 +538,159 @@ type	Code/symtable.h	/^	Type type;$/;"	m	struct:FieldList_
 type	Code/symtable.h	/^	Type type;$/;"	m	struct:Var
 type	Code/symtable.h	/^	int type;$/;"	m	struct:SymNode
 type	Code/tree.h	/^	Type type;$/;"	m	struct:node
+type_node	Code/syntax.tab.c	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:struct:YYSTYPE::node	file:
+type_node	Code/syntax.tab.h	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:struct:YYSTYPE::node
+unput	Code/lex.yy.c	202;"	d	file:
 updateChildDepth	Code/tree.c	/^void updateChildDepth(struct node *node)$/;"	f
 usedIndex	Code/symtable.h	/^	int usedIndex[SYMBOLMAX];$/;"	m	struct:HashTableInfo
 value	Code/tree.h	/^union value {$/;"	u
 var	Code/symtable.h	/^		struct Var *var;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Var
 varlistnum	Code/semantic.c	/^int varlistnum = 0;$/;"	v
+yy_accept	Code/lex.yy.c	/^static yyconst flex_int16_t yy_accept[75] =$/;"	v	file:
+yy_at_bol	Code/lex.yy.c	/^	int yy_at_bol;$/;"	m	struct:yy_buffer_state	file:
+yy_base	Code/lex.yy.c	/^static yyconst flex_int16_t yy_base[78] =$/;"	v	file:
+yy_bs_column	Code/lex.yy.c	/^    int yy_bs_column; \/**< The column count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_bs_lineno	Code/lex.yy.c	/^    int yy_bs_lineno; \/**< The line count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_pos	Code/lex.yy.c	/^	char *yy_buf_pos;		\/* current position in input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_size	Code/lex.yy.c	/^	yy_size_t yy_buf_size;$/;"	m	struct:yy_buffer_state	file:
+yy_buffer_stack	Code/lex.yy.c	/^static YY_BUFFER_STATE * yy_buffer_stack = 0; \/**< Stack as an array. *\/$/;"	v	file:
+yy_buffer_stack_max	Code/lex.yy.c	/^static size_t yy_buffer_stack_max = 0; \/**< capacity of stack. *\/$/;"	v	file:
+yy_buffer_stack_top	Code/lex.yy.c	/^static size_t yy_buffer_stack_top = 0; \/**< index of top of stack. *\/$/;"	v	file:
+yy_buffer_state	Code/lex.yy.c	/^struct yy_buffer_state$/;"	s	file:
+yy_buffer_status	Code/lex.yy.c	/^	int yy_buffer_status;$/;"	m	struct:yy_buffer_state	file:
+yy_c_buf_p	Code/lex.yy.c	/^static char *yy_c_buf_p = (char *) 0;$/;"	v	file:
+yy_ch_buf	Code/lex.yy.c	/^	char *yy_ch_buf;		\/* input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_chk	Code/lex.yy.c	/^static yyconst flex_int16_t yy_chk[188] =$/;"	v	file:
+yy_create_buffer	Code/lex.yy.c	/^    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )$/;"	f
+yy_def	Code/lex.yy.c	/^static yyconst flex_int16_t yy_def[78] =$/;"	v	file:
+yy_delete_buffer	Code/lex.yy.c	/^    void yy_delete_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_did_buffer_switch_on_eof	Code/lex.yy.c	/^static int yy_did_buffer_switch_on_eof;$/;"	v	file:
+yy_ec	Code/lex.yy.c	/^static yyconst flex_int32_t yy_ec[256] =$/;"	v	file:
+yy_fatal_error	Code/lex.yy.c	/^static void yy_fatal_error (yyconst char* msg )$/;"	f	file:
+yy_fill_buffer	Code/lex.yy.c	/^	int yy_fill_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_flex_debug	Code/lex.yy.c	/^int yy_flex_debug = 0;$/;"	v
+yy_flex_strlen	Code/lex.yy.c	/^static int yy_flex_strlen (yyconst char * s )$/;"	f	file:
+yy_flex_strncpy	Code/lex.yy.c	/^static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )$/;"	f	file:
+yy_flush_buffer	Code/lex.yy.c	/^    void yy_flush_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_get_next_buffer	Code/lex.yy.c	/^static int yy_get_next_buffer (void)$/;"	f	file:
+yy_get_previous_state	Code/lex.yy.c	/^    static yy_state_type yy_get_previous_state (void)$/;"	f	file:
+yy_hold_char	Code/lex.yy.c	/^static char yy_hold_char;$/;"	v	file:
+yy_init	Code/lex.yy.c	/^static int yy_init = 0;		\/* whether we need to initialize *\/$/;"	v	file:
+yy_init_buffer	Code/lex.yy.c	/^    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )$/;"	f	file:
+yy_init_globals	Code/lex.yy.c	/^static int yy_init_globals (void)$/;"	f	file:
+yy_input_file	Code/lex.yy.c	/^	FILE *yy_input_file;$/;"	m	struct:yy_buffer_state	file:
+yy_is_interactive	Code/lex.yy.c	/^	int yy_is_interactive;$/;"	m	struct:yy_buffer_state	file:
+yy_is_our_buffer	Code/lex.yy.c	/^	int yy_is_our_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_last_accepting_cpos	Code/lex.yy.c	/^static char *yy_last_accepting_cpos;$/;"	v	file:
+yy_last_accepting_state	Code/lex.yy.c	/^static yy_state_type yy_last_accepting_state;$/;"	v	file:
+yy_load_buffer_state	Code/lex.yy.c	/^static void yy_load_buffer_state  (void)$/;"	f	file:
+yy_meta	Code/lex.yy.c	/^static yyconst flex_int32_t yy_meta[43] =$/;"	v	file:
+yy_n_chars	Code/lex.yy.c	/^	int yy_n_chars;$/;"	m	struct:yy_buffer_state	file:
+yy_n_chars	Code/lex.yy.c	/^static int yy_n_chars;		\/* number of characters read into yy_ch_buf *\/$/;"	v	file:
+yy_new_buffer	Code/lex.yy.c	331;"	d	file:
+yy_nxt	Code/lex.yy.c	/^	flex_int32_t yy_nxt;$/;"	m	struct:yy_trans_info	file:
+yy_nxt	Code/lex.yy.c	/^static yyconst flex_int16_t yy_nxt[188] =$/;"	v	file:
+yy_reduce_print	Code/syntax.tab.c	/^yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule)$/;"	f	file:
+yy_rule_can_match_eol	Code/lex.yy.c	/^static yyconst flex_int32_t yy_rule_can_match_eol[34] =$/;"	v	file:
+yy_scan_buffer	Code/lex.yy.c	/^YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )$/;"	f
+yy_scan_bytes	Code/lex.yy.c	/^YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )$/;"	f
+yy_scan_string	Code/lex.yy.c	/^YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )$/;"	f
+yy_set_bol	Code/lex.yy.c	343;"	d	file:
+yy_set_interactive	Code/lex.yy.c	333;"	d	file:
+yy_size_t	Code/lex.yy.c	/^typedef size_t yy_size_t;$/;"	t	file:
+yy_stack_print	Code/syntax.tab.c	/^yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)$/;"	f	file:
+yy_start	Code/lex.yy.c	/^static int yy_start = 0;	\/* start state number *\/$/;"	v	file:
+yy_state_type	Code/lex.yy.c	/^typedef int yy_state_type;$/;"	t	file:
+yy_switch_to_buffer	Code/lex.yy.c	/^    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )$/;"	f
+yy_symbol_print	Code/syntax.tab.c	/^yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)$/;"	f	file:
+yy_symbol_value_print	Code/syntax.tab.c	/^yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)$/;"	f	file:
+yy_trans_info	Code/lex.yy.c	/^struct yy_trans_info$/;"	s	file:
+yy_try_NUL_trans	Code/lex.yy.c	/^    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )$/;"	f	file:
+yy_verify	Code/lex.yy.c	/^	flex_int32_t yy_verify;$/;"	m	struct:yy_trans_info	file:
+yyalloc	Code/lex.yy.c	/^void *yyalloc (yy_size_t  size )$/;"	f
+yyalloc	Code/syntax.tab.c	/^union yyalloc$/;"	u	file:
+yychar	Code/syntax.tab.c	/^int yychar;$/;"	v
+yycheck	Code/syntax.tab.c	/^static const yytype_int16 yycheck[] =$/;"	v	file:
+yyclearin	Code/syntax.tab.c	742;"	d	file:
+yycolumn	Code/lex.yy.c	/^	int yycolumn = 1;$/;"	v
+yyconst	Code/lex.yy.c	107;"	d	file:
+yyconst	Code/lex.yy.c	109;"	d	file:
+yydebug	Code/syntax.tab.c	/^int yydebug;$/;"	v
+yydefact	Code/syntax.tab.c	/^static const yytype_uint8 yydefact[] =$/;"	v	file:
+yydefgoto	Code/syntax.tab.c	/^static const yytype_int8 yydefgoto[] =$/;"	v	file:
+yydestruct	Code/syntax.tab.c	/^yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp)$/;"	f	file:
+yyensure_buffer_stack	Code/lex.yy.c	/^static void yyensure_buffer_stack (void)$/;"	f	file:
+yyerrok	Code/syntax.tab.c	741;"	d	file:
+yyerror	Code/syntax.tab.c	/^yyerror(char *msg) {$/;"	f
+yyfree	Code/lex.yy.c	/^void yyfree (void * ptr )$/;"	f
+yyget_debug	Code/lex.yy.c	/^int yyget_debug  (void)$/;"	f
+yyget_in	Code/lex.yy.c	/^FILE *yyget_in  (void)$/;"	f
+yyget_leng	Code/lex.yy.c	/^int yyget_leng  (void)$/;"	f
+yyget_lineno	Code/lex.yy.c	/^int yyget_lineno  (void)$/;"	f
+yyget_out	Code/lex.yy.c	/^FILE *yyget_out  (void)$/;"	f
+yyget_text	Code/lex.yy.c	/^char *yyget_text  (void)$/;"	f
+yyin	Code/lex.yy.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yyinput	Code/lex.yy.c	/^    static int yyinput (void)$/;"	f	file:
+yyleng	Code/lex.yy.c	/^int yyleng;$/;"	v
+yyless	Code/lex.yy.c	189;"	d	file:
+yyless	Code/lex.yy.c	1975;"	d	file:
+yyless	Code/lex.yy.c	1976;"	d	file:
+yylex_destroy	Code/lex.yy.c	/^int yylex_destroy  (void)$/;"	f
+yylineno	Code/lex.yy.c	/^int yylineno = 1;$/;"	v
+yylloc	Code/syntax.tab.c	/^YYLTYPE yylloc;$/;"	v
+yyls_alloc	Code/syntax.tab.c	/^  YYLTYPE yyls_alloc;$/;"	m	union:yyalloc	file:
+yyltype	Code/syntax.tab.c	173;"	d	file:
+yyltype	Code/syntax.tab.h	103;"	d
+yylval	Code/syntax.tab.c	/^YYSTYPE yylval;$/;"	v
+yymore	Code/lex.yy.c	538;"	d	file:
+yynerrs	Code/syntax.tab.c	/^int yynerrs;$/;"	v
+yyout	Code/lex.yy.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yypact	Code/syntax.tab.c	/^static const yytype_int16 yypact[] =$/;"	v	file:
+yypact_value_is_default	Code/syntax.tab.c	674;"	d	file:
+yyparse	Code/syntax.tab.c	/^yyparse (void *YYPARSE_PARAM)$/;"	f
+yypgoto	Code/syntax.tab.c	/^static const yytype_int16 yypgoto[] =$/;"	v	file:
+yypop_buffer_state	Code/lex.yy.c	/^void yypop_buffer_state (void)$/;"	f
+yyprhs	Code/syntax.tab.c	/^static const yytype_uint16 yyprhs[] =$/;"	v	file:
+yypush_buffer_state	Code/lex.yy.c	/^void yypush_buffer_state (YY_BUFFER_STATE new_buffer )$/;"	f
+yyr1	Code/syntax.tab.c	/^static const yytype_uint8 yyr1[] =$/;"	v	file:
+yyr2	Code/syntax.tab.c	/^static const yytype_uint8 yyr2[] =$/;"	v	file:
+yyrealloc	Code/lex.yy.c	/^void *yyrealloc  (void * ptr, yy_size_t  size )$/;"	f
+yyrestart	Code/lex.yy.c	/^    void yyrestart  (FILE * input_file )$/;"	f
+yyrhs	Code/syntax.tab.c	/^static const yytype_int8 yyrhs[] =$/;"	v	file:
+yyrline	Code/syntax.tab.c	/^static const yytype_uint8 yyrline[] =$/;"	v	file:
+yyset_debug	Code/lex.yy.c	/^void yyset_debug (int  bdebug )$/;"	f
+yyset_in	Code/lex.yy.c	/^void yyset_in (FILE *  in_str )$/;"	f
+yyset_lineno	Code/lex.yy.c	/^void yyset_lineno (int  line_number )$/;"	f
+yyset_out	Code/lex.yy.c	/^void yyset_out (FILE *  out_str )$/;"	f
+yyss_alloc	Code/syntax.tab.c	/^  yytype_int16 yyss_alloc;$/;"	m	union:yyalloc	file:
+yystos	Code/syntax.tab.c	/^static const yytype_uint8 yystos[] =$/;"	v	file:
+yystpcpy	Code/syntax.tab.c	/^yystpcpy (char *yydest, const char *yysrc)$/;"	f	file:
+yystpcpy	Code/syntax.tab.c	1053;"	d	file:
+yystrlen	Code/syntax.tab.c	/^yystrlen (const char *yystr)$/;"	f	file:
+yystrlen	Code/syntax.tab.c	1030;"	d	file:
+yystype	Code/syntax.tab.c	161;"	d	file:
+yystype	Code/syntax.tab.h	89;"	d
+yysyntax_error	Code/syntax.tab.c	/^yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,$/;"	f	file:
+yytable	Code/syntax.tab.c	/^static const yytype_int16 yytable[] =$/;"	v	file:
+yytable_value_is_error	Code/syntax.tab.c	677;"	d	file:
+yyterminate	Code/lex.yy.c	707;"	d	file:
+yytext	Code/lex.yy.c	/^char *yytext;$/;"	v
+yytext_ptr	Code/lex.yy.c	371;"	d	file:
+yytname	Code/syntax.tab.c	/^static const char *const yytname[] =$/;"	v	file:
+yytnamerr	Code/syntax.tab.c	/^yytnamerr (char *yyres, const char *yystr)$/;"	f	file:
+yytokentype	Code/syntax.tab.c	/^   enum yytokentype {$/;"	g	file:
+yytokentype	Code/syntax.tab.h	/^   enum yytokentype {$/;"	g
+yytoknum	Code/syntax.tab.c	/^static const yytype_uint16 yytoknum[] =$/;"	v	file:
+yytranslate	Code/syntax.tab.c	/^static const yytype_uint8 yytranslate[] =$/;"	v	file:
+yytype_int16	Code/syntax.tab.c	/^typedef YYTYPE_INT16 yytype_int16;$/;"	t	file:
+yytype_int16	Code/syntax.tab.c	/^typedef short int yytype_int16;$/;"	t	file:
+yytype_int8	Code/syntax.tab.c	/^typedef YYTYPE_INT8 yytype_int8;$/;"	t	file:
+yytype_int8	Code/syntax.tab.c	/^typedef short int yytype_int8;$/;"	t	file:
+yytype_int8	Code/syntax.tab.c	/^typedef signed char yytype_int8;$/;"	t	file:
+yytype_uint16	Code/syntax.tab.c	/^typedef YYTYPE_UINT16 yytype_uint16;$/;"	t	file:
+yytype_uint16	Code/syntax.tab.c	/^typedef unsigned short int yytype_uint16;$/;"	t	file:
+yytype_uint8	Code/syntax.tab.c	/^typedef YYTYPE_UINT8 yytype_uint8;$/;"	t	file:
+yytype_uint8	Code/syntax.tab.c	/^typedef unsigned char yytype_uint8;$/;"	t	file:
+yyunput	Code/lex.yy.c	/^    static void yyunput (int c, register char * yy_bp )$/;"	f	file:
+yyvs_alloc	Code/syntax.tab.c	/^  YYSTYPE yyvs_alloc;$/;"	m	union:yyalloc	file:
+yywrap	Code/lex.yy.c	357;"	d	file:

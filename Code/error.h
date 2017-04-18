@@ -8,6 +8,7 @@
 #include "syntax.tab.h"
 
 struct ErrorInfo {
+	int ErrorType;
 	int ErrorLine;
 	char *ErrorLineStr;
 };

@@ -20,19 +20,20 @@ int argsnum = 0;
 int varlistnum = 0;
 int specifierLock = 0;
 
-/*
+/*--------------------------------------------------------------------------
+
 	High-level Definitions
+
+--------------------------------------------------------------------------
 */
 void ProgramAnalyze(struct node *parent, int num) {
-	struct FuncList *unDefList = NULL;
-	if(isAllDef()) {
-	
-	}else {
-		unDefList = getUnDefFunc();	
-		while(unDefList != NULL) {
-			SemanticError(18, unDefList->funcSymbol->errorInfo);
-			unDefList = unDefList->next;
-		}
+	struct FuncList *errorlist = NULL;
+	int errortype;
+	errorlist = checkDecFuncList();
+	while(errorlist != NULL) {
+		errortype = errorlist->funcSymbol->errorInfo->ErrorType;
+		SemanticError(errortype, errorlist->funcSymbol->errorInfo);
+		errorlist = errorlist->next;
 	}
 }
 void ExtDefListAnalyze(struct node *parent, int num) {
@@ -68,21 +69,25 @@ void ExtDefAnalyze(struct node *parent, int num) {
 		//Specifier FunDec SEMI
 		case SEMI:
 			Funcsymbol->func->isDeclare = 1;			
-			if(checkFuncError(Funcsymbol)) {
-				SemanticError(19, Funcsymbol->errorInfo);
+ 			if(lookupDecFuncByName(Funcsymbol)) {
+				if(!lookupDecFunc(Funcsymbol)) {
+				//name is the same, type is diff
+					SemanticError(19, Funcsymbol->errorInfo);
+				}
 			}else {
-				addUnDefFunc(Funcsymbol);
-			}	
+				insert(Funcsymbol);
+				addDecFunc(Funcsymbol);
+			}
 			Funcsymbol = NULL;
 			break;
 		//Specifier FunDec CompSt
 		case CompSt:
 			Funcsymbol->func->isDefine = 1;			
-			if(isDefFunc(Funcsymbol)) {
+ 			if(lookupDefFuncByName(Funcsymbol)) {
 				SemanticError(4, Funcsymbol->errorInfo);
 			}else {
+				insert(Funcsymbol);
 				addDefFunc(Funcsymbol);
-				updateUnDefFunc(Funcsymbol);
 			}
 			Funcsymbol = NULL;
 			break;
@@ -95,6 +100,8 @@ void ExtDefAnalyze(struct node *parent, int num) {
 	specifierLock = 0;
 ExtDefDebug:
 	if(debug2) {
+		showDefFuncList();
+		showDecFuncList();
 	}
 }
 // update add symbol
@@ -345,7 +352,7 @@ VarDecDebug:
 		fprintf(stdout, "\n");
 	}
 }
-// update GFuncReturn
+// update GFuncReturn, parent->errorInfo
 void FunDecAnalyze(struct node *parent, int num) {
 	struct node *id = NULL;
 	struct node *varlist = NULL;
@@ -374,18 +381,19 @@ void FunDecAnalyze(struct node *parent, int num) {
 		}
 	}
 
-	idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - varlistnum);
 	varlistnum = 0;
-	
+	/*
 	symNode = lookup(parent->nodevalue.str);
 	if(symNode) {
 		//may def may dec
 //		SemanticError(4, idErrorInfo);
-		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
+		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
 	}else {
-		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
+		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
 		insert(symNode);
 	}
+	*/
+	symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
  	Funcsymbol = symNode;
 
 FunDecDebug:

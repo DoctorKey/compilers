@@ -102,13 +102,15 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct Error
 struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
 struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
 
-void addUnDefFunc(struct SymNode *symbol); 
+void showDefFuncList(); 
+void showDecFuncList(); 
 void addDefFunc(struct SymNode *symbol); 
-int isAllDef(); 
-struct FuncList *getUnDefFunc(); 
-int isDefFunc(struct SymNode *symbol); 
-int checkFuncError(struct SymNode *symbol); 
-void updateUnDefFunc(struct SymNode *defFunc); 
+void addDecFunc(struct SymNode *symbol); 
+int lookupDefFuncByName(struct SymNode *symbol);
+int lookupDefFunc(struct SymNode *symbol);
+int lookupDecFuncByName(struct SymNode *symbol);
+int lookupDecFunc(struct SymNode *symbol);
+struct FuncList *checkDecFuncList(); 
 
 int cmpFuncSym(struct SymNode *left, struct SymNode *right); 
 int cmpFuncSymByName(struct SymNode *left, struct SymNode *right); 

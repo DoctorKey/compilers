@@ -305,18 +305,9 @@ Type getSymType(struct SymNode *symNode) {
 	Declare function
 ------------------------------------------------------------------
 */
-struct FuncList *unDefFunc = NULL;
-struct FuncList *DefFunc = NULL;
-int isAllDef() {
-	if(unDefFunc == NULL)
-		return true;
-	else
-		return false;
-}
-struct FuncList *getUnDefFunc() {
-	return unDefFunc;
-}
-void addUnDefFunc(struct SymNode *symbol) {
+struct FuncList *DecFuncList = NULL;
+struct FuncList *DefFuncList = NULL;
+void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
 	struct FuncList *new = NULL;
 	new = malloc(sizeof(struct FuncList));
 	if (!new) {
@@ -325,56 +316,65 @@ void addUnDefFunc(struct SymNode *symbol) {
 	}
 	new->funcSymbol = symbol;
 	new->next = NULL;
-	if (DefFunc == NULL) {
-		unDefFunc = new;
+	if ((*funcList) == NULL) {
+		(*funcList) = new;
 	}else {
-		unDefFunc->next = new;
+		(*funcList)->next = new;
 	}
+}
+void addDecFunc(struct SymNode *symbol) {
+	addFunc(&DecFuncList, symbol);
 }
 void addDefFunc(struct SymNode *symbol) {
-	struct FuncList *new = NULL;
-	new = malloc(sizeof(struct FuncList));
-	if (!new) {
-		fprintf(stderr, "malloc fails\n");
-		exit(0);
-	}
-	new->funcSymbol = symbol;
-	new->next = NULL;
-	if (DefFunc == NULL) {
-		DefFunc = new;
-	}else {
-		DefFunc->next = new;
-	}
+	addFunc(&DefFuncList, symbol);
 }
-void updateUnDefFunc(struct SymNode *defFunc) {
-	struct FuncList *undeflist = unDefFunc;
-	struct FuncList *pre = NULL;
-	struct FuncList *temp = NULL;
-	struct SymNode *target = NULL;
-	while (undeflist != NULL) {
-		if(cmpFuncSymByName(undeflist->funcSymbol, defFunc) == 0) {
-			target = undeflist->funcSymbol;
-			temp = undeflist;
-			if(!cmpFunc(target->func, defFunc->func)) {
-				//different
-				SemanticError(19, target->errorInfo);
-			}else {
-				//the same
+void showDefFuncList() {
+	struct FuncList *temp = DefFuncList;
+	fprintf(stdout, "----------------DefFuncList-------------------\n");
+	while (temp != NULL) {
+		showSymbol(temp->funcSymbol);
+		temp = temp->next;
+	}
+	fprintf(stdout, "----------------------------------------------\n");
+}
+void showDecFuncList() {
+	struct FuncList *temp = DecFuncList;
+	fprintf(stdout, "----------------DecFuncList-------------------\n");
+	while (temp != NULL) {
+		showSymbol(temp->funcSymbol);
+		temp = temp->next;
+	}
+	fprintf(stdout, "----------------------------------------------\n");
+}
+void freeFuncListNode(struct FuncList *funcList) {
+	if(funcList == NULL)
+		return;
+	freeSymNode(funcList->funcSymbol);
+	funcList->funcSymbol = NULL;
+	free(funcList);
+	funcList = NULL;
+}
+//delete the same name func in funclist
+void deleteFunc(struct FuncList *funcList, struct SymNode *symbol) {
+	struct FuncList *pre = NULL, *now = funcList;
+	if(now == NULL) {
+		return;
+	}
+	if(!cmpFuncSymByName(now->funcSymbol, symbol)) {
+		pre = now->next;
+		freeFuncListNode(now);
+		deleteFunc(pre, symbol);
+	}else {
+		pre = now;
+		now = now->next;
+		while(now != NULL) {
+			if(!cmpFuncSymByName(now->funcSymbol, symbol)){
+				pre->next = now->next;
+				freeFuncListNode(now);
 			}
-			if(pre == NULL) {
-				undeflist = temp->next;
-				unDefFunc = temp->next;
-			}else {
-				pre->next = temp->next;
-			}
-			freeSymNode(temp->funcSymbol);
-			temp->funcSymbol = NULL;
-			free(temp);
-			temp = NULL;
-			continue;
+			pre = now;
+			now = now->next;
 		}
-		pre = undeflist;
-		undeflist = undeflist->next;
 	}
 }
 int cmpFunc(struct Func *left, struct Func *right) {
@@ -407,8 +407,19 @@ int cmpFuncSym(struct SymNode *left, struct SymNode *right) {
 	}
 	return 0;
 }
-int isDefFunc(struct SymNode *symbol) {
-	struct FuncList *temp = DefFunc;
+// return 0 if can't find the same name. 
+int lookupFuncByName(struct FuncList *funcList, struct SymNode *symbol) {
+	struct FuncList *temp = funcList;
+	while (temp != NULL) {
+		if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0)
+			return 1;
+		temp = temp->next;
+	}
+	return 0;
+}
+// return 0 if can't find the same type. 
+int lookupFunc(struct FuncList *funcList, struct SymNode *symbol) {
+	struct FuncList *temp = funcList;
 	while (temp != NULL) {
 		if(cmpFuncSym(temp->funcSymbol, symbol) == 0)
 			return 1;
@@ -416,35 +427,41 @@ int isDefFunc(struct SymNode *symbol) {
 	}
 	return 0;
 }
-// return 0 no error or not find. return 1 error
-int checkFuncError(struct SymNode *symbol) {
-	struct FuncList *temp = DefFunc;
-	struct SymNode *target = NULL;
-	while (temp != NULL) {
-		if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0) {
-			target = temp->funcSymbol;
-			break;
-		}
-		temp = temp->next;
-	}
-	if (temp == NULL) {
-		temp = unDefFunc;
-		while (temp != NULL) {
-			if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0) {
-				target = temp->funcSymbol;
-				break;
+//lookup in DefFuncList to find this func has been defined
+int lookupDefFuncByName(struct SymNode *symbol) {
+	return lookupFuncByName(DefFuncList, symbol);
+}
+int lookupDefFunc(struct SymNode *symbol) {
+	return lookupFunc(DefFuncList, symbol);
+}
+int lookupDecFuncByName(struct SymNode *symbol) {
+	return lookupFuncByName(DecFuncList, symbol);
+}
+int lookupDecFunc(struct SymNode *symbol) {
+	return lookupFunc(DecFuncList, symbol);
+}
+struct FuncList *checkDecFuncList() {
+	struct FuncList *resultHead = NULL;
+	struct FuncList *declist = DecFuncList;
+	struct FuncList *deflist = DefFuncList;
+	struct SymNode *decfuncSymbol = NULL;
+	while (declist != NULL) {
+		decfuncSymbol = declist->funcSymbol;
+		if(lookupDefFuncByName(decfuncSymbol)) {
+			//find the same name
+			if(lookupDefFunc(decfuncSymbol)) {
+				//find the same func
+			}else {
+				decfuncSymbol->errorInfo->ErrorType = 19;
+				addFunc(&resultHead, decfuncSymbol);
 			}
-		}
-	}
-	if (target == NULL) {
-		return 0;
-	}else {
-		if(!cmpFunc(target->func, symbol->func)) {
-			return 0;	
 		}else {
-			return 1;
+			decfuncSymbol->errorInfo->ErrorType = 18;
+			addFunc(&resultHead, decfuncSymbol);
 		}
+		declist = declist->next;
 	}
+	return resultHead;
 }
 /*---------------------------------------------------------------
 	hash table
