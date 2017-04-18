@@ -1,6 +1,7 @@
 #include "symtable.h"
 #include "main.h"
 #include "error.h"
+#include "semantichelp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -173,9 +174,31 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct Error
 	}
 	func->Return = Return;
 	func->argtype = argtype;
+	func->isDefine = 0;
+	func->isDeclare = 0;
  	symNode = createSymNode(Func, name, errorInfo);
 	symNode->func = func;
 	return symNode;
+}
+struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {
+	struct SymNode *func = NULL;
+	func = newFunc(name, Return, argtype, errorInfo);
+	if(!func) {
+		fprintf(stderr, "out of space\n");
+		exit(0);
+	}
+	func->func->isDefine = 1;
+	return func;
+}
+struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) { 
+	struct SymNode *func = NULL;
+	func = newFunc(name, Return, argtype, errorInfo);
+	if(!func) {
+		fprintf(stderr, "out of space\n");
+		exit(0);
+	}
+	func->func->isDeclare = 1;
+	return func;
 }
 void freeFunc(struct Func *func) {
 	int i;
@@ -277,7 +300,153 @@ Type getSymType(struct SymNode *symNode) {
 		break;
 	}
 } 
-/*
+/*-----------------------------------------------------------------
+	Define function
+	Declare function
+------------------------------------------------------------------
+*/
+struct FuncList *unDefFunc = NULL;
+struct FuncList *DefFunc = NULL;
+int isAllDef() {
+	if(unDefFunc == NULL)
+		return true;
+	else
+		return false;
+}
+struct FuncList *getUnDefFunc() {
+	return unDefFunc;
+}
+void addUnDefFunc(struct SymNode *symbol) {
+	struct FuncList *new = NULL;
+	new = malloc(sizeof(struct FuncList));
+	if (!new) {
+		fprintf(stderr, "malloc fails\n");
+		exit(0);
+	}
+	new->funcSymbol = symbol;
+	new->next = NULL;
+	if (DefFunc == NULL) {
+		unDefFunc = new;
+	}else {
+		unDefFunc->next = new;
+	}
+}
+void addDefFunc(struct SymNode *symbol) {
+	struct FuncList *new = NULL;
+	new = malloc(sizeof(struct FuncList));
+	if (!new) {
+		fprintf(stderr, "malloc fails\n");
+		exit(0);
+	}
+	new->funcSymbol = symbol;
+	new->next = NULL;
+	if (DefFunc == NULL) {
+		DefFunc = new;
+	}else {
+		DefFunc->next = new;
+	}
+}
+void updateUnDefFunc(struct SymNode *defFunc) {
+	struct FuncList *undeflist = unDefFunc;
+	struct FuncList *pre = NULL;
+	struct FuncList *temp = NULL;
+	struct SymNode *target = NULL;
+	while (undeflist != NULL) {
+		if(cmpFuncSymByName(undeflist->funcSymbol, defFunc) == 0) {
+			target = undeflist->funcSymbol;
+			temp = undeflist;
+			if(!cmpFunc(target->func, defFunc->func)) {
+				//different
+				SemanticError(19, target->errorInfo);
+			}else {
+				//the same
+			}
+			if(pre == NULL) {
+				undeflist = temp->next;
+				unDefFunc = temp->next;
+			}else {
+				pre->next = temp->next;
+			}
+			freeSymNode(temp->funcSymbol);
+			temp->funcSymbol = NULL;
+			free(temp);
+			temp = NULL;
+			continue;
+		}
+		pre = undeflist;
+		undeflist = undeflist->next;
+	}
+}
+int cmpFunc(struct Func *left, struct Func *right) {
+	if(cmpType(left->Return, right->Return)) {
+		return 1;
+	} 
+	if(cmpFieldList(left->argtype, right->argtype)) {
+		return 1;
+	} 
+	return 0;
+}
+int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {
+	if(left->type != Func || right->type != Func) {
+		return 1;
+	}	
+	if(strcmp(left->name, right->name)) {
+		return 1;
+	}
+	return 0;
+}
+int cmpFuncSym(struct SymNode *left, struct SymNode *right) {
+	if(left->type != Func || right->type != Func) {
+		return 1;
+	}	
+	if(strcmp(left->name, right->name)) {
+		return 1;
+	}
+	if(cmpFunc(left->func, right->func)) {
+		return 1;
+	}
+	return 0;
+}
+int isDefFunc(struct SymNode *symbol) {
+	struct FuncList *temp = DefFunc;
+	while (temp != NULL) {
+		if(cmpFuncSym(temp->funcSymbol, symbol) == 0)
+			return 1;
+		temp = temp->next;
+	}
+	return 0;
+}
+// return 0 no error or not find. return 1 error
+int checkFuncError(struct SymNode *symbol) {
+	struct FuncList *temp = DefFunc;
+	struct SymNode *target = NULL;
+	while (temp != NULL) {
+		if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0) {
+			target = temp->funcSymbol;
+			break;
+		}
+		temp = temp->next;
+	}
+	if (temp == NULL) {
+		temp = unDefFunc;
+		while (temp != NULL) {
+			if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0) {
+				target = temp->funcSymbol;
+				break;
+			}
+		}
+	}
+	if (target == NULL) {
+		return 0;
+	}else {
+		if(!cmpFunc(target->func, symbol->func)) {
+			return 0;	
+		}else {
+			return 1;
+		}
+	}
+}
+/*---------------------------------------------------------------
 	hash table
 */
 unsigned int hash_pjw(char *name) {

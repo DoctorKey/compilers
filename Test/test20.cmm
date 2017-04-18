@@ -1,0 +1,23 @@
+struct B {
+	int z[5];
+};
+
+struct A {
+	int x;
+	struct B b;
+};
+
+struct B func(struct A aa) 
+{
+	return aa.b;
+}
+
+struct C {
+	int c1;
+	int c2;
+	float c3;
+}	fund(struct A a1, int d1)
+{
+	struct C cc;
+	return cc.c3;
+}

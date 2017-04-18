@@ -14,14 +14,26 @@ Type Gspecifier = NULL;
 Type GFuncReturn = NULL;
 extern struct ErrorInfoStack *IdErrorInfoStackHead;
 extern struct ErrorInfoStack *NumErrorInfoStackHead;
+struct SymNode *Funcsymbol = NULL;
 int structdefnum = 0;
 int argsnum = 0;
 int varlistnum = 0;
+int specifierLock = 0;
 
 /*
 	High-level Definitions
 */
 void ProgramAnalyze(struct node *parent, int num) {
+	struct FuncList *unDefList = NULL;
+	if(isAllDef()) {
+	
+	}else {
+		unDefList = getUnDefFunc();	
+		while(unDefList != NULL) {
+			SemanticError(18, unDefList->funcSymbol->errorInfo);
+			unDefList = unDefList->next;
+		}
+	}
 }
 void ExtDefListAnalyze(struct node *parent, int num) {
 }
@@ -29,6 +41,7 @@ void ExtDefListAnalyze(struct node *parent, int num) {
 void ExtDefAnalyze(struct node *parent, int num) {
 	struct node *specifier = NULL;
 	struct node *midchild = NULL;
+	struct node *rightchild = NULL;
 	struct SymNode *symNode = NULL;
 	FieldList fieldList = NULL;
 
@@ -45,11 +58,41 @@ void ExtDefAnalyze(struct node *parent, int num) {
 	//Specifier ExtDecList SEMI
 	if (midchild->nodetype == ExtDecList) {
 	}
-	//Specifier FunDec SEMI
 	if (midchild->nodetype == FunDec) {
+		rightchild = parent->children[2];
+		if (rightchild == NULL) {
+			fprintf(stderr, "ExtDef's right child is NULL\n");
+			goto ExtDefDebug;
+		}
+		switch(rightchild->nodetype) {
+		//Specifier FunDec SEMI
+		case SEMI:
+			Funcsymbol->func->isDeclare = 1;			
+			if(checkFuncError(Funcsymbol)) {
+				SemanticError(19, Funcsymbol->errorInfo);
+			}else {
+				addUnDefFunc(Funcsymbol);
+			}	
+			Funcsymbol = NULL;
+			break;
+		//Specifier FunDec CompSt
+		case CompSt:
+			Funcsymbol->func->isDefine = 1;			
+			if(isDefFunc(Funcsymbol)) {
+				SemanticError(4, Funcsymbol->errorInfo);
+			}else {
+				addDefFunc(Funcsymbol);
+				updateUnDefFunc(Funcsymbol);
+			}
+			Funcsymbol = NULL;
+			break;
+		default:
+			break;
+		}
 		GFuncReturn = NULL;
 	}
 	Gspecifier = NULL;
+	specifierLock = 0;
 ExtDefDebug:
 	if(debug2) {
 	}
@@ -113,6 +156,10 @@ void SpecifierAnalyze(struct node *parent, int num) {
 		break;
 	}
 	Gspecifier = parent->type;
+	if (specifierLock == 0) {
+		GFuncReturn = parent->type;
+		specifierLock = 1;
+	}
 SpecifierDebug:
 	if(debug2) {
 		fprintf(stdout, "Specifier->type : ");
@@ -327,16 +374,19 @@ void FunDecAnalyze(struct node *parent, int num) {
 		}
 	}
 
-	GFuncReturn = Gspecifier;
 	idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - varlistnum);
 	varlistnum = 0;
+	
 	symNode = lookup(parent->nodevalue.str);
 	if(symNode) {
-		SemanticError(4, idErrorInfo);
+		//may def may dec
+//		SemanticError(4, idErrorInfo);
+		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
 	}else {
 		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, idErrorInfo);
 		insert(symNode);
 	}
+ 	Funcsymbol = symNode;
 
 FunDecDebug:
 	if(debug2) {
@@ -518,7 +568,7 @@ void DefAnalyze(struct node *parent, int num) {
 		goto DefDebug;
 	}
 	parent->fieldList = declist->fieldList;
-
+	specifierLock = 0;
 DefDebug:
 	if (debug2) {
 		fprintf(stdout, "Def->type : \n");

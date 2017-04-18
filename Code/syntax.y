@@ -90,6 +90,8 @@ ExtDef : Specifier ExtDecList SEMI
 		{ $$ = newNode(ExtDef, 2, $1, $2); }
 	| Specifier FunDec CompSt 
 		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
+	| Specifier FunDec SEMI 
+		{ $$ = newNode(ExtDef, 3, $1, $2, $3); }
 	| error SEMI 
 		{ $$ = newNode(ExtDef, 2, NULL, $2); yyerrok; }
 	;

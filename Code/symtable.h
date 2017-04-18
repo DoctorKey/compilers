@@ -46,9 +46,12 @@ struct Var {
 		float floatValue;
 	};
 };
+
 struct Func {
 	Type Return;
 	int argc;
+	int isDefine;
+	int isDeclare;
 	FieldList argtype;
 };
 struct SymNode {
@@ -61,6 +64,10 @@ struct SymNode {
 	};
 	struct ErrorInfo *errorInfo;
 	struct SymNode *next;
+};
+struct FuncList {
+	struct SymNode *funcSymbol;
+	struct FuncList *next;
 };
 
 struct HashNode {
@@ -92,6 +99,20 @@ void freeFieldList(FieldList fieldList);
 struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo); 
 struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo); 
 struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
+struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
+struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
+
+void addUnDefFunc(struct SymNode *symbol); 
+void addDefFunc(struct SymNode *symbol); 
+int isAllDef(); 
+struct FuncList *getUnDefFunc(); 
+int isDefFunc(struct SymNode *symbol); 
+int checkFuncError(struct SymNode *symbol); 
+void updateUnDefFunc(struct SymNode *defFunc); 
+
+int cmpFuncSym(struct SymNode *left, struct SymNode *right); 
+int cmpFuncSymByName(struct SymNode *left, struct SymNode *right); 
+int cmpFunc(struct Func *left, struct Func *right); 
 
 int freeSymNode(struct SymNode *symNode); 
 
