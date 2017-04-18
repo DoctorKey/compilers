@@ -1,4 +1,5 @@
 #include "semantic.h"
+#include "semantichelp.h"
 #include "name.h"
 #include "error.h"
 #include <stdio.h>
@@ -17,52 +18,6 @@ int structdefnum = 0;
 int argsnum = 0;
 int varlistnum = 0;
 
-int cmpType(Type type1, Type type2); 
-
-/*
-	compare two FieldList
-	return 0 if the same
-	       1 if different
-*/
-int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {
-	if(fieldList1 == NULL && fieldList2 == NULL)
-		return 0;
-	if(fieldList1 == NULL || fieldList2 == NULL)
-		return 1;
-	//TODO: no need to compare the name?
-//	if(!strcmp(fieldList1->name, fieldList2->name))
-//		return 1;
-	if(!cmpType(fieldList1->type, fieldList2->type))
-		return 1;
-	return cmpFieldList(fieldList1->tail, fieldList2->tail);
-}
-/*
-	compare two Type
-	return 0 if the same
-	       1 if different
-*/
-int cmpType(Type type1, Type type2) {
-	if(type1 == NULL && type2 == NULL)
-		return 0;
-	if(type1 == NULL || type2 == NULL)
-		return 1;
-	if(type1->kind == BASIC && type2->kind == BASIC) {
-		if(type1->basic == type2->basic)
-			return 0;
-		else
-			return 1;
-	}
-	if(type1->kind == ARRAY && type2->kind == ARRAY) {
-		//don't compare the array size
-		// just compare the dimension
-		return cmpType(type1->array.elem, type2->array.elem);
-	}
-	if(type1->kind == STRUCTURE && type2->kind == STRUCTURE) {
-		return cmpFieldList(type1->structure, type2->structure);
-	}
-	//type1->kind != type2->kind
-	return 1;
-}
 /*
 	High-level Definitions
 */
@@ -761,6 +716,8 @@ void ExpAnalyze(struct node *parent, int num) {
 				SemanticError(14, parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
+			}else {
+				parent->nodevalue.str = childright->nodevalue.str;
 			}
 			goto ExpDebug;
 		}
@@ -821,6 +778,8 @@ void ExpAnalyze(struct node *parent, int num) {
 	}
 ExpDebug:
 	if(debug2) {
+		fprintf(stdout, "Exp: ");
+		ShowErrorInfo(parent->errorInfo);
 		fprintf(stdout, "Exp->type: \n");
 		showType(parent->type);
 		fprintf(stdout, "\n");
