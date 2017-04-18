@@ -1,6 +1,6 @@
 int func(int a);
 
-int func(int b)
+int func(int a)
 {
 	return 1;
 }

@@ -69,8 +69,12 @@ FieldList newFieldList(char *name, Type type, FieldList tail) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
 	}
-	fieldList->name = malloc(sizeof(char) * strlen(name));
-	strcpy(fieldList->name, name);
+	if(name != NULL) {
+		fieldList->name = malloc(sizeof(char) * strlen(name));
+		strcpy(fieldList->name, name);
+	}else {
+		fieldList->name = NULL;
+	}
 	fieldList->type = type;
 	fieldList->tail = tail;
 	return fieldList;

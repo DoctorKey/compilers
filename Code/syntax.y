@@ -257,7 +257,6 @@ yyerror(char *msg) {
 	fprintf(stderr, "\033[31m\033[1m");
 	fprintf(stderr, "Error ");
 	fprintf(stderr, "\033[0m");
-//	fprintf(stderr, "Error type B at Line %d: \"%s\" in column %d in %s\n", yylineno, yytext, yycolumn, curbs->filename);
 	fprintf(stderr, "type B at Line %d: ", yylineno);
 	PrintError('B', msg);
 }

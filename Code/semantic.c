@@ -784,6 +784,7 @@ void ExpAnalyze(struct node *parent, int num) {
 			parent->errorInfo = childleft->errorInfo;
 			if (childleft->type->kind == ERROR)
 				goto ExpDebug;
+			//TODO: just need name equal
 			if(cmpType(childleft->type, childright->type))
 				SemanticError(5, parent->errorInfo);
 			if(!childleft->nodevalue.str)
@@ -871,7 +872,7 @@ void ArgsAnalyze(struct node *parent, int num) {
 		parent->fieldList = fieldList;
 	}else {
 		//parent->fieldList = newFieldList(exp->nodevalue.str, exp->type, fieldList);	
-		parent->fieldList = newFieldList(" ", exp->type, fieldList);	
+		parent->fieldList = newFieldList(NULL, exp->type, fieldList);	
 	}
 ArgsDebug:
 	if (debug2) {
