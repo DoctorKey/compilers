@@ -213,6 +213,9 @@ SpecifierDebug:
 		fprintf(stdout, "Gspecifier: ");
 		showType(Gspecifier);
 		fprintf(stdout, "\n");
+		fprintf(stdout, "GFuncReturn: ");
+		showType(GFuncReturn);
+		fprintf(stdout, "\n");
 	}
 }
 // new struct type; add to symTable; update parent->type, parent->nodevalue.str, structdefnum--
@@ -225,10 +228,11 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 	tag = parent->children[1];
 	if (tag == NULL) {
 		parent->nodevalue.str = NULL;
+		parent->errorcount = 0;
 	}else {
 		parent->nodevalue.str = tag->nodevalue.str;
+		parent->errorcount = tag->errorcount;
 	}
-	parent->errorcount = tag->errorcount;
 	// STRUCT OptTag LC DefList RC
 	if (num == 5) {
 		parent->type = newType();
@@ -304,7 +308,7 @@ void TagAnalyze(struct node *parent, int num) {
 	struct SymNode *symNode = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	// not define
-	structdefnum--;
+//	structdefnum--;
 	if (child == NULL) {
 		fprintf(stderr, "Tag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -536,8 +540,14 @@ void StmtAnalyze(struct node *parent, int num) {
 			return;
 		}
 		parent->errorInfo = exp->errorInfo;
-		if (cmpType(GFuncReturn, exp->type)) {
+//		if (cmpType(GFuncReturn, exp->type)) {
+		if (cmpType(Funcsymbol->func->Return, exp->type)) {
 			SemanticError(8, parent->errorInfo);
+		}
+		if(debug2) {
+			fprintf(stderr, "Stmt check return\n");	
+			showType(GFuncReturn);
+			showType(exp->type);
 		}
 	}
 	// if; while
@@ -550,6 +560,9 @@ void StmtAnalyze(struct node *parent, int num) {
 		if (exp->type->kind != BASIC || exp->type->basic != INT) {
 			//fprintf(stderr, "assumption 2\n");
 		}
+	}
+	if(debug2) {
+		fprintf(stderr, "Stmt\n");	
 	}
 }
 /*

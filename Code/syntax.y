@@ -9,6 +9,7 @@
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
 	extern int lexical_isError;
+	extern int structdefnum;
 %}
 
 /* declared types */
@@ -109,9 +110,9 @@ StructSpecifier : STRUCT OptTag LC DefList RC
 		{ $$ = newNode(StructSpecifier, 4, NULL, $2, NULL, $4); yyerrok; }
 	;
 OptTag : 	
-		{ $$ = NULL; }
+		{ $$ = NULL; structdefnum++; }
 	| ID	
-		{ $$ = newNode(OptTag, 1, $1); }
+		{ $$ = newNode(OptTag, 1, $1); structdefnum++; }
 	;
 Tag : ID	
 		{ $$ = newNode(Tag, 1, $1); }
