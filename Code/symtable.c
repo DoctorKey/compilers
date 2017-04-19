@@ -1,6 +1,5 @@
 #include "symtable.h"
 #include "main.h"
-#include "error.h"
 #include "semantichelp.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +37,7 @@ void showType(Type type) {
 		fprintf(stdout, " size: %d ", type->array.size);
 		break;
 	case STRUCTURE:
-		fprintf(stdout, " structure ");
+		fprintf(stdout, " structure \n");
 		showFieldList(type->structure);
 		break;
 	}
@@ -82,11 +81,16 @@ FieldList newFieldList(char *name, Type type, FieldList tail) {
 void showFieldList(FieldList fieldList) {
 	if (fieldList == NULL)
 		return;
-	fprintf(stdout, "fieldList name: %s \n", fieldList->name);
-	fprintf(stdout, "fieldList type: ");
+	fprintf(stdout, "fieldList name: %s ", fieldList->name);
+//	fprintf(stdout, "fieldList type: ");
+	fprintf(stdout, "(");
 	showType(fieldList->type);
-	fprintf(stdout, "\n");
-	showFieldList(fieldList->tail);
+	fprintf(stdout, ")\n");
+//	fprintf(stdout, "\n");
+	if(fieldList->tail) {
+		fprintf(stdout, "next fieldList: \n");
+		showFieldList(fieldList->tail);
+	}
 }
 void freeFieldList(FieldList fieldList) {
 	if (fieldList == NULL)
@@ -163,7 +167,7 @@ void freeVar(struct Var *var) {
 	return;
 }
 void showVar(struct Var *var) {
-	fprintf(stdout, "var type: ");
+	fprintf(stdout, "var type: \n");
 	showType(var->type);	
 	fprintf(stdout, "\n");
 }
@@ -184,26 +188,6 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct Error
 	symNode->func = func;
 	return symNode;
 }
-struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {
-	struct SymNode *func = NULL;
-	func = newFunc(name, Return, argtype, errorInfo);
-	if(!func) {
-		fprintf(stderr, "out of space\n");
-		exit(0);
-	}
-	func->func->isDefine = 1;
-	return func;
-}
-struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) { 
-	struct SymNode *func = NULL;
-	func = newFunc(name, Return, argtype, errorInfo);
-	if(!func) {
-		fprintf(stderr, "out of space\n");
-		exit(0);
-	}
-	func->func->isDeclare = 1;
-	return func;
-}
 void freeFunc(struct Func *func) {
 	int i;
 	if (func == NULL)
@@ -223,7 +207,7 @@ void showFunc(struct Func *func) {
 	showType(func->Return);	
 	fprintf(stdout, "\n");
 	fprintf(stdout, "func argc: %d\n", func->argc);
-	fprintf(stdout, "func args type: ");
+	fprintf(stdout, "func args type: \n");
 	showFieldList(func->argtype);
 	fprintf(stdout, "\n");
 }
@@ -304,172 +288,6 @@ Type getSymType(struct SymNode *symNode) {
 		break;
 	}
 } 
-/*-----------------------------------------------------------------
-	Define function
-	Declare function
-------------------------------------------------------------------
-*/
-struct FuncList *DecFuncList = NULL;
-struct FuncList *DefFuncList = NULL;
-struct FuncList *getDecFuncList() {
-	return DecFuncList;
-}
-void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
-	struct FuncList *new = NULL;
-	new = malloc(sizeof(struct FuncList));
-	if (!new) {
-		fprintf(stderr, "malloc fails\n");
-		exit(0);
-	}
-	new->funcSymbol = symbol;
-	new->next = NULL;
-	if ((*funcList) == NULL) {
-		(*funcList) = new;
-	}else {
-		(*funcList)->next = new;
-	}
-}
-void addDecFunc(struct SymNode *symbol) {
-	addFunc(&DecFuncList, symbol);
-}
-void addDefFunc(struct SymNode *symbol) {
-	addFunc(&DefFuncList, symbol);
-}
-void showDefFuncList() {
-	struct FuncList *temp = DefFuncList;
-	fprintf(stdout, "----------------DefFuncList-------------------\n");
-	while (temp != NULL) {
-		showSymbol(temp->funcSymbol);
-		temp = temp->next;
-	}
-	fprintf(stdout, "----------------------------------------------\n");
-}
-void showDecFuncList() {
-	struct FuncList *temp = DecFuncList;
-	fprintf(stdout, "----------------DecFuncList-------------------\n");
-	while (temp != NULL) {
-		showSymbol(temp->funcSymbol);
-		temp = temp->next;
-	}
-	fprintf(stdout, "----------------------------------------------\n");
-}
-void freeFuncListNode(struct FuncList *funcList) {
-	if(funcList == NULL)
-		return;
-	freeSymNode(funcList->funcSymbol);
-	funcList->funcSymbol = NULL;
-	free(funcList);
-	funcList = NULL;
-}
-//delete the same name func in funclist
-void deleteFunc(struct FuncList *funcList, struct SymNode *symbol) {
-	struct FuncList *pre = NULL, *now = funcList;
-	if(now == NULL) {
-		return;
-	}
-	if(!cmpFuncSymByName(now->funcSymbol, symbol)) {
-		pre = now->next;
-		freeFuncListNode(now);
-		deleteFunc(pre, symbol);
-	}else {
-		pre = now;
-		now = now->next;
-		while(now != NULL) {
-			if(!cmpFuncSymByName(now->funcSymbol, symbol)){
-				pre->next = now->next;
-				freeFuncListNode(now);
-			}
-			pre = now;
-			now = now->next;
-		}
-	}
-}
-int cmpFunc(struct Func *left, struct Func *right) {
-	if(cmpType(left->Return, right->Return)) {
-		return 1;
-	} 
-	if(cmpFieldList(left->argtype, right->argtype)) {
-		return 1;
-	} 
-	return 0;
-}
-int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {
-	if(left->type != Func || right->type != Func) {
-		return 1;
-	}	
-	if(strcmp(left->name, right->name)) {
-		return 1;
-	}
-	return 0;
-}
-int cmpFuncSym(struct SymNode *left, struct SymNode *right) {
-	if(left->type != Func || right->type != Func) {
-		return 1;
-	}	
-	if(strcmp(left->name, right->name)) {
-		return 1;
-	}
-	if(cmpFunc(left->func, right->func)) {
-		return 1;
-	}
-	return 0;
-}
-// return 0 if can't find the same name. 
-int lookupFuncByName(struct FuncList *funcList, struct SymNode *symbol) {
-	struct FuncList *temp = funcList;
-	while (temp != NULL) {
-		if(cmpFuncSymByName(temp->funcSymbol, symbol) == 0)
-			return 1;
-		temp = temp->next;
-	}
-	return 0;
-}
-// return 0 if can't find the same type. 
-int lookupFunc(struct FuncList *funcList, struct SymNode *symbol) {
-	struct FuncList *temp = funcList;
-	while (temp != NULL) {
-		if(cmpFuncSym(temp->funcSymbol, symbol) == 0)
-			return 1;
-		temp = temp->next;
-	}
-	return 0;
-}
-//lookup in DefFuncList to find this func has been defined
-int lookupDefFuncByName(struct SymNode *symbol) {
-	return lookupFuncByName(DefFuncList, symbol);
-}
-int lookupDefFunc(struct SymNode *symbol) {
-	return lookupFunc(DefFuncList, symbol);
-}
-int lookupDecFuncByName(struct SymNode *symbol) {
-	return lookupFuncByName(DecFuncList, symbol);
-}
-int lookupDecFunc(struct SymNode *symbol) {
-	return lookupFunc(DecFuncList, symbol);
-}
-struct FuncList *checkDecFuncList() {
-	struct FuncList *resultHead = NULL;
-	struct FuncList *declist = DecFuncList;
-	struct FuncList *deflist = DefFuncList;
-	struct SymNode *decfuncSymbol = NULL;
-	while (declist != NULL) {
-		decfuncSymbol = declist->funcSymbol;
-		if(lookupDefFuncByName(decfuncSymbol)) {
-			//find the same name
-			if(lookupDefFunc(decfuncSymbol)) {
-				//find the same func
-			}else {
-				decfuncSymbol->errorInfo->ErrorType = 19;
-				addFunc(&resultHead, decfuncSymbol);
-			}
-		}else {
-			decfuncSymbol->errorInfo->ErrorType = 18;
-			addFunc(&resultHead, decfuncSymbol);
-		}
-		declist = declist->next;
-	}
-	return resultHead;
-}
 /*---------------------------------------------------------------
 	hash table
 */
@@ -600,51 +418,3 @@ void getHashTableInfo(void) {
 	}
 	fprintf(stdout, "\n--------------------------------------\n");
 }
-int test(void) {
-}
-/*
-int test(void) {
-	char *name = "test", *name2 = "test2";
-	struct SymNode *symNode = NULL, *result = NULL;
-	Type type;
-	
-	type = malloc(sizeof(Type));
-	type->kind = BASIC;
-	type->basic = 5;
-
-	symNode = newVar(name, type);
-	getHashTableInfo();
-	if (symNode == NULL) {
-		fprintf(stderr, "creat fails\n");
-		return 1;
-	}
-	showSymbol(symNode);
-	fprintf(stdout, "symbol name %s\n", symNode->name);
-	fprintf(stdout, "list %d\n", insert(symNode));
-	getHashTableInfo();
-
-	symNode = newVar(name2, type);
-	showSymbol(symNode);
-	getHashTableInfo();
-	if (symNode == NULL) {
-		fprintf(stderr, "creat fails\n");
-		return 1;
-	}
-	fprintf(stdout, "symbol name %s\n", symNode->name);
-	fprintf(stdout, "list %d\n", insert(symNode));
-	getHashTableInfo();
-
-	fprintf(stdout, "show all symbols\n");
-	showAllSymbol();
-	result = lookup(name);
-	if (result == NULL) {
-		fprintf(stderr, "lookup fails\n");
-		return 1;
-	}
-	else
-		fprintf(stdout, "name is %s\n", result->name);
-	cleanHashTable();
-	getHashTableInfo();
-	return 0;
-}
-*/

@@ -99,23 +99,6 @@ void freeFieldList(FieldList fieldList);
 struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo); 
 struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo); 
 struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
-struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
-struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
-
-struct FuncList *getDecFuncList(); 
-void showDefFuncList(); 
-void showDecFuncList(); 
-void addDefFunc(struct SymNode *symbol); 
-void addDecFunc(struct SymNode *symbol); 
-int lookupDefFuncByName(struct SymNode *symbol);
-int lookupDefFunc(struct SymNode *symbol);
-int lookupDecFuncByName(struct SymNode *symbol);
-int lookupDecFunc(struct SymNode *symbol);
-struct FuncList *checkDecFuncList(); 
-
-int cmpFuncSym(struct SymNode *left, struct SymNode *right); 
-int cmpFuncSymByName(struct SymNode *left, struct SymNode *right); 
-int cmpFunc(struct Func *left, struct Func *right); 
 
 int freeSymNode(struct SymNode *symNode); 
 
@@ -129,7 +112,5 @@ Type getSymType(struct SymNode *symNode);
 
 int cleanHashTable(void); 
 void getHashTableInfo(void); 
-int test(void);
-
 
 #endif

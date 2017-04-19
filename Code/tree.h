@@ -17,6 +17,7 @@ struct node {
 	Type type;
 	FieldList fieldList;
 	struct ErrorInfo *errorInfo;
+	int errorcount;
 	union value nodevalue;
 	int depth;
 	int lineno;

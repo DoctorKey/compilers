@@ -48,62 +48,79 @@ int cmpType(Type type1, Type type2) {
 	//type1->kind != type2->kind
 	return 1;
 }
-
-Type *specifierstack = NULL;
-int index = 0;
-int specifierstacksize = 0;
-int InitSpecifierStack()
-{
-	if(specifierstack == NULL) {
-		specifierstack = malloc(sizeof(Type) * STACKSIZE);
-		if (specifierstack == NULL) {
-			fprintf(stderr, "malloc fails\n");
-			return 1;
-		}
-		specifierstacksize = STACKSIZE;
-		return 0;
-	}else {
-		fprintf(stderr, "specifierstack isn't NULL, can't init\n");
+int cmpFunc(struct Func *left, struct Func *right) {
+	if(cmpType(left->Return, right->Return)) {
 		return 1;
-	}
-}
-int IncreaseSpecifierStack() {
-	int i;
-	Type *pre = specifierstack;
-	specifierstack = malloc(sizeof(Type) * (specifierstacksize + INCREASE));
-	if (specifierstack == NULL) {
-		fprintf(stderr, "malloc fails\n");
+	} 
+	if(cmpFieldList(left->argtype, right->argtype)) {
 		return 1;
-	}
-	for (i = 0; i != specifierstacksize; i++ ) {
-		specifierstack[i] = pre[i];
-	}
-	free(pre);
-	pre = NULL;
-	specifierstacksize += INCREASE;
+	} 
 	return 0;
 }
-void PushSpecifier(Type type) {
-	if (specifierstack == NULL) {
-		if(InitSpecifierStack) {
-			fprintf(stderr, "push Specifier fails\n");
-			return;
-		}
+int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {
+	if(left->type != Func || right->type != Func) {
+		return 1;
+	}	
+	if(strcmp(left->name, right->name)) {
+		return 1;
 	}
-	if (index >= specifierstacksize) {
-		if(IncreaseSpecifierStack) {
-			fprintf(stderr, "increase Specifier fails\n");
-			return;
-		}
-	}
-	specifierstack[index] = type;
-	index++;
-	return;
+	return 0;
 }
-Type GetSpecifierByIndex(int i) {
-	if (i >= index || i < 0) {
-		fprintf(stderr, "just have %d Specifier, can't get %d\n", index, i);
-		return NULL;
+int cmpFuncSym(struct SymNode *left, struct SymNode *right) {
+	if(left->type != Func || right->type != Func) {
+		return 1;
+	}	
+	if(strcmp(left->name, right->name)) {
+		return 1;
 	}
-	return specifierstack[i];
+	if(cmpFunc(left->func, right->func)) {
+		return 1;
+	}
+	return 0;
+}
+
+/*-----------------------------------------------------------------
+	Define function
+	Declare function
+------------------------------------------------------------------
+*/
+struct FuncList *DecFuncList = NULL;
+
+struct FuncList *getDecFuncList() {
+	return DecFuncList;
+}
+void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
+	struct FuncList *new = NULL;
+	new = malloc(sizeof(struct FuncList));
+	if (!new) {
+		fprintf(stderr, "malloc fails\n");
+		exit(0);
+	}
+	new->funcSymbol = symbol;
+	new->next = NULL;
+	if ((*funcList) == NULL) {
+		(*funcList) = new;
+	}else {
+		(*funcList)->next = new;
+	}
+}
+void addDecFunc(struct SymNode *symbol) {
+	addFunc(&DecFuncList, symbol);
+}
+void showDecFuncList() {
+	struct FuncList *temp = DecFuncList;
+	fprintf(stdout, "----------------DecFuncList-------------------\n");
+	while (temp != NULL) {
+		showSymbol(temp->funcSymbol);
+		temp = temp->next;
+	}
+	fprintf(stdout, "----------------------------------------------\n");
+}
+void freeFuncListNode(struct FuncList *funcList) {
+	if(funcList == NULL)
+		return;
+	freeSymNode(funcList->funcSymbol);
+	funcList->funcSymbol = NULL;
+	free(funcList);
+	funcList = NULL;
 }

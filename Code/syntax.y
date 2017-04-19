@@ -9,8 +9,6 @@
 	/* indicate grammar analyze is error or not*/
 	int isError = 0;
 	extern int lexical_isError;
-	extern struct ErrorInfoStack *IdErrorInfoStackHead;
-	extern struct ErrorInfoStack *NumErrorInfoStackHead;
 %}
 
 /* declared types */
@@ -67,14 +65,6 @@ Program : ExtDefList
 			if(isError == 0 && lexical_isError == 0)
 				showTree($$);
 			#endif
-			if(debug2){
-				showAllSymbol();
-				getHashTableInfo();
-				ShowErrorInfoStack(IdErrorInfoStackHead);
-				ShowErrorInfoStack(NumErrorInfoStackHead);
-			}
-			cleanHashTable();
-			//getHashTableInfo();
 			clearTree($$); 
 			$$ = NULL;
 		}

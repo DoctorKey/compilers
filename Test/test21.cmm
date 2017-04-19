@@ -1,0 +1,14 @@
+struct A 
+{
+	int a;
+	struct B
+	{
+		int b;
+		float c;
+		int d[5];
+	} f;
+} func (struct A e, int g, float h, int i[3])
+{
+	struct A aa;
+	return e;
+}

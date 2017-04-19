@@ -17,7 +17,6 @@ extern struct ErrorInfoStack *NumErrorInfoStackHead;
 struct SymNode *Funcsymbol = NULL;
 int structdefnum = 0;
 int argsnum = 0;
-int varlistnum = 0;
 int specifierLock = 0;
 
 /*--------------------------------------------------------------------------
@@ -27,11 +26,9 @@ int specifierLock = 0;
 --------------------------------------------------------------------------
 */
 void ProgramAnalyze(struct node *parent, int num) {
-	struct FuncList *errorlist = NULL;
 	struct FuncList *declist = NULL;
 	struct SymNode *symNode = NULL;
 	struct SymNode *tarNode = NULL;
-	int errortype;
 	declist = getDecFuncList(); 
 	while(declist != NULL) {
 		symNode = declist->funcSymbol;	
@@ -43,14 +40,14 @@ void ProgramAnalyze(struct node *parent, int num) {
 		}
 		declist = declist->next;
 	}
-	/*
-	errorlist = checkDecFuncList();
-	while(errorlist != NULL) {
-		errortype = errorlist->funcSymbol->errorInfo->ErrorType;
-		SemanticError(errortype, errorlist->funcSymbol->errorInfo);
-		errorlist = errorlist->next;
+	if(debug2){
+		showAllSymbol();
+		getHashTableInfo();
+		ShowErrorInfoStack(IdErrorInfoStackHead);
+		ShowErrorInfoStack(NumErrorInfoStackHead);
 	}
-	*/
+	cleanHashTable();
+	//getHashTableInfo();
 }
 void ExtDefListAnalyze(struct node *parent, int num) {
 }
@@ -84,16 +81,8 @@ void ExtDefAnalyze(struct node *parent, int num) {
 		switch(rightchild->nodetype) {
 		//Specifier FunDec SEMI
 		case SEMI:
-			Funcsymbol->func->isDeclare = 1;			
 			symNode = lookup(Funcsymbol->name);
 			if(symNode) {
-			/*
- 			if(lookupDecFuncByName(Funcsymbol)) {
-				if(!lookupDecFunc(Funcsymbol)) {
-				//name is the same, type is diff
-					SemanticError(19, Funcsymbol->errorInfo);
-				}
-				*/
 				if(symNode->func->isDefine || symNode->func->isDeclare) {
 					//have been defined or declared	
 					if(cmpFuncSym(symNode, Funcsymbol)) {
@@ -102,44 +91,41 @@ void ExtDefAnalyze(struct node *parent, int num) {
 					}else {
 						symNode->func->isDeclare = 1;			
 					}
+					freeSymNode(Funcsymbol);
 				}else {
-					fprintf(stderr, "init func error!\n");	
+					//first declare
+					symNode->func->isDeclare = 1;			
+					Funcsymbol->func->isDeclare = 1;			
+					addDecFunc(Funcsymbol);
 				}
 			}else {
-				insert(Funcsymbol);
-				addDecFunc(Funcsymbol);
+				fprintf(stderr, "not insert the function!\n");
 			}
 			Funcsymbol = NULL;
 			break;
 		//Specifier FunDec CompSt
 		case CompSt:
-			Funcsymbol->func->isDefine = 1;			
 			symNode = lookup(Funcsymbol->name);
 			if(symNode) {
 				if(symNode->func->isDefine) {
 					//have been defined
 					SemanticError(4, Funcsymbol->errorInfo);
+					freeSymNode(Funcsymbol);
 				}else if (symNode->func->isDeclare) {
 					if(cmpFuncSym(symNode, Funcsymbol)) {
 						//diff
 						SemanticError(19, symNode->errorInfo);
-					}else {
+					}else { 
 						symNode->func->isDefine = 1;			
 					}
+					freeSymNode(Funcsymbol);
 				}else {
-					fprintf(stderr, "init func error!\n");	
+					//first define
+					symNode->func->isDefine = 1;			
 				}
 			}else {
-				insert(Funcsymbol);
+				fprintf(stderr, "not insert the function!\n");
 			}
-			/*
- 			if(lookupDefFuncByName(Funcsymbol)) {
-				SemanticError(4, Funcsymbol->errorInfo);
-			}else {
-				insert(Funcsymbol);
-				addDefFunc(Funcsymbol);
-			}
-			*/
 			Funcsymbol = NULL;
 			break;
 		default:
@@ -151,7 +137,6 @@ void ExtDefAnalyze(struct node *parent, int num) {
 	specifierLock = 0;
 ExtDefDebug:
 	if(debug2) {
-		showDefFuncList();
 		showDecFuncList();
 	}
 }
@@ -195,6 +180,7 @@ void SpecifierAnalyze(struct node *parent, int num) {
 	}
 	switch (child->nodetype) {
 	case TYPE:
+		parent->errorcount = 0;
 		parent->type = newType();
 		parent->type->kind = BASIC;
 		if (!strcmp(child->nodevalue.str, "int"))
@@ -205,6 +191,7 @@ void SpecifierAnalyze(struct node *parent, int num) {
 			fprintf(stderr, "error type\n");
 		break;
 	case StructSpecifier:
+		parent->errorcount = child->errorcount;
 		parent->type = child->type;
 		break;
 	default:
@@ -241,6 +228,7 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 	}else {
 		parent->nodevalue.str = tag->nodevalue.str;
 	}
+	parent->errorcount = tag->errorcount;
 	// STRUCT OptTag LC DefList RC
 	if (num == 5) {
 		parent->type = newType();
@@ -252,6 +240,7 @@ void StructSpecifierAnalyze(struct node *parent, int num) {
 		}else {
 			parent->type->structure = deflist->fieldList;	
 		}
+		parent->errorcount += deflist->errorcount;
 		//only when OptTag has name,add it to symTable 
 		if (parent->nodevalue.str != NULL) {
 			symNode = newNewType(parent->nodevalue.str, parent->type, tag->errorInfo);
@@ -291,6 +280,7 @@ void OptTagAnalyze(struct node *parent, int num) {
 	struct SymNode *symNode = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
+	parent->errorcount = 1;
 	if (child == NULL) {
 		fprintf(stderr, "OptTag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -324,6 +314,7 @@ void TagAnalyze(struct node *parent, int num) {
 	}
 	//TODO: just -1 may error
 	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - 1);
+	parent->errorcount = 1;
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode == NULL) {
@@ -360,6 +351,7 @@ void VarDecAnalyze(struct node *parent, int num) {
 	// ID
 	if (num == 1) {
 		parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
+		parent->errorcount = 1;
 		id = parent->children[0];	// ID
 		if (id == NULL) {
 			fprintf(stderr, "VarDec's child ID is NULL\n");
@@ -385,6 +377,7 @@ void VarDecAnalyze(struct node *parent, int num) {
 			parent->type->array.elem = vardec->type;
 		}
 		parent->errorInfo = vardec->errorInfo;
+		parent->errorcount = vardec->errorcount + 1;
 
 		// Error type B check it is INT
 		index = parent->children[2];
@@ -409,9 +402,9 @@ void FunDecAnalyze(struct node *parent, int num) {
 	struct node *varlist = NULL;
 	struct SymNode *symNode = NULL;
 	struct ErrorInfo *idErrorInfo = NULL;
+	int errorcount;
 	int totalErrorInfo = GetTotalErrorInfo();
 
-	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - varlistnum);
 	id = parent->children[0];
 	if (id == NULL) {
 		fprintf(stderr, "FunDec's child ID is NULL\n");
@@ -422,6 +415,7 @@ void FunDecAnalyze(struct node *parent, int num) {
 
 	if (num == 3) {
 		parent->fieldList = NULL;
+		parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 	}else {
 		varlist = parent->children[2];
 		if (varlist == NULL) {
@@ -429,23 +423,16 @@ void FunDecAnalyze(struct node *parent, int num) {
 			parent->fieldList = NULL;
 		}else {
 			parent->fieldList = varlist->fieldList;
+			errorcount = varlist->errorcount;
+			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - errorcount);
 		}
 	}
 
-	varlistnum = 0;
-	/*
+	Funcsymbol = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
 	symNode = lookup(parent->nodevalue.str);
-	if(symNode) {
-		//may def may dec
-//		SemanticError(4, idErrorInfo);
-		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
-	}else {
-		symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
-		insert(symNode);
+	if(symNode == NULL) {
+		insert(Funcsymbol);
 	}
-	*/
-	symNode = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
- 	Funcsymbol = symNode;
 
 FunDecDebug:
 	if(debug2) {
@@ -460,12 +447,12 @@ void VarListAnalyze(struct node *parent, int num) {
 	struct node *varlist = NULL;
 	FieldList fieldList = NULL;
 
-	varlistnum++;
 	paramdec = parent->children[0];
 	if (paramdec == NULL) {
 		fprintf(stderr, "VarList's child ParamDec is NULL\n");
 		return;
 	}
+	parent->errorcount = paramdec->errorcount;
 
 	if (num == 1) {
 		fieldList = NULL;
@@ -476,6 +463,7 @@ void VarListAnalyze(struct node *parent, int num) {
 			return;
 		}
 		fieldList = varlist->fieldList;
+		parent->errorcount += varlist->errorcount;
 	}	
 	parent->fieldList = newFieldList(paramdec->nodevalue.str, paramdec->type, fieldList);
 	if(debug2) {
@@ -503,6 +491,7 @@ void ParamDecAnalyze(struct node *parent, int num) {
 		goto ParamDecDebug;
 	}
 	parent->errorInfo = varDec->errorInfo;
+	parent->errorcount = specifier->errorcount + varDec->errorcount;
 
 	parent->type = varDec->type;
 	parent->nodevalue.str = varDec->nodevalue.str;
@@ -573,12 +562,13 @@ void DefListAnalyze(struct node *parent, int num) {
 	struct node *deflist = NULL;	
 	FieldList fieldList = NULL;
 
-	def = parent->children[0];	// Def
+	def = parent->children[0];	
 	if (def == NULL) {
 		fprintf(stderr, "DefList's child Def is NULL\n");
 		goto DefListDebug;
 	}
 	parent->fieldList = def->fieldList;
+	parent->errorcount = def->errorcount;
 	
 	fieldList = parent->fieldList;
 	if (fieldList == NULL) {
@@ -595,6 +585,7 @@ void DefListAnalyze(struct node *parent, int num) {
 	}else {
 		// just link Def->tail = DefList
 		fieldList->tail = deflist->fieldList;
+		parent->errorcount += deflist->errorcount;
 	}
 DefListDebug:
 	if (debug2) {
@@ -611,8 +602,6 @@ void DefAnalyze(struct node *parent, int num) {
 	FieldList fieldList = NULL;
 	struct SymNode *symNode = NULL;
 	
-//	freeErrorInfoStack(IdErrorInfoStackHead);
-//	IdErrorInfoStackHead = NULL;
 	Gspecifier = NULL;
 	specifier = parent->children[0];	// Specifier
 	if (specifier == NULL) {
@@ -627,6 +616,7 @@ void DefAnalyze(struct node *parent, int num) {
 		goto DefDebug;
 	}
 	parent->fieldList = declist->fieldList;
+	parent->errorcount = specifier->errorcount + declist->errorcount;
 	specifierLock = 0;
 DefDebug:
 	if (debug2) {
@@ -648,6 +638,7 @@ void DecListAnalyze(struct node *parent, int num) {
 		fprintf(stderr, "DecList's child Dec is NULL\n");
 		goto DecListDebug;
 	}
+	parent->errorcount = dec->errorcount;
 	// Dec
 	if (num == 1) {
 		fieldList = NULL;
@@ -660,6 +651,7 @@ void DecListAnalyze(struct node *parent, int num) {
 			goto DecListDebug;
 		}
 		fieldList = declist->fieldList;
+		parent->errorcount += declist->errorcount;
 	}
 	parent->fieldList = newFieldList(dec->nodevalue.str, dec->type, fieldList);	
 DecListDebug:
@@ -682,6 +674,7 @@ void DecAnalyze(struct node *parent, int num) {
 		goto DecDebug;
 	}
 	parent->errorInfo = vardec->errorInfo;
+	parent->errorcount = vardec->errorcount;
 
 	parent->nodevalue.str = vardec->nodevalue.str;
 	parent->type = vardec->type;

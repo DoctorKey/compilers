@@ -3,11 +3,15 @@
 
 #include "symtable.h"
 
-#define STACKSIZE 100
-#define INCREASE 20
-
 int cmpType(Type type1, Type type2); 
 int cmpFieldList(FieldList fieldList1, FieldList fieldList2); 
-void PushSpecifier(Type type); 
-Type GetSpecifierByIndex(int i); 
+
+struct FuncList *getDecFuncList(); 
+void showDecFuncList(); 
+void addDecFunc(struct SymNode *symbol); 
+
+int cmpFuncSym(struct SymNode *left, struct SymNode *right); 
+int cmpFuncSymByName(struct SymNode *left, struct SymNode *right); 
+int cmpFunc(struct Func *left, struct Func *right); 
+
 #endif
