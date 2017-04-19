@@ -28,13 +28,29 @@ int specifierLock = 0;
 */
 void ProgramAnalyze(struct node *parent, int num) {
 	struct FuncList *errorlist = NULL;
+	struct FuncList *declist = NULL;
+	struct SymNode *symNode = NULL;
+	struct SymNode *tarNode = NULL;
 	int errortype;
+	declist = getDecFuncList(); 
+	while(declist != NULL) {
+		symNode = declist->funcSymbol;	
+		tarNode = lookup(symNode->name);
+		if(tarNode == NULL || tarNode->func->isDefine == 0) {
+			SemanticError(18, symNode->errorInfo);
+		}else {
+			tarNode->func->isDeclare = 1;
+		}
+		declist = declist->next;
+	}
+	/*
 	errorlist = checkDecFuncList();
 	while(errorlist != NULL) {
 		errortype = errorlist->funcSymbol->errorInfo->ErrorType;
 		SemanticError(errortype, errorlist->funcSymbol->errorInfo);
 		errorlist = errorlist->next;
 	}
+	*/
 }
 void ExtDefListAnalyze(struct node *parent, int num) {
 }
@@ -69,10 +85,25 @@ void ExtDefAnalyze(struct node *parent, int num) {
 		//Specifier FunDec SEMI
 		case SEMI:
 			Funcsymbol->func->isDeclare = 1;			
+			symNode = lookup(Funcsymbol->name);
+			if(symNode) {
+			/*
  			if(lookupDecFuncByName(Funcsymbol)) {
 				if(!lookupDecFunc(Funcsymbol)) {
 				//name is the same, type is diff
 					SemanticError(19, Funcsymbol->errorInfo);
+				}
+				*/
+				if(symNode->func->isDefine || symNode->func->isDeclare) {
+					//have been defined or declared	
+					if(cmpFuncSym(symNode, Funcsymbol)) {
+						//diff
+						SemanticError(19, Funcsymbol->errorInfo);
+					}else {
+						symNode->func->isDeclare = 1;			
+					}
+				}else {
+					fprintf(stderr, "init func error!\n");	
 				}
 			}else {
 				insert(Funcsymbol);
@@ -83,12 +114,32 @@ void ExtDefAnalyze(struct node *parent, int num) {
 		//Specifier FunDec CompSt
 		case CompSt:
 			Funcsymbol->func->isDefine = 1;			
+			symNode = lookup(Funcsymbol->name);
+			if(symNode) {
+				if(symNode->func->isDefine) {
+					//have been defined
+					SemanticError(4, Funcsymbol->errorInfo);
+				}else if (symNode->func->isDeclare) {
+					if(cmpFuncSym(symNode, Funcsymbol)) {
+						//diff
+						SemanticError(19, symNode->errorInfo);
+					}else {
+						symNode->func->isDefine = 1;			
+					}
+				}else {
+					fprintf(stderr, "init func error!\n");	
+				}
+			}else {
+				insert(Funcsymbol);
+			}
+			/*
  			if(lookupDefFuncByName(Funcsymbol)) {
 				SemanticError(4, Funcsymbol->errorInfo);
 			}else {
 				insert(Funcsymbol);
 				addDefFunc(Funcsymbol);
 			}
+			*/
 			Funcsymbol = NULL;
 			break;
 		default:

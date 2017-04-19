@@ -102,6 +102,7 @@ struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct Error
 struct SymNode *newDefFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
 struct SymNode *newDecFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
 
+struct FuncList *getDecFuncList(); 
 void showDefFuncList(); 
 void showDecFuncList(); 
 void addDefFunc(struct SymNode *symbol); 

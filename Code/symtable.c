@@ -311,6 +311,9 @@ Type getSymType(struct SymNode *symNode) {
 */
 struct FuncList *DecFuncList = NULL;
 struct FuncList *DefFuncList = NULL;
+struct FuncList *getDecFuncList() {
+	return DecFuncList;
+}
 void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
 	struct FuncList *new = NULL;
 	new = malloc(sizeof(struct FuncList));
