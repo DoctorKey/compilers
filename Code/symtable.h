@@ -19,6 +19,7 @@
 
 typedef struct Type_* Type;
 typedef struct FieldList_* FieldList;
+typedef struct SymNode* Symbol;
 
 struct Type_ {
 	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;

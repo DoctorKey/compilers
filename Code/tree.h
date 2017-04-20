@@ -6,6 +6,7 @@
 
 #define CHILD_NUM 7
 
+typedef struct node* TreeNode;
 union value {
 	int INT;
 	float FLOAT;

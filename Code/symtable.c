@@ -220,10 +220,14 @@ int freeSymNode(struct SymNode *symNode) {
 		fprintf(stderr, "there is a symNode next to this, can't free this.\n");
 		return 1;
 	}
-	free(symNode->name);
-	symNode->name = NULL;
-	FreeErrorInfo(symNode->errorInfo);
-	symNode->errorInfo = NULL;
+	if (symNode->name) {
+		free(symNode->name);
+		symNode->name = NULL;
+	}
+	if (symNode->errorInfo) {
+		FreeErrorInfo(symNode->errorInfo);
+		symNode->errorInfo = NULL;
+	}
 	switch (symNode->type) {
 	case Var:
 		freeVar(symNode->var);

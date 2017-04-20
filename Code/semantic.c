@@ -14,7 +14,7 @@ Type Gspecifier = NULL;
 Type GFuncReturn = NULL;
 extern struct ErrorInfoStack *IdErrorInfoStackHead;
 extern struct ErrorInfoStack *NumErrorInfoStackHead;
-struct SymNode *Funcsymbol = NULL;
+Symbol Funcsymbol = NULL;
 int structdefnum = 0;
 int argsnum = 0;
 int specifierLock = 0;
@@ -25,10 +25,10 @@ int specifierLock = 0;
 
 --------------------------------------------------------------------------
 */
-void ProgramAnalyze(struct node *parent, int num) {
+void ProgramAnalyze(TreeNode parent, int num) {
 	struct FuncList *declist = NULL;
-	struct SymNode *symNode = NULL;
-	struct SymNode *tarNode = NULL;
+	Symbol symNode = NULL;
+	Symbol tarNode = NULL;
 	declist = getDecFuncList(); 
 	while(declist != NULL) {
 		symNode = declist->funcSymbol;	
@@ -49,14 +49,14 @@ void ProgramAnalyze(struct node *parent, int num) {
 	cleanHashTable();
 	//getHashTableInfo();
 }
-void ExtDefListAnalyze(struct node *parent, int num) {
+void ExtDefListAnalyze(TreeNode parent, int num) {
 }
 // update Gspecifier = NULL;GFuncReturn = NULL;
-void ExtDefAnalyze(struct node *parent, int num) {
-	struct node *specifier = NULL;
-	struct node *midchild = NULL;
-	struct node *rightchild = NULL;
-	struct SymNode *symNode = NULL;
+void ExtDefAnalyze(TreeNode parent, int num) {
+	TreeNode specifier = NULL;
+	TreeNode midchild = NULL;
+	TreeNode rightchild = NULL;
+	Symbol symNode = NULL;
 	FieldList fieldList = NULL;
 
 	specifier = parent->children[0];
@@ -141,9 +141,9 @@ ExtDefDebug:
 	}
 }
 // update add symbol
-void ExtDecListAnalyze(struct node *parent, int num) {
-	struct node *vardec = NULL;
-	struct SymNode *symNode = NULL;
+void ExtDecListAnalyze(TreeNode parent, int num) {
+	TreeNode vardec = NULL;
+	Symbol symNode = NULL;
 
 	vardec = parent->children[0];
 	if (vardec == NULL) {
@@ -169,9 +169,9 @@ ExtDecListDebug:
 	Specifiers
 */
 // update parent->type , Gspecifier
-void SpecifierAnalyze(struct node *parent, int num) {
+void SpecifierAnalyze(TreeNode parent, int num) {
 	//TYPE; StructSpecifier
-	struct node *child = parent->children[0];
+	TreeNode child = parent->children[0];
 	if (child == NULL) {
 		fprintf(stderr, "Specifier have no child!\n");
 		parent->type = newType();
@@ -219,10 +219,10 @@ SpecifierDebug:
 	}
 }
 // new struct type; add to symTable; update parent->type, parent->nodevalue.str, structdefnum--
-void StructSpecifierAnalyze(struct node *parent, int num) {
-	struct node *tag = NULL;
-	struct node *deflist = NULL;
-	struct SymNode *symNode = NULL;
+void StructSpecifierAnalyze(TreeNode parent, int num) {
+	TreeNode tag = NULL;
+	TreeNode deflist = NULL;
+	Symbol symNode = NULL;
 	//finish define
 	structdefnum--;
 	tag = parent->children[1];
@@ -278,10 +278,10 @@ StructSpecifierDebug:
 	}
 }
 // update parent->nodevalue.str, parent->errorInfo
-void OptTagAnalyze(struct node *parent, int num) {
+void OptTagAnalyze(TreeNode parent, int num) {
 	// only when OptTag -> ID , call this function
-	struct node *child = parent->children[0];
-	struct SymNode *symNode = NULL;
+	TreeNode child = parent->children[0];
+	Symbol symNode = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 	parent->errorcount = 1;
@@ -302,10 +302,10 @@ OptTagDebug:
 	}
 }
 //update parent->nodevalue.str, parent->type, parent->errorInfo
-void TagAnalyze(struct node *parent, int num) {
+void TagAnalyze(TreeNode parent, int num) {
 	// ID
-	struct node *child = parent->children[0];
-	struct SymNode *symNode = NULL;
+	TreeNode child = parent->children[0];
+	Symbol symNode = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	// not define
 //	structdefnum--;
@@ -347,10 +347,10 @@ TagDebug:
 	Declarators
 */
 // update parent->type, parent->nodevalue.str
-void VarDecAnalyze(struct node *parent, int num) {
-	struct node *id = NULL;
-	struct node *vardec = NULL;
-	struct node *index = NULL;
+void VarDecAnalyze(TreeNode parent, int num) {
+	TreeNode id = NULL;
+	TreeNode vardec = NULL;
+	TreeNode index = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	// ID
 	if (num == 1) {
@@ -401,10 +401,10 @@ VarDecDebug:
 	}
 }
 // update GFuncReturn, parent->errorInfo
-void FunDecAnalyze(struct node *parent, int num) {
-	struct node *id = NULL;
-	struct node *varlist = NULL;
-	struct SymNode *symNode = NULL;
+void FunDecAnalyze(TreeNode parent, int num) {
+	TreeNode id = NULL;
+	TreeNode varlist = NULL;
+	Symbol symNode = NULL;
 	struct ErrorInfo *idErrorInfo = NULL;
 	int errorcount;
 	int totalErrorInfo = GetTotalErrorInfo();
@@ -446,15 +446,15 @@ FunDecDebug:
 	}
 }
 // update parent->fieldList
-void VarListAnalyze(struct node *parent, int num) {
-	struct node *paramdec = NULL;
-	struct node *varlist = NULL;
+void VarListAnalyze(TreeNode parent, int num) {
+	TreeNode paramdec = NULL;
+	TreeNode varlist = NULL;
 	FieldList fieldList = NULL;
 
 	paramdec = parent->children[0];
 	if (paramdec == NULL) {
 		fprintf(stderr, "VarList's child ParamDec is NULL\n");
-		return;
+		goto VarListDebug;
 	}
 	parent->errorcount = paramdec->errorcount;
 
@@ -464,12 +464,13 @@ void VarListAnalyze(struct node *parent, int num) {
 		varlist = parent->children[2];
 		if (varlist == NULL) {
 			fprintf(stderr, "VarList's child VarList is NULL\n");
-			return;
+			goto VarListDebug;
 		}
 		fieldList = varlist->fieldList;
 		parent->errorcount += varlist->errorcount;
 	}	
 	parent->fieldList = newFieldList(paramdec->nodevalue.str, paramdec->type, fieldList);
+VarListDebug:
 	if(debug2) {
 		fprintf(stdout, "VarList->fieldList : \n");
 		showFieldList(parent->fieldList);
@@ -477,12 +478,12 @@ void VarListAnalyze(struct node *parent, int num) {
 	}
 }
 //update parent->type, parent->nodevalue.str, add to symbol table
-void ParamDecAnalyze(struct node *parent, int num) {
-	struct node *specifier = NULL;	
-	struct node *varDec = NULL;	
+void ParamDecAnalyze(TreeNode parent, int num) {
+	TreeNode specifier = NULL;	
+	TreeNode varDec = NULL;	
 	Type type, lastType;
 	FieldList fieldList = NULL;
-	struct SymNode *symNode = NULL;
+	Symbol symNode = NULL;
 
 	specifier = parent->children[0];	// Specifier
 	varDec = parent->children[1];	// VarDec
@@ -500,12 +501,14 @@ void ParamDecAnalyze(struct node *parent, int num) {
 	parent->type = varDec->type;
 	parent->nodevalue.str = varDec->nodevalue.str;
 
+	
 	if(lookup(parent->nodevalue.str)) {
 		SemanticError(3, parent->errorInfo);
 	}else {
 		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
 		insert(symNode);
 	}
+	
 ParamDecDebug:
 	if (debug2) {
 		fprintf(stdout, "ParamDec->nodevalue.str = %s\n", parent->nodevalue.str);
@@ -520,13 +523,13 @@ ParamDecDebug:
 /*
 	Statements
 */
-void CompStAnalyze(struct node *parent, int num) {
+void CompStAnalyze(TreeNode parent, int num) {
 }
-void StmtListAnalyze(struct node *parent, int num) {
+void StmtListAnalyze(TreeNode parent, int num) {
 }
-void StmtAnalyze(struct node *parent, int num) {
-	struct node *exp = NULL;
-	struct node *stmtType = NULL;
+void StmtAnalyze(TreeNode parent, int num) {
+	TreeNode exp = NULL;
+	TreeNode stmtType = NULL;
 	stmtType = parent->children[0];
 	if (stmtType == NULL) {
 		fprintf(stderr, "Stmt's child is NULL\n");
@@ -569,10 +572,10 @@ void StmtAnalyze(struct node *parent, int num) {
 	Local Definitions
 */
 // update parent->fieldList 
-void DefListAnalyze(struct node *parent, int num) {
+void DefListAnalyze(TreeNode parent, int num) {
 	// Def DefList
-	struct node *def = NULL;	
-	struct node *deflist = NULL;	
+	TreeNode def = NULL;	
+	TreeNode deflist = NULL;	
 	FieldList fieldList = NULL;
 
 	def = parent->children[0];	
@@ -608,12 +611,12 @@ DefListDebug:
 	}
 }
 // update parent->type, parent->fieldList, Gspecifier = NULL
-void DefAnalyze(struct node *parent, int num) {
+void DefAnalyze(TreeNode parent, int num) {
 	// Specifier DefList SEMI
-	struct node *specifier = NULL;	
-	struct node *declist = NULL;	
+	TreeNode specifier = NULL;	
+	TreeNode declist = NULL;	
 	FieldList fieldList = NULL;
-	struct SymNode *symNode = NULL;
+	Symbol symNode = NULL;
 	
 	Gspecifier = NULL;
 	specifier = parent->children[0];	// Specifier
@@ -641,9 +644,9 @@ DefDebug:
 	}
 }
 //update parent->fieldList 
-void DecListAnalyze(struct node *parent, int num) {
-	struct node *dec = NULL;
-	struct node *declist = NULL;
+void DecListAnalyze(TreeNode parent, int num) {
+	TreeNode dec = NULL;
+	TreeNode declist = NULL;
 	FieldList fieldList = NULL;
 
 	dec = parent->children[0];	//Dec
@@ -675,10 +678,10 @@ DecListDebug:
 	}
 }
 // update parent->nodevalue.str, parent->type, add symbol
-void DecAnalyze(struct node *parent, int num) {
-	struct node *vardec = NULL;
-	struct node *exp = NULL;
-	struct SymNode *symNode = NULL;
+void DecAnalyze(TreeNode parent, int num) {
+	TreeNode vardec = NULL;
+	TreeNode exp = NULL;
+	Symbol symNode = NULL;
 
 	// VarDec
 	vardec = parent->children[0];	//VarDec
@@ -732,9 +735,9 @@ DecDebug:
 	Expressions
 */
 // update parent->nodevalue.str, parent->type
-void ExpAnalyze(struct node *parent, int num) {
-	struct node *childleft, *childright, *childmid;
-	struct SymNode *symNode = NULL;
+void ExpAnalyze(TreeNode parent, int num) {
+	TreeNode childleft, childright, childmid;
+	Symbol symNode = NULL;
 	struct ErrorInfo *idErrorInfo = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	childleft = parent->children[0];
@@ -902,9 +905,9 @@ ExpDebug:
 	}
 }
 // update parent->fieldList 
-void ArgsAnalyze(struct node *parent, int num) {
-	struct node *exp = NULL;
-	struct node *args = NULL;
+void ArgsAnalyze(TreeNode parent, int num) {
+	TreeNode exp = NULL;
+	TreeNode args = NULL;
 	FieldList fieldList = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 
@@ -939,7 +942,7 @@ ArgsDebug:
 	}
 }
 
-void semanticAnalyze(struct node *parent, int num) {
+void semanticAnalyze(TreeNode parent, int num) {
 	switch (parent->nodetype) {
 	case Program:		ProgramAnalyze(parent, num);		break;
 	case ExtDefList:	ExtDefListAnalyze(parent, num);		break;
