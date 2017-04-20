@@ -126,8 +126,9 @@ struct ErrorInfo *initError(int type) {
 	sprintf(temp, "%.*s\"", curbuffer->lBuffer - end , errbuftemp + end);
 	strcat(errbuf, temp);
 	errorInfo = malloc(sizeof(struct ErrorInfo));
+	errorInfo->ErrorType = type;
 	errorInfo->ErrorLine = getErrorLine();	
-	errorInfo->ErrorLineStr = malloc(sizeof(char) * strlen(errbuf));	
+	errorInfo->ErrorLineStr = malloc(sizeof(char) * (strlen(errbuf)+1));	
 	strcpy(errorInfo->ErrorLineStr, errbuf);
 	if (debug2) {
 		fprintf(stderr, "line %d: %s\n", errorInfo->ErrorLine, errorInfo->ErrorLineStr);
@@ -137,6 +138,7 @@ struct ErrorInfo *initError(int type) {
 
 	return errorInfo;
 }
+void deleteErrorInfoStack(int type, int num); 
 void FreeErrorInfo(struct ErrorInfo *errorInfo) {
 	if (errorInfo == NULL)
 		return;
@@ -144,6 +146,7 @@ void FreeErrorInfo(struct ErrorInfo *errorInfo) {
 		free(errorInfo->ErrorLineStr);
 		errorInfo->ErrorLineStr = NULL;
 	}
+	deleteErrorInfoStack(errorInfo->ErrorType, errorInfo->ErrorLine);
 	free(errorInfo);
 	errorInfo = NULL;
 }
@@ -151,7 +154,7 @@ void ShowErrorInfo(struct ErrorInfo *errorInfo) {
 	if (errorInfo == NULL) {
 		fprintf(stderr, "errorInfo is NULL\n");
 	}
-	fprintf(stderr, "%s\n", errorInfo->ErrorLineStr);
+	fprintf(stderr, "Line %d: %s\n", errorInfo->ErrorLine, errorInfo->ErrorLineStr);
 }
 
 struct ErrorInfoStack *IdErrorInfoStackHead = NULL;
@@ -181,6 +184,23 @@ int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {
 		ShowErrorInfo(temp->errorInfo);
 	}
 }
+void deleteErrorInfoStack(int type, int num) {
+	struct ErrorInfoStack *temp = NULL;
+	if (type == INT || type == FLOAT) {
+		temp = NumErrorInfoStackHead;
+	}else if(type == ID) {
+		temp = IdErrorInfoStackHead;
+	}
+	while(temp != NULL) {
+		if(temp->errorInfo) {
+			if(temp->errorInfo->ErrorLine == num) {
+				temp->errorInfo = NULL;
+				break;
+			}
+		}
+		temp = temp->last;
+	}
+}
 //only free Stack. not free errorInfo
 void freeErrorInfoStack(struct ErrorInfoStack *head) {
 	if(head->last == NULL) {
@@ -207,7 +227,10 @@ void ShowErrorInfoStack(struct ErrorInfoStack *head) {
 	fprintf(stdout, "-----------ErrorInfoStack----------------\n");
 	while (head != NULL) {
 		fprintf(stderr, "num %d: ", head->num);
-		ShowErrorInfo(head->errorInfo);
+		if(head->errorInfo)
+			ShowErrorInfo(head->errorInfo);
+		else 
+			fprintf(stderr, "\n");
 		head = head->last;
 	}
 	fprintf(stdout, "-----------------------------------------\n");
