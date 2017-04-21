@@ -42,6 +42,8 @@ enum {Var, Func, NewType};
 
 struct Var {
 	Type type;
+	int isDefine;
+	int isDeclare;
 	union {
 		int intValue;
 		float floatValue;
@@ -66,6 +68,7 @@ struct SymNode {
 	struct ErrorInfo *errorInfo;
 	struct SymNode *next;
 };
+
 struct FuncList {
 	struct SymNode *funcSymbol;
 	struct FuncList *next;
@@ -107,6 +110,7 @@ void showSymbol(struct SymNode *symNode);
 void showAllSymbol(void);
 
 int insert(struct SymNode *symNode); 
+int removeSymbol(char *name); 
 struct SymNode *lookup(char *name);
 Type lookupFieldListElem(FieldList fieldList, char *name);
 Type getSymType(struct SymNode *symNode);

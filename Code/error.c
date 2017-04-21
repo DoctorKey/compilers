@@ -1,4 +1,5 @@
 #include "error.h"
+#include "name.h"
 #include <string.h>
 
 void printfErrorRow(char *errmsg, int start, int end); 
@@ -154,7 +155,7 @@ void ShowErrorInfo(struct ErrorInfo *errorInfo) {
 	if (errorInfo == NULL) {
 		fprintf(stderr, "errorInfo is NULL\n");
 	}
-	fprintf(stderr, "Line %d: %s\n", errorInfo->ErrorLine, errorInfo->ErrorLineStr);
+	fprintf(stderr, "%s\n", errorInfo->ErrorLineStr);
 }
 
 struct ErrorInfoStack *IdErrorInfoStackHead = NULL;
@@ -166,7 +167,6 @@ int GetTotalErrorInfo() {
 }
 int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {
 	struct ErrorInfoStack *temp = NULL;
-	struct ErrorInfoStack *head = NULL;
 	totalErrorInfo++;
 	temp = malloc(sizeof(struct ErrorInfoStack));
 	temp->errorInfo = errorInfo;
@@ -179,8 +179,9 @@ int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {
 		IdErrorInfoStackHead = temp;
 	}
 	if(debug2) {
-		fprintf(stderr, "push ErrorInfo into %s\n", type == ID? "ID":"Num");
+		fprintf(stderr, "push ErrorInfo into %s\n", getName(type));
 		fprintf(stderr, "num %d: ", temp->num);
+		fprintf(stderr, "Line %d: ", temp->errorInfo->ErrorLine);
 		ShowErrorInfo(temp->errorInfo);
 	}
 }
@@ -203,6 +204,9 @@ void deleteErrorInfoStack(int type, int num) {
 }
 //only free Stack. not free errorInfo
 void freeErrorInfoStack(struct ErrorInfoStack *head) {
+	if(head == NULL) {
+		return;
+	}
 	if(head->last == NULL) {
 		free(head);
 		head = NULL;	
@@ -227,8 +231,10 @@ void ShowErrorInfoStack(struct ErrorInfoStack *head) {
 	fprintf(stdout, "-----------ErrorInfoStack----------------\n");
 	while (head != NULL) {
 		fprintf(stderr, "num %d: ", head->num);
-		if(head->errorInfo)
+		if(head->errorInfo) {
+			fprintf(stderr, "Line %d: ", head->errorInfo->ErrorLine);
 			ShowErrorInfo(head->errorInfo);
+		}
 		else 
 			fprintf(stderr, "\n");
 		head = head->last;

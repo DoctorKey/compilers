@@ -10,12 +10,14 @@ int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {
 		return 0;
 	if(fieldList1 == NULL || fieldList2 == NULL)
 		return 1;
-	//TODO: no need to compare the name?
-//	if(!strcmp(fieldList1->name, fieldList2->name))
-//		return 1;
-	if(fieldList1->name != NULL && fieldList2->name != NULL) {
-		if(strcmp(fieldList1->name, fieldList2->name))
-			return 1;
+	// this node is structure. only compare name. don't need compare type
+	if(fieldList1->type->kind == STRUCTURE && fieldList2->type->kind == STRUCTURE) {
+		if(fieldList1->name != NULL && fieldList2->name != NULL) {
+			if(strcmp(fieldList1->name, fieldList2->name))
+				return 1;
+			else
+				return cmpFieldList(fieldList1->tail, fieldList2->tail);
+		}
 	}
 	if(cmpType(fieldList1->type, fieldList2->type))
 		return 1;

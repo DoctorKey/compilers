@@ -58,7 +58,10 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 	TreeNode rightchild = NULL;
 	Symbol symNode = NULL;
 	FieldList fieldList = NULL;
+	FieldList param = NULL;
+	struct ErrorInfo *errorInfo = NULL;
 
+	specifierLock = 0;
 	specifier = parent->children[0];
 	if (specifier == NULL) {
 		fprintf(stderr, "ExtDef's child Specifier is NULL\n");
@@ -69,72 +72,87 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 		fprintf(stderr, "ExtDef's child is NULL\n");
 		goto ExtDefDebug;
 	}
+	//Specifier SEMI
+	if (midchild->nodetype == SEMI) {
+		goto ExtDefDebug;
+	}
+	rightchild = parent->children[2];
+	if (rightchild == NULL) {
+		fprintf(stderr, "ExtDef's right child is NULL\n");
+		goto ExtDefDebug;
+	}
 	//Specifier ExtDecList SEMI
 	if (midchild->nodetype == ExtDecList) {
+		goto ExtDefDebug;
 	}
-	if (midchild->nodetype == FunDec) {
-		rightchild = parent->children[2];
-		if (rightchild == NULL) {
-			fprintf(stderr, "ExtDef's right child is NULL\n");
-			goto ExtDefDebug;
+	//Specifier FunDec SEMI
+	if (rightchild->nodetype == SEMI) {
+		param = Funcsymbol->func->argtype;
+		while(param) {
+			symNode = lookup(param->name);
+			symNode->var->isDeclare = 1;
+			param = param->tail;
 		}
-		switch(rightchild->nodetype) {
-		//Specifier FunDec SEMI
-		case SEMI:
-			symNode = lookup(Funcsymbol->name);
-			if(symNode) {
-				if(symNode->func->isDefine || symNode->func->isDeclare) {
-					//have been defined or declared	
-					if(cmpFuncSym(symNode, Funcsymbol)) {
-						//diff
-						SemanticError(19, Funcsymbol->errorInfo);
-					}else {
-						symNode->func->isDeclare = 1;			
-					}
-					freeSymNode(Funcsymbol);
+		symNode = lookup(Funcsymbol->name);
+		if(symNode) {
+			if(symNode->func->isDefine || symNode->func->isDeclare) {
+				//have been defined or declared	
+				if(cmpFuncSym(symNode, Funcsymbol)) {
+					//diff
+					SemanticError(19, Funcsymbol->errorInfo);
 				}else {
-					//first declare
 					symNode->func->isDeclare = 1;			
-					Funcsymbol->func->isDeclare = 1;			
-					addDecFunc(Funcsymbol);
 				}
+				freeSymNode(Funcsymbol);
 			}else {
-				fprintf(stderr, "not insert the function!\n");
+				//first declare
+				symNode->func->isDeclare = 1;			
+				Funcsymbol->func->isDeclare = 1;			
+				addDecFunc(Funcsymbol);
 			}
-			Funcsymbol = NULL;
-			break;
-		//Specifier FunDec CompSt
-		case CompSt:
-			symNode = lookup(Funcsymbol->name);
-			if(symNode) {
-				if(symNode->func->isDefine) {
-					//have been defined
-					SemanticError(4, Funcsymbol->errorInfo);
-					freeSymNode(Funcsymbol);
-				}else if (symNode->func->isDeclare) {
-					if(cmpFuncSym(symNode, Funcsymbol)) {
-						//diff
-						SemanticError(19, symNode->errorInfo);
-					}else { 
-						symNode->func->isDefine = 1;			
-					}
-					freeSymNode(Funcsymbol);
-				}else {
-					//first define
+		}else {
+			fprintf(stderr, "not insert the function!\n");
+		}
+		Funcsymbol = NULL;
+	}
+	//Specifier FunDec CompSt
+	if (rightchild->nodetype == CompSt) {
+		param = Funcsymbol->func->argtype;
+		while(param) {
+			symNode = lookup(param->name);
+			if(symNode->var->isDeclare == 0) {
+				errorInfo = symNode->errorInfo;	
+				SemanticError(errorInfo->ErrorType, errorInfo);
+			}else {
+				symNode->var->isDefine = 1;
+			}
+			param = param->tail;
+		}
+		symNode = lookup(Funcsymbol->name);
+		if(symNode) {
+			if(symNode->func->isDefine) {
+				//have been defined
+				SemanticError(4, Funcsymbol->errorInfo);
+				freeSymNode(Funcsymbol);
+			}else if (symNode->func->isDeclare) {
+				if(cmpFuncSym(symNode, Funcsymbol)) {
+					//diff
+					SemanticError(19, symNode->errorInfo);
+				}else { 
 					symNode->func->isDefine = 1;			
 				}
+				freeSymNode(Funcsymbol);
 			}else {
-				fprintf(stderr, "not insert the function!\n");
+				//first define
+				symNode->func->isDefine = 1;			
 			}
-			Funcsymbol = NULL;
-			break;
-		default:
-			break;
+		}else {
+			fprintf(stderr, "not insert the function!\n");
 		}
-		GFuncReturn = NULL;
+		Funcsymbol = NULL;
 	}
+	GFuncReturn = NULL;
 	Gspecifier = NULL;
-	specifierLock = 0;
 ExtDefDebug:
 	if(debug2) {
 		showDecFuncList();
@@ -193,6 +211,7 @@ void SpecifierAnalyze(TreeNode parent, int num) {
 	case StructSpecifier:
 		parent->errorcount = child->errorcount;
 		parent->type = child->type;
+		parent->nodevalue.str = child->nodevalue.str;
 		break;
 	default:
 		fprintf(stderr, "Specifier child type error!\n");
@@ -233,6 +252,16 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 		parent->nodevalue.str = tag->nodevalue.str;
 		parent->errorcount = tag->errorcount;
 	}
+	// STRUCT Tag
+	if (num == 2) {
+		if (tag == NULL) {
+			fprintf(stderr, "StructSpecifier's child Tag is NULL!\n");
+			parent->type = newType();
+			parent->type->kind = ERROR;
+			goto StructSpecifierDebug;
+		}
+		parent->type = tag->type;
+	}
 	// STRUCT OptTag LC DefList RC
 	if (num == 5) {
 		parent->type = newType();
@@ -255,17 +284,6 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 			insert(symNode);
 			goto StructSpecifierDebug;
 		}
-	}
-	// STRUCT Tag
-	if (num == 2) {
-		tag = parent->children[1];	// Tag
-		if (tag == NULL) {
-			fprintf(stderr, "StructSpecifier's child Tag is NULL!\n");
-			parent->type = newType();
-			parent->type->kind = ERROR;
-			goto StructSpecifierDebug;
-		}
-		parent->type = tag->type;
 	}
 StructSpecifierDebug:
 	if(debug2) {
@@ -307,8 +325,6 @@ void TagAnalyze(TreeNode parent, int num) {
 	TreeNode child = parent->children[0];
 	Symbol symNode = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
-	// not define
-//	structdefnum--;
 	if (child == NULL) {
 		fprintf(stderr, "Tag have no child\n");
 		parent->nodevalue.str = NULL;
@@ -501,9 +517,10 @@ void ParamDecAnalyze(TreeNode parent, int num) {
 	parent->type = varDec->type;
 	parent->nodevalue.str = varDec->nodevalue.str;
 
-	
-	if(lookup(parent->nodevalue.str)) {
-		SemanticError(3, parent->errorInfo);
+	symNode = lookup(parent->nodevalue.str);
+	if(symNode) {
+//		SemanticError(3, parent->errorInfo);
+		parent->errorInfo->ErrorType = 3;
 	}else {
 		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
 		insert(symNode);
