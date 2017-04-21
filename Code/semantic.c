@@ -34,7 +34,8 @@ void ProgramAnalyze(TreeNode parent, int num) {
 		symNode = declist->funcSymbol;	
 		tarNode = lookup(symNode->name);
 		if(tarNode == NULL || tarNode->func->isDefine == 0) {
-			SemanticError(18, symNode->errorInfo);
+			symNode->errorInfo->ErrorTypeNum = 18;
+			SemanticError(symNode->errorInfo);
 		}else {
 			tarNode->func->isDeclare = 1;
 		}
@@ -46,7 +47,7 @@ void ProgramAnalyze(TreeNode parent, int num) {
 		ShowErrorInfoStack(IdErrorInfoStackHead);
 		ShowErrorInfoStack(NumErrorInfoStackHead);
 	}
-	cleanHashTable();
+//	cleanHashTable();
 	//getHashTableInfo();
 }
 void ExtDefListAnalyze(TreeNode parent, int num) {
@@ -59,7 +60,7 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 	Symbol symNode = NULL;
 	FieldList fieldList = NULL;
 	FieldList param = NULL;
-	struct ErrorInfo *errorInfo = NULL;
+	ErrorInfo errorInfo = NULL;
 
 	specifierLock = 0;
 	specifier = parent->children[0];
@@ -99,11 +100,13 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 				//have been defined or declared	
 				if(cmpFuncSym(symNode, Funcsymbol)) {
 					//diff
-					SemanticError(19, Funcsymbol->errorInfo);
+					Funcsymbol->errorInfo->ErrorTypeNum = 19;
+					SemanticError(Funcsymbol->errorInfo);
 				}else {
 					symNode->func->isDeclare = 1;			
 				}
-				freeSymNode(Funcsymbol);
+				//may free some types
+//				freeSymNode(Funcsymbol);
 			}else {
 				//first declare
 				symNode->func->isDeclare = 1;			
@@ -120,9 +123,10 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 		param = Funcsymbol->func->argtype;
 		while(param) {
 			symNode = lookup(param->name);
-			if(symNode->var->isDeclare == 0) {
-				errorInfo = symNode->errorInfo;	
-				SemanticError(errorInfo->ErrorType, errorInfo);
+			if(symNode->var->isDefine == 1) {
+				errorInfo = param->errorInfo;	
+				errorInfo->ErrorTypeNum = 3;
+				SemanticError(errorInfo);
 			}else {
 				symNode->var->isDefine = 1;
 			}
@@ -132,16 +136,20 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 		if(symNode) {
 			if(symNode->func->isDefine) {
 				//have been defined
-				SemanticError(4, Funcsymbol->errorInfo);
-				freeSymNode(Funcsymbol);
+				Funcsymbol->errorInfo->ErrorTypeNum = 4;
+				SemanticError(Funcsymbol->errorInfo);
+				//may free some types
+//				freeSymNode(Funcsymbol);
 			}else if (symNode->func->isDeclare) {
 				if(cmpFuncSym(symNode, Funcsymbol)) {
 					//diff
-					SemanticError(19, symNode->errorInfo);
+					symNode->errorInfo->ErrorTypeNum = 19;
+					SemanticError(symNode->errorInfo);
 				}else { 
 					symNode->func->isDefine = 1;			
 				}
-				freeSymNode(Funcsymbol);
+				//may free some types
+//				freeSymNode(Funcsymbol);
 			}else {
 				//first define
 				symNode->func->isDefine = 1;			
@@ -171,7 +179,8 @@ void ExtDecListAnalyze(TreeNode parent, int num) {
 	parent->errorInfo = vardec->errorInfo;
 	symNode = lookup(vardec->nodevalue.str);
 	if (symNode) {
-		SemanticError(3, parent->errorInfo);
+		parent->errorInfo->ErrorTypeNum = 3;
+		SemanticError(parent->errorInfo);
 	}else {
 		symNode = newVar(vardec->nodevalue.str, Gspecifier, parent->errorInfo);
 		insert(symNode);
@@ -211,7 +220,6 @@ void SpecifierAnalyze(TreeNode parent, int num) {
 	case StructSpecifier:
 		parent->errorcount = child->errorcount;
 		parent->type = child->type;
-		parent->nodevalue.str = child->nodevalue.str;
 		break;
 	default:
 		fprintf(stderr, "Specifier child type error!\n");
@@ -266,6 +274,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 	if (num == 5) {
 		parent->type = newType();
 		parent->type->kind = STRUCTURE;
+		parent->type->structname = parent->nodevalue.str;
 		deflist = parent->children[3];	
 		if (deflist == NULL) {
 			// DefList can be NULL!
@@ -311,7 +320,8 @@ void OptTagAnalyze(TreeNode parent, int num) {
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode != NULL) {
-		SemanticError(16, parent->errorInfo);
+		parent->errorInfo->ErrorTypeNum = 16;
+		SemanticError(parent->errorInfo);
 		goto OptTagDebug;
 	}
 OptTagDebug:
@@ -338,13 +348,15 @@ void TagAnalyze(TreeNode parent, int num) {
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
 	if (symNode == NULL) {
-		SemanticError(17, parent->errorInfo);
+		parent->errorInfo->ErrorTypeNum = 17;
+		SemanticError(parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
 	if (symNode->type != NewType) {
-		SemanticError(16, parent->errorInfo);
+		parent->errorInfo->ErrorTypeNum = 16;
+		SemanticError(parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
@@ -421,7 +433,6 @@ void FunDecAnalyze(TreeNode parent, int num) {
 	TreeNode id = NULL;
 	TreeNode varlist = NULL;
 	Symbol symNode = NULL;
-	struct ErrorInfo *idErrorInfo = NULL;
 	int errorcount;
 	int totalErrorInfo = GetTotalErrorInfo();
 
@@ -456,8 +467,8 @@ void FunDecAnalyze(TreeNode parent, int num) {
 
 FunDecDebug:
 	if(debug2) {
-		fprintf(stdout, "FunDec add new func symbol: \n");
-		showSymbol(symNode);
+		fprintf(stdout, "FunDec symbol: \n");
+		showSymbol(Funcsymbol);
 		fprintf(stdout, "\n");
 	}
 }
@@ -485,7 +496,7 @@ void VarListAnalyze(TreeNode parent, int num) {
 		fieldList = varlist->fieldList;
 		parent->errorcount += varlist->errorcount;
 	}	
-	parent->fieldList = newFieldList(paramdec->nodevalue.str, paramdec->type, fieldList);
+	parent->fieldList = newFieldList(paramdec->nodevalue.str, paramdec->type, fieldList, paramdec->errorInfo);
 VarListDebug:
 	if(debug2) {
 		fprintf(stdout, "VarList->fieldList : \n");
@@ -497,9 +508,6 @@ VarListDebug:
 void ParamDecAnalyze(TreeNode parent, int num) {
 	TreeNode specifier = NULL;	
 	TreeNode varDec = NULL;	
-	Type type, lastType;
-	FieldList fieldList = NULL;
-	Symbol symNode = NULL;
 
 	specifier = parent->children[0];	// Specifier
 	varDec = parent->children[1];	// VarDec
@@ -518,10 +526,8 @@ void ParamDecAnalyze(TreeNode parent, int num) {
 	parent->nodevalue.str = varDec->nodevalue.str;
 
 	symNode = lookup(parent->nodevalue.str);
-	if(symNode) {
-//		SemanticError(3, parent->errorInfo);
-		parent->errorInfo->ErrorType = 3;
-	}else {
+	//only insert once
+	if(!symNode) {
 		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
 		insert(symNode);
 	}
@@ -562,7 +568,8 @@ void StmtAnalyze(TreeNode parent, int num) {
 		parent->errorInfo = exp->errorInfo;
 //		if (cmpType(GFuncReturn, exp->type)) {
 		if (cmpType(Funcsymbol->func->Return, exp->type)) {
-			SemanticError(8, parent->errorInfo);
+			parent->errorInfo->ErrorTypeNum = 8;
+			SemanticError(parent->errorInfo);
 		}
 		if(debug2) {
 			fprintf(stderr, "Stmt check return\n");	
@@ -686,7 +693,7 @@ void DecListAnalyze(TreeNode parent, int num) {
 		fieldList = declist->fieldList;
 		parent->errorcount += declist->errorcount;
 	}
-	parent->fieldList = newFieldList(dec->nodevalue.str, dec->type, fieldList);	
+	parent->fieldList = newFieldList(dec->nodevalue.str, dec->type, fieldList, dec->errorInfo);	
 DecListDebug:
 	if (debug2) {
 		fprintf(stdout, "DecList->fieldList :\n");
@@ -714,10 +721,13 @@ void DecAnalyze(TreeNode parent, int num) {
 
 	symNode = lookup(parent->nodevalue.str);
 	if (symNode) {
-		if (structdefnum > 0)
-			SemanticError(15, parent->errorInfo);
-		else
-			SemanticError(3, parent->errorInfo);
+		if (structdefnum > 0) {
+			parent->errorInfo->ErrorTypeNum = 15;
+			SemanticError(parent->errorInfo);
+		}else {
+			parent->errorInfo->ErrorTypeNum = 3;
+			SemanticError(parent->errorInfo);
+		}
 	}else {
 		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
 		insert(symNode);
@@ -725,7 +735,8 @@ void DecAnalyze(TreeNode parent, int num) {
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {
 		if (structdefnum > 0) {
-			SemanticError(15, parent->errorInfo);
+			parent->errorInfo->ErrorTypeNum = 15;
+			SemanticError(parent->errorInfo);
 			goto DecDebug;
 		}
 		exp = parent->children[2];
@@ -734,7 +745,8 @@ void DecAnalyze(TreeNode parent, int num) {
 			goto DecDebug;
 		}
 		if (cmpType(vardec->type, exp->type)) {
-			SemanticError(5, parent->errorInfo);
+			parent->errorInfo->ErrorTypeNum = 5;
+			SemanticError(parent->errorInfo);
 		}
 	}
 DecDebug:
@@ -751,11 +763,11 @@ DecDebug:
 /*
 	Expressions
 */
-// update parent->nodevalue.str, parent->type
+// update parent->type, parent->errorInfo, parent->nodevalue.str
 void ExpAnalyze(TreeNode parent, int num) {
 	TreeNode childleft, childright, childmid;
 	Symbol symNode = NULL;
-	struct ErrorInfo *idErrorInfo = NULL;
+	ErrorInfo idErrorInfo = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	childleft = parent->children[0];
 	if (childleft == NULL) {
@@ -769,7 +781,8 @@ void ExpAnalyze(TreeNode parent, int num) {
 			symNode = lookup(childleft->nodevalue.str);
 			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 			if (symNode == NULL) {
-				SemanticError(1, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 1;
+				SemanticError(parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
 			}else {
@@ -797,7 +810,7 @@ void ExpAnalyze(TreeNode parent, int num) {
 		childleft = parent->children[1];
 		if (childleft == NULL) {
 			fprintf(stderr, "Exp's child Exp is NULL\n");
-			return;
+			goto ExpDebug;
 		}
 		parent->errorInfo = childleft->errorInfo;
 		parent->type = childleft->type;
@@ -806,12 +819,12 @@ void ExpAnalyze(TreeNode parent, int num) {
 	childright = parent->children[2];
 	if (childright == NULL) {
 		fprintf(stderr, "Exp's child Exp is NULL\n");
-		return;
+		goto ExpDebug;
 	}
 	childmid = parent->children[1];
 	if (childmid == NULL) {
 		fprintf(stderr, "Exp's child mid is NULL\n");
-		return;
+		goto ExpDebug;
 	}
 	if (num == 3) {
 		// LP Exp RP
@@ -822,15 +835,16 @@ void ExpAnalyze(TreeNode parent, int num) {
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
-			idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
+			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
 			argsnum = 0;
-			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
 			if (symNode == NULL || symNode->type != Func) {
-				SemanticError(2, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 2;
+				SemanticError(parent->errorInfo);
 			}
 			if (cmpFieldList(symNode->func->argtype, NULL)) {
-				SemanticError(9, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 9;
+				SemanticError(parent->errorInfo);
 			}
 			parent->type = symNode->func->Return;
 			goto ExpDebug;
@@ -839,7 +853,8 @@ void ExpAnalyze(TreeNode parent, int num) {
 		if (childright->nodetype == ID) {
 			parent->errorInfo = childleft->errorInfo;
 			if(childleft->type->kind != STRUCTURE){
-				SemanticError(13, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 13;
+				SemanticError(parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
 				goto ExpDebug;
@@ -847,8 +862,8 @@ void ExpAnalyze(TreeNode parent, int num) {
 			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
 			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
 			if (parent->type == NULL) {
-			//	parent->errorInfo = GerrorInfo;
-				SemanticError(14, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 14;
+				SemanticError(parent->errorInfo);
 				parent->type = newType();
 				parent->type->kind = ERROR;
 			}else {
@@ -862,16 +877,22 @@ void ExpAnalyze(TreeNode parent, int num) {
 			if (childleft->type->kind == ERROR)
 				goto ExpDebug;
 			//TODO: just need name equal
-			if(cmpType(childleft->type, childright->type))
-				SemanticError(5, parent->errorInfo);
-			if(!childleft->nodevalue.str)
-				SemanticError(6, parent->errorInfo);
+			if(cmpType(childleft->type, childright->type)) {
+				parent->errorInfo->ErrorTypeNum = 5;
+				SemanticError(parent->errorInfo);
+			}
+			if(!childleft->nodevalue.str) {
+				parent->errorInfo->ErrorTypeNum = 6;
+				SemanticError(parent->errorInfo);
+			}
 			goto ExpDebug;
 		}
 		// other Exp
 		parent->errorInfo = childleft->errorInfo;
-		if(cmpType(childleft->type, childright->type))
-			SemanticError(7, parent->errorInfo);
+		if(cmpType(childleft->type, childright->type)) {
+			parent->errorInfo->ErrorTypeNum = 7;
+			SemanticError(parent->errorInfo);
+		}
 		//TODO: just take left type maybe error
 		parent->type = childleft->type;
 		goto ExpDebug;
@@ -885,15 +906,18 @@ void ExpAnalyze(TreeNode parent, int num) {
 			parent->errorInfo = idErrorInfo;
 			symNode = lookup(childleft->nodevalue.str);
 			if (symNode == NULL) {
-				SemanticError(2, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 2;
+				SemanticError(parent->errorInfo);
 				goto ExpDebug;
 			}
 			if (symNode->type != Func) {
-				SemanticError(11, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 11;
+				SemanticError(parent->errorInfo);
 				goto ExpDebug;
 			}
 			if (cmpFieldList(symNode->func->argtype, childright->fieldList)) {
-				SemanticError(9, parent->errorInfo);
+				parent->errorInfo->ErrorTypeNum = 9;
+				SemanticError(parent->errorInfo);
 			}
 			parent->type = symNode->func->Return;
 			goto ExpDebug;
@@ -901,12 +925,14 @@ void ExpAnalyze(TreeNode parent, int num) {
 		// Exp LB Exp RB
 		parent->errorInfo = childleft->errorInfo;
 		if(childleft->type->kind != ARRAY){
-			SemanticError(10, parent->errorInfo);
+			parent->errorInfo->ErrorTypeNum = 10;
+			SemanticError(parent->errorInfo);
 			parent->type = childleft->type;
 			goto ExpDebug;
 		}
 		if(childright->type->kind != BASIC || childright->type->basic != INT) {
-			SemanticError(12, childright->errorInfo);
+			parent->errorInfo->ErrorTypeNum = 12;
+			SemanticError(parent->errorInfo);
 		}
 		parent->type = childleft->type->array.elem;
 		parent->nodevalue.str = childleft->nodevalue.str;
@@ -948,8 +974,7 @@ void ArgsAnalyze(TreeNode parent, int num) {
 		fprintf(stderr, "Args's child Exp is NULL\n");
 		parent->fieldList = fieldList;
 	}else {
-		//parent->fieldList = newFieldList(exp->nodevalue.str, exp->type, fieldList);	
-		parent->fieldList = newFieldList(NULL, exp->type, fieldList);	
+		parent->fieldList = newFieldList(NULL, exp->type, fieldList, parent->errorInfo);	
 	}
 ArgsDebug:
 	if (debug2) {

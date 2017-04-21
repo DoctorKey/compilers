@@ -29,13 +29,18 @@ struct Type_ {
 			Type elem;
 			int size;
 		}array;
-		FieldList structure;
+		struct {
+			char *structname;
+			ErrorInfo errorInfo;
+			FieldList structure;
+		};
 	};
 };
 struct FieldList_ {
 	char *name;
 	Type type;
 	FieldList tail;
+	ErrorInfo errorInfo;
 };
 
 enum {Var, Func, NewType};
@@ -65,13 +70,8 @@ struct SymNode {
 		struct Func *func;
 		Type specifier;
 	};
-	struct ErrorInfo *errorInfo;
+	ErrorInfo errorInfo;
 	struct SymNode *next;
-};
-
-struct FuncList {
-	struct SymNode *funcSymbol;
-	struct FuncList *next;
 };
 
 struct HashNode {
@@ -96,13 +96,13 @@ Type newType();
 void showType(Type type); 
 void showFieldList(FieldList fieldList); 
 
-FieldList newFieldList(char *name, Type type, FieldList tail); 
+FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo); 
 void freeType(Type type); 
 void freeFieldList(FieldList fieldList); 
 
-struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo); 
-struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo); 
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo); 
+struct SymNode *newNewType(char *name, Type type, ErrorInfo errorInfo); 
+struct SymNode *newVar(char *name, Type type, ErrorInfo errorInfo); 
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo); 
 
 int freeSymNode(struct SymNode *symNode); 
 

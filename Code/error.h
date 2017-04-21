@@ -7,28 +7,31 @@
 #include "file.h"
 #include "syntax.tab.h"
 
-struct ErrorInfo {
-	int ErrorType;
-	int ErrorLine;
+typedef struct ErrorInfo_* ErrorInfo;
+
+struct ErrorInfo_ {
+	int ErrorTypeNum;
+	int ErrorLineNum;
 	char *ErrorLineStr;
+	int ErrorStrType;
 };
 extern void PrintError(char type, char *s, ...);
 
-void SemanticError(int type, struct ErrorInfo *errorInfo); 
-struct ErrorInfo *initError(int type);
-void FreeErrorInfo(struct ErrorInfo *errorInfo); 
-void ShowErrorInfo(struct ErrorInfo *errorInfo); 
+void SemanticError(ErrorInfo errorInfo); 
+ErrorInfo initError(int type);
+void FreeErrorInfo(ErrorInfo errorInfo); 
+void ShowErrorInfo(ErrorInfo errorInfo); 
 
 struct ErrorInfoStack {
 	int num;
-	struct ErrorInfo *errorInfo;
+	ErrorInfo errorInfo;
 	struct ErrorInfoStack *last;
 };
 
 int GetTotalErrorInfo(); 
-int pushErrorInfo(struct ErrorInfo *errorInfo, int type); 
+int pushErrorInfo(ErrorInfo errorInfo, int type); 
 void freeErrorInfoStack(struct ErrorInfoStack *head); 
-struct ErrorInfo *GetErrorInfoByNum(struct ErrorInfoStack *head, int num); 
+ErrorInfo GetErrorInfoByNum(struct ErrorInfoStack *head, int num); 
 void ShowErrorInfoStack(struct ErrorInfoStack *head); 
 
 #endif /*__ERROR_H_*/

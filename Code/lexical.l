@@ -14,7 +14,6 @@
 	#include "tree.h"
 	int lexical_isError = 0;
 
-	extern int structdefnum;
 	int yycolumn = 1;
 #define YY_USER_ACTION \
 	yylloc.first_line = yylloc.last_line = yylineno; \
@@ -176,8 +175,6 @@ xdigit [0-9a-fA-F]
 "struct"			{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(STRUCT);
-					//define or use
-					structdefnum++;
 					return STRUCT;}
 "return"			{ 
     					BeginToken(yytext); 

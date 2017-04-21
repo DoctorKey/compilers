@@ -9,14 +9,14 @@ void initerrorBuffer(char *);
 *--------------------------------------------------------------------
 */
 extern int yylineno;
-struct ErrorInfo *GerrorInfo = NULL;
+ErrorInfo GerrorInfo = NULL;
 static char errbuf[100];
-void SemanticError(int type, struct ErrorInfo *errorInfo) {
+void SemanticError(ErrorInfo errorInfo) {
 	fprintf(stderr, "\033[31m\033[1m");
 	fprintf(stderr, "Error ");
 	fprintf(stderr, "\033[0m");
-	fprintf(stderr, "type %d at Line %d: ", type, errorInfo->ErrorLine);
-	switch(type) {
+	fprintf(stderr, "type %d at Line %d: ", errorInfo->ErrorTypeNum, errorInfo->ErrorLineNum);
+	switch(errorInfo->ErrorTypeNum) {
 	case 1: fprintf(stderr, "Undefined variable "); break;
 	case 2: fprintf(stderr, "Undefined function "); break;
 	case 3: fprintf(stderr, "Redefined variable "); break;
@@ -111,9 +111,9 @@ initerrorBuffer(char *errorbuffer) {
 	return;
 }
 
-struct ErrorInfo *initError(int type) {
+ErrorInfo initError(int type) {
 	//errbuf
-	struct ErrorInfo *errorInfo = NULL;
+	ErrorInfo errorInfo = NULL;
 	char errbuftemp[100];
 	char temp[100];
 	int start = curbuffer->nTokenStart;
@@ -126,13 +126,13 @@ struct ErrorInfo *initError(int type) {
 	strcat(errbuf, "\033[0m");
 	sprintf(temp, "%.*s\"", curbuffer->lBuffer - end , errbuftemp + end);
 	strcat(errbuf, temp);
-	errorInfo = malloc(sizeof(struct ErrorInfo));
-	errorInfo->ErrorType = type;
-	errorInfo->ErrorLine = getErrorLine();	
+	errorInfo = malloc(sizeof(struct ErrorInfo_));
+	errorInfo->ErrorStrType = type;
+	errorInfo->ErrorLineNum = getErrorLine();	
 	errorInfo->ErrorLineStr = malloc(sizeof(char) * (strlen(errbuf)+1));	
 	strcpy(errorInfo->ErrorLineStr, errbuf);
 	if (debug2) {
-		fprintf(stderr, "line %d: %s\n", errorInfo->ErrorLine, errorInfo->ErrorLineStr);
+		fprintf(stderr, "line %d: %s\n", errorInfo->ErrorLineNum, errorInfo->ErrorLineStr);
 	}
 
 	pushErrorInfo(errorInfo, type);
@@ -140,18 +140,18 @@ struct ErrorInfo *initError(int type) {
 	return errorInfo;
 }
 void deleteErrorInfoStack(int type, int num); 
-void FreeErrorInfo(struct ErrorInfo *errorInfo) {
+void FreeErrorInfo(ErrorInfo errorInfo) {
 	if (errorInfo == NULL)
 		return;
 	if (errorInfo->ErrorLineStr != NULL) {
 		free(errorInfo->ErrorLineStr);
 		errorInfo->ErrorLineStr = NULL;
 	}
-	deleteErrorInfoStack(errorInfo->ErrorType, errorInfo->ErrorLine);
+	deleteErrorInfoStack(errorInfo->ErrorStrType, errorInfo->ErrorLineNum);
 	free(errorInfo);
 	errorInfo = NULL;
 }
-void ShowErrorInfo(struct ErrorInfo *errorInfo) {
+void ShowErrorInfo(ErrorInfo errorInfo) {
 	if (errorInfo == NULL) {
 		fprintf(stderr, "errorInfo is NULL\n");
 	}
@@ -165,7 +165,7 @@ static int totalErrorInfo = 0;
 int GetTotalErrorInfo() {
 	return totalErrorInfo;
 }
-int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {
+int pushErrorInfo(ErrorInfo errorInfo, int type) {
 	struct ErrorInfoStack *temp = NULL;
 	totalErrorInfo++;
 	temp = malloc(sizeof(struct ErrorInfoStack));
@@ -181,7 +181,7 @@ int pushErrorInfo(struct ErrorInfo *errorInfo, int type) {
 	if(debug2) {
 		fprintf(stderr, "push ErrorInfo into %s\n", getName(type));
 		fprintf(stderr, "num %d: ", temp->num);
-		fprintf(stderr, "Line %d: ", temp->errorInfo->ErrorLine);
+		fprintf(stderr, "Line %d: ", temp->errorInfo->ErrorLineNum);
 		ShowErrorInfo(temp->errorInfo);
 	}
 }
@@ -194,7 +194,7 @@ void deleteErrorInfoStack(int type, int num) {
 	}
 	while(temp != NULL) {
 		if(temp->errorInfo) {
-			if(temp->errorInfo->ErrorLine == num) {
+			if(temp->errorInfo->ErrorLineNum == num) {
 				temp->errorInfo = NULL;
 				break;
 			}
@@ -214,7 +214,7 @@ void freeErrorInfoStack(struct ErrorInfoStack *head) {
 	else
 		freeErrorInfoStack(head->last);
 }
-struct ErrorInfo *GetErrorInfoByNum(struct ErrorInfoStack *head, int num) {
+ErrorInfo GetErrorInfoByNum(struct ErrorInfoStack *head, int num) {
 	struct ErrorInfoStack *temp = head;
 	int i;
 	if (temp == NULL)
@@ -232,7 +232,7 @@ void ShowErrorInfoStack(struct ErrorInfoStack *head) {
 	while (head != NULL) {
 		fprintf(stderr, "num %d: ", head->num);
 		if(head->errorInfo) {
-			fprintf(stderr, "Line %d: ", head->errorInfo->ErrorLine);
+			fprintf(stderr, "Line %d: ", head->errorInfo->ErrorLineNum);
 			ShowErrorInfo(head->errorInfo);
 		}
 		else 

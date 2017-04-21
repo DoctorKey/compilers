@@ -13,7 +13,7 @@ struct HashTableInfo hashTableInfo;
 */
 Type newType() {
 	Type type = NULL;
-	type = malloc(sizeof(Type));
+	type = malloc(sizeof(struct Type_));
 	if(!type) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
@@ -37,7 +37,7 @@ void showType(Type type) {
 		fprintf(stdout, " size: %d ", type->array.size);
 		break;
 	case STRUCTURE:
-		fprintf(stdout, " structure \n");
+		fprintf(stdout, " structure %s \n", type->structname);
 		showFieldList(type->structure);
 		break;
 	}
@@ -61,21 +61,22 @@ void freeType(Type type) {
 	type = NULL;
 }
 
-FieldList newFieldList(char *name, Type type, FieldList tail) {
+FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo) {
 	FieldList fieldList = NULL;
-	fieldList = malloc(sizeof(FieldList));
+	fieldList = malloc(sizeof(struct FieldList_));
 	if(!fieldList) {
 		fprintf(stderr, "out of space\n");
 		exit(0);
 	}
 	if(name != NULL) {
-		fieldList->name = malloc(sizeof(char) * strlen(name));
+		fieldList->name = malloc(sizeof(char) * (strlen(name)+1));
 		strcpy(fieldList->name, name);
 	}else {
 		fieldList->name = NULL;
 	}
 	fieldList->type = type;
 	fieldList->tail = tail;
+	fieldList->errorInfo = errorInfo;
 	return fieldList;
 }
 void showFieldList(FieldList fieldList) {
@@ -122,7 +123,7 @@ Type lookupFieldListElem(FieldList fieldList, char *name) {
 /*
 	symbol node
 */
-struct SymNode *createSymNode(int type, char *name, struct ErrorInfo *errorInfo) {
+struct SymNode *createSymNode(int type, char *name, ErrorInfo errorInfo) {
 	struct SymNode *symNode;
 	symNode = malloc(sizeof(struct SymNode));
 	if(!symNode) {
@@ -132,19 +133,19 @@ struct SymNode *createSymNode(int type, char *name, struct ErrorInfo *errorInfo)
 	hashTableInfo.allocTimes++;
 
 	symNode->type = type;
-	symNode->name = malloc(sizeof(char) * strlen(name));
+	symNode->name = malloc(sizeof(char) * (strlen(name)+1));
 	strcpy(symNode->name, name);
 	symNode->errorInfo = errorInfo;
 	symNode->next = NULL;
 	return symNode;
 }
-struct SymNode *newNewType(char *name, Type type, struct ErrorInfo *errorInfo) {
+struct SymNode *newNewType(char *name, Type type, ErrorInfo errorInfo) {
 	struct SymNode *symNode = NULL;
  	symNode = createSymNode(NewType, name, errorInfo);
 	symNode->specifier = type;
 	return symNode;
 }
-struct SymNode *newVar(char *name, Type type, struct ErrorInfo *errorInfo) {
+struct SymNode *newVar(char *name, Type type, ErrorInfo errorInfo) {
 	struct Var *var = NULL;
 	struct SymNode *symNode = NULL;
 	var = malloc(sizeof(struct Var));
@@ -171,7 +172,7 @@ void showVar(struct Var *var) {
 	showType(var->type);	
 	fprintf(stdout, "\n");
 }
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype, struct ErrorInfo *errorInfo) {
+struct SymNode *newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo) {
 	int i;
 	struct Func *func = NULL;
 	struct SymNode *symNode = NULL;
@@ -231,12 +232,15 @@ int freeSymNode(struct SymNode *symNode) {
 	switch (symNode->type) {
 	case Var:
 		freeVar(symNode->var);
+		symNode->var = NULL;
 		break;
 	case Func:
 		freeFunc(symNode->func);
+		symNode->func = NULL;
 		break;
 	case NewType:
 		freeType(symNode->specifier);
+		symNode->specifier = NULL;
 		break;
 	default:
 		fprintf(stderr, "error type\n");

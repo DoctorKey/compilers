@@ -10,15 +10,11 @@ int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {
 		return 0;
 	if(fieldList1 == NULL || fieldList2 == NULL)
 		return 1;
-	// this node is structure. only compare name. don't need compare type
-	if(fieldList1->type->kind == STRUCTURE && fieldList2->type->kind == STRUCTURE) {
-		if(fieldList1->name != NULL && fieldList2->name != NULL) {
-			if(strcmp(fieldList1->name, fieldList2->name))
-				return 1;
-			else
-				return cmpFieldList(fieldList1->tail, fieldList2->tail);
-		}
-	}
+	/*
+	if(fieldList1->name != NULL && fieldList2->name != NULL) {
+		if(strcmp(fieldList1->name, fieldList2->name))
+			return 1;
+	}*/
 	if(cmpType(fieldList1->type, fieldList2->type))
 		return 1;
 	return cmpFieldList(fieldList1->tail, fieldList2->tail);
@@ -45,7 +41,9 @@ int cmpType(Type type1, Type type2) {
 		return cmpType(type1->array.elem, type2->array.elem);
 	}
 	if(type1->kind == STRUCTURE && type2->kind == STRUCTURE) {
-		return cmpFieldList(type1->structure, type2->structure);
+		if(strcmp(type1->structname, type2->structname))
+			return 1;
+//		return cmpFieldList(type1->structure, type2->structure);
 	}
 	//type1->kind != type2->kind
 	return 1;
@@ -59,7 +57,7 @@ int cmpFunc(struct Func *left, struct Func *right) {
 	} 
 	return 0;
 }
-int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {
+int cmpFuncSymByName(Symbol left, Symbol right) {
 	if(left->type != Func || right->type != Func) {
 		return 1;
 	}	
@@ -68,7 +66,7 @@ int cmpFuncSymByName(struct SymNode *left, struct SymNode *right) {
 	}
 	return 0;
 }
-int cmpFuncSym(struct SymNode *left, struct SymNode *right) {
+int cmpFuncSym(Symbol left, Symbol right) {
 	if(left->type != Func || right->type != Func) {
 		return 1;
 	}	
@@ -91,7 +89,7 @@ struct FuncList *DecFuncList = NULL;
 struct FuncList *getDecFuncList() {
 	return DecFuncList;
 }
-void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
+void addFunc(struct FuncList **funcList, Symbol symbol) {
 	struct FuncList *new = NULL;
 	new = malloc(sizeof(struct FuncList));
 	if (!new) {
@@ -106,7 +104,7 @@ void addFunc(struct FuncList **funcList, struct SymNode *symbol) {
 		(*funcList)->next = new;
 	}
 }
-void addDecFunc(struct SymNode *symbol) {
+void addDecFunc(Symbol symbol) {
 	addFunc(&DecFuncList, symbol);
 }
 void showDecFuncList() {
@@ -118,11 +116,13 @@ void showDecFuncList() {
 	}
 	fprintf(stdout, "----------------------------------------------\n");
 }
-void freeFuncListNode(struct FuncList *funcList) {
-	if(funcList == NULL)
-		return;
-	freeSymNode(funcList->funcSymbol);
-	funcList->funcSymbol = NULL;
-	free(funcList);
-	funcList = NULL;
+void freeDecFuncList() {
+	struct FuncList *temp = DecFuncList;
+	struct FuncList *next = NULL;
+	while(temp) {
+		next = temp->next;
+		free(temp);
+		temp = next;
+	}
+	DecFuncList = NULL;
 }

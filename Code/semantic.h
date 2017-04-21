@@ -7,4 +7,5 @@
 #include "symtable.h"
 
 void semanticAnalyze(struct node *parent, int num); 
+
 #endif

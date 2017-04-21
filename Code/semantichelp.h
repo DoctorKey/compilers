@@ -6,12 +6,17 @@
 int cmpType(Type type1, Type type2); 
 int cmpFieldList(FieldList fieldList1, FieldList fieldList2); 
 
+int cmpFuncSym(Symbol left, Symbol right); 
+int cmpFuncSymByName(Symbol left, Symbol right); 
+int cmpFunc(struct Func *left, struct Func *right); 
+
+struct FuncList {
+	struct SymNode *funcSymbol;
+	struct FuncList *next;
+};
 struct FuncList *getDecFuncList(); 
 void showDecFuncList(); 
-void addDecFunc(struct SymNode *symbol); 
-
-int cmpFuncSym(struct SymNode *left, struct SymNode *right); 
-int cmpFuncSymByName(struct SymNode *left, struct SymNode *right); 
-int cmpFunc(struct Func *left, struct Func *right); 
+void addDecFunc(Symbol symbol); 
+void freeDecFuncList(); 
 
 #endif
