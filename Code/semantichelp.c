@@ -43,6 +43,8 @@ int cmpType(Type type1, Type type2) {
 	if(type1->kind == STRUCTURE && type2->kind == STRUCTURE) {
 		if(strcmp(type1->structname, type2->structname))
 			return 1;
+		else 
+			return 0;
 //		return cmpFieldList(type1->structure, type2->structure);
 	}
 	//type1->kind != type2->kind

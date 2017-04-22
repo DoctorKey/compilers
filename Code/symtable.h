@@ -110,7 +110,6 @@ void showSymbol(struct SymNode *symNode);
 void showAllSymbol(void);
 
 int insert(struct SymNode *symNode); 
-int removeSymbol(char *name); 
 struct SymNode *lookup(char *name);
 Type lookupFieldListElem(FieldList fieldList, char *name);
 Type getSymType(struct SymNode *symNode);

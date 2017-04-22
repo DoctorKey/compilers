@@ -10,7 +10,6 @@ typedef struct node* TreeNode;
 union value {
 	int INT;
 	float FLOAT;
-	//int ID_index;
 	char *str;
 };
 struct node {

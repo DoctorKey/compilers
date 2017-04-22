@@ -47,8 +47,8 @@ void ProgramAnalyze(TreeNode parent, int num) {
 		ShowErrorInfoStack(IdErrorInfoStackHead);
 		ShowErrorInfoStack(NumErrorInfoStackHead);
 	}
-//	cleanHashTable();
-	//getHashTableInfo();
+	cleanHashTable();
+	getHashTableInfo();
 }
 void ExtDefListAnalyze(TreeNode parent, int num) {
 }
@@ -508,6 +508,7 @@ VarListDebug:
 void ParamDecAnalyze(TreeNode parent, int num) {
 	TreeNode specifier = NULL;	
 	TreeNode varDec = NULL;	
+	Symbol symNode = NULL;
 
 	specifier = parent->children[0];	// Specifier
 	varDec = parent->children[1];	// VarDec

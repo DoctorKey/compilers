@@ -307,9 +307,6 @@ unsigned int hash_pjw(char *name) {
 		if (i = val & ~HASHSIZE)
 			val = (val ^ (i >> 12)) & HASHSIZE;
 	}
-	if (debug2) {
-//		fprintf(stdout, "%s hash val %d\n", temp, val);
-	}
 	return val;
 }
 /*
@@ -345,40 +342,6 @@ int insert(struct SymNode *symNode) {
 	return symTable[index].num;
 }
 
-/*
-	remove a symbol in hashTable
-	symNode: symNode to remove
-*/
-int removeSymbol(char *name) {
-	unsigned int index;
-	struct SymNode *pre, *list;
-	if(name == NULL) {
-		return 0;
-	}
-	index = hash_pjw(name);
-	list = symTable[index].symNode;
-	if (list == NULL) {
-		return 1;
-	}
-	if (strcmp(list->name, name) == 0) {
-		symTable[index].symNode = list->next;
-		freeSymNode(list);
-		list = NULL;
-		return 0;
-	}
-	pre = list;
-	while (list != NULL) {
-		if (strcmp(list->name, name) == 0) {
-			pre->next = list->next;
-			freeSymNode(list);
-			list = NULL;
-			return 0;
-		}
-		pre = list;
-		list = list->next;
-	}
-	return 1;
-}
 /*
 	name: name of symNode
 	return: if hit return symNode
