@@ -61,6 +61,9 @@ void freeType(Type type) {
 	type = NULL;
 }
 
+/*
+	FieldList
+*/
 FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo) {
 	FieldList fieldList = NULL;
 	fieldList = malloc(sizeof(struct FieldList_));
@@ -123,8 +126,8 @@ Type lookupFieldListElem(FieldList fieldList, char *name) {
 /*
 	symbol node
 */
-struct SymNode *createSymNode(int type, char *name, ErrorInfo errorInfo) {
-	struct SymNode *symNode;
+Symbol createSymNode(int type, char *name, ErrorInfo errorInfo) {
+	Symbol symNode;
 	symNode = malloc(sizeof(struct SymNode));
 	if(!symNode) {
 		fprintf(stderr, "out of space\n");
@@ -139,15 +142,15 @@ struct SymNode *createSymNode(int type, char *name, ErrorInfo errorInfo) {
 	symNode->next = NULL;
 	return symNode;
 }
-struct SymNode *newNewType(char *name, Type type, ErrorInfo errorInfo) {
-	struct SymNode *symNode = NULL;
- 	symNode = createSymNode(NewType, name, errorInfo);
-	symNode->specifier = type;
+Symbol newStruct(char *name, Type type, ErrorInfo errorInfo) {
+	Symbol symNode = NULL;
+ 	symNode = createSymNode(Struct, name, errorInfo);
+	symNode->structure = type;
 	return symNode;
 }
-struct SymNode *newVar(char *name, Type type, ErrorInfo errorInfo) {
+Symbol newVar(char *name, Type type, ErrorInfo errorInfo) {
 	struct Var *var = NULL;
-	struct SymNode *symNode = NULL;
+	Symbol symNode = NULL;
 	var = malloc(sizeof(struct Var));
 	if(!var) {
 		fprintf(stderr, "out of space\n");
@@ -172,10 +175,10 @@ void showVar(struct Var *var) {
 	showType(var->type);	
 	fprintf(stdout, "\n");
 }
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo) {
+Symbol newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo) {
 	int i;
 	struct Func *func = NULL;
-	struct SymNode *symNode = NULL;
+	Symbol symNode = NULL;
 	func = malloc(sizeof(struct Func));
 	if(!func) {
 		fprintf(stderr, "out of space\n");
@@ -193,8 +196,9 @@ void freeFunc(struct Func *func) {
 	int i;
 	if (func == NULL)
 		return;
-	if (func->argtype != NULL)
-		freeFieldList(func->argtype);
+	// argtype is freed by freeVar
+//	if (func->argtype != NULL)
+//		freeFieldList(func->argtype);
 	func->argtype = NULL;
 	if (func->Return != NULL)
 		freeType(func->Return);
@@ -213,7 +217,7 @@ void showFunc(struct Func *func) {
 	fprintf(stdout, "\n");
 }
 
-int freeSymNode(struct SymNode *symNode) {
+int freeSymNode(Symbol symNode) {
 	if (symNode == NULL) {
 		return 0;
 	}
@@ -222,6 +226,7 @@ int freeSymNode(struct SymNode *symNode) {
 		return 1;
 	}
 	if (symNode->name) {
+		fprintf(stdout, "free %s\n", symNode->name);
 		free(symNode->name);
 		symNode->name = NULL;
 	}
@@ -238,9 +243,9 @@ int freeSymNode(struct SymNode *symNode) {
 		freeFunc(symNode->func);
 		symNode->func = NULL;
 		break;
-	case NewType:
-		freeType(symNode->specifier);
-		symNode->specifier = NULL;
+	case Struct:
+		freeType(symNode->structure);
+		symNode->structure = NULL;
 		break;
 	default:
 		fprintf(stderr, "error type\n");
@@ -251,7 +256,7 @@ int freeSymNode(struct SymNode *symNode) {
 	hashTableInfo.freeTimes++;
 	return 0;
 }
-void showSymbol(struct SymNode *symNode) {
+void showSymbol(Symbol symNode) {
 	if (symNode == NULL)
 		return;
 	fprintf(stdout, "----------------Symbol---------------\n");
@@ -268,10 +273,10 @@ void showSymbol(struct SymNode *symNode) {
 		showFunc(symNode->func);
 		ShowErrorInfo(symNode->errorInfo);
 		break;
-	case NewType:
+	case Struct:
 		fprintf(stdout, "NewType: ");
 		fprintf(stdout, "%s\n", symNode->name);
-		showType(symNode->specifier);
+		showType(symNode->structure);
 		ShowErrorInfo(symNode->errorInfo);
 		break;
 	default:
@@ -281,12 +286,12 @@ void showSymbol(struct SymNode *symNode) {
 	fprintf(stdout, "-------------------------------------\n");
 }
 // when get func type, just get return type
-Type getSymType(struct SymNode *symNode) {
+Type getSymType(Symbol symNode) {
 	if(symNode == NULL)
 		return NULL;
 	switch(symNode->type) {
-	case NewType:
-		return symNode->specifier;
+	case Struct:
+		return symNode->structure;
 		break;
 	case Var:
 		return symNode->var->type;
@@ -314,9 +319,9 @@ unsigned int hash_pjw(char *name) {
 	symNode: symNode to insert
 	return: the num of symnode in HashNode
 */
-int insert(struct SymNode *symNode) {
+int insert(Symbol symNode) {
 	unsigned int index;
-	struct SymNode *list;
+	Symbol list;
 	index = hash_pjw(symNode->name);
 	list = symTable[index].symNode;
 	if (list == NULL) {
@@ -347,9 +352,9 @@ int insert(struct SymNode *symNode) {
 	return: if hit return symNode
 		else return null
 */
-struct SymNode *lookup(char *name) {
+Symbol lookup(char *name) {
 	unsigned int index;
-	struct SymNode *result, *list;
+	Symbol result, list;
 	index = hash_pjw(name);
 	list = symTable[index].symNode;
 	if (list == NULL) {
@@ -366,8 +371,8 @@ struct SymNode *lookup(char *name) {
 /*
 	free all symnodes in a hashnode
 */
-int cleanSymList(struct SymNode *head) {
-	struct SymNode *next;
+int cleanSymList(Symbol head) {
+	Symbol next;
 	if (head == NULL)
 		return 0;
 	while (head != NULL) {
@@ -379,7 +384,7 @@ int cleanSymList(struct SymNode *head) {
 	}
 	return 0;
 }
-int showSymList(struct SymNode *head) {
+int showSymList(Symbol head) {
 	if (head == NULL)
 		return 0;
 	while (head != NULL) {

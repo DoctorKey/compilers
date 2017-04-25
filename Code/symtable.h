@@ -43,16 +43,16 @@ struct FieldList_ {
 	ErrorInfo errorInfo;
 };
 
-enum {Var, Func, NewType};
+enum {Var, Func, Struct};
 
 struct Var {
 	Type type;
 	int isDefine;
 	int isDeclare;
-	union {
-		int intValue;
-		float floatValue;
-	};
+//	union {
+//		int intValue;
+//		float floatValue;
+//	};
 };
 
 struct Func {
@@ -68,15 +68,15 @@ struct SymNode {
 	union {
 		struct Var *var;
 		struct Func *func;
-		Type specifier;
+		Type structure;
 	};
 	ErrorInfo errorInfo;
-	struct SymNode *next;
+	Symbol next;
 };
 
 struct HashNode {
 	int num;	//num of this hash node
-	struct SymNode *symNode;//the head of list
+	Symbol symNode;//the head of list
 };
 struct HashTableInfo {
 	// alloc symbols times
@@ -100,19 +100,19 @@ FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInf
 void freeType(Type type); 
 void freeFieldList(FieldList fieldList); 
 
-struct SymNode *newNewType(char *name, Type type, ErrorInfo errorInfo); 
-struct SymNode *newVar(char *name, Type type, ErrorInfo errorInfo); 
-struct SymNode *newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo); 
+Symbol newStruct(char *name, Type type, ErrorInfo errorInfo); 
+Symbol newVar(char *name, Type type, ErrorInfo errorInfo); 
+Symbol newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo); 
 
-int freeSymNode(struct SymNode *symNode); 
+int freeSymNode(Symbol symNode); 
 
-void showSymbol(struct SymNode *symNode);
+void showSymbol(Symbol symNode);
 void showAllSymbol(void);
 
-int insert(struct SymNode *symNode); 
-struct SymNode *lookup(char *name);
+int insert(Symbol symNode); 
+Symbol lookup(char *name);
 Type lookupFieldListElem(FieldList fieldList, char *name);
-Type getSymType(struct SymNode *symNode);
+Type getSymType(Symbol symNode);
 
 int cleanHashTable(void); 
 void getHashTableInfo(void); 

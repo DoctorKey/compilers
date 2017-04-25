@@ -1,4 +1,7 @@
 #include "semantic.h"
+#include "main.h"
+#include "symtable.h"
+#include "syntax.tab.h"
 #include "semantichelp.h"
 #include "name.h"
 #include "error.h"
@@ -47,8 +50,8 @@ void ProgramAnalyze(TreeNode parent, int num) {
 		ShowErrorInfoStack(IdErrorInfoStackHead);
 		ShowErrorInfoStack(NumErrorInfoStackHead);
 	}
-	cleanHashTable();
-	getHashTableInfo();
+//	cleanHashTable();
+//	getHashTableInfo();
 }
 void ExtDefListAnalyze(TreeNode parent, int num) {
 }
@@ -285,7 +288,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 		parent->errorcount += deflist->errorcount;
 		//only when OptTag has name,add it to symTable 
 		if (parent->nodevalue.str != NULL) {
-			symNode = newNewType(parent->nodevalue.str, parent->type, tag->errorInfo);
+			symNode = newStruct(parent->nodevalue.str, parent->type, tag->errorInfo);
 			if (symNode == NULL) {
 				fprintf(stderr, "can't create symNode\n");
 				goto StructSpecifierDebug;
@@ -354,14 +357,14 @@ void TagAnalyze(TreeNode parent, int num) {
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
-	if (symNode->type != NewType) {
+	if (symNode->type != Struct) {
 		parent->errorInfo->ErrorTypeNum = 16;
 		SemanticError(parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
-	parent->type = symNode->specifier;
+	parent->type = symNode->structure;
 TagDebug:
 	if(debug2) {
 		fprintf(stdout, "Tag->nodevalue.str = %s\n", parent->nodevalue.str);
