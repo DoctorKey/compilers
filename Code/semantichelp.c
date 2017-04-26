@@ -81,6 +81,18 @@ int cmpFuncSym(Symbol left, Symbol right) {
 	return 0;
 }
 
+FieldList lookupfieldListByName(FieldList fieldList, char *name) {
+	FieldList result = fieldList;
+	while(result) {
+		if(strcmp(name, result->name) == 0) 
+			return result;
+		else
+			result = result->tail;
+	}
+	return NULL;
+
+}
+
 /*-----------------------------------------------------------------
 	Define function
 	Declare function

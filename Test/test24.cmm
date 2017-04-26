@@ -1,0 +1,21 @@
+struct A {
+	int a;
+	float A;
+	struct B {
+		int A;
+		float a;
+	}b1, b2;
+	int B;
+};
+
+int main(int a, int B) {
+
+}
+
+int B (int A) {
+	struct A b;
+	b.b1.a = 3.5;
+	b.b2.A = 4;
+	b.B = 2;
+	b.A = 1.2;
+}

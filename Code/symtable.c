@@ -369,6 +369,27 @@ Symbol lookup(char *name) {
 }
 
 /*
+	name: name of symNode
+	type: type of symNode {Var, Func, Struct}
+	return: if hit return symNode
+		else return null
+*/
+Symbol lookupByType(char *name, int type) {
+	unsigned int index;
+	Symbol result, list;
+	index = hash_pjw(name);
+	list = symTable[index].symNode;
+	if (list == NULL) {
+		return NULL;
+	}
+	while (list != NULL) {
+		if (strcmp(list->name, name) == 0 && list->type == type)
+			return list;
+		list = list->next;
+	}
+	return NULL;
+}
+/*
 	free all symnodes in a hashnode
 */
 int cleanSymList(Symbol head) {

@@ -97,7 +97,7 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 			symNode->var->isDeclare = 1;
 			param = param->tail;
 		}
-		symNode = lookup(Funcsymbol->name);
+		symNode = lookupByType(Funcsymbol->name, Func);
 		if(symNode) {
 			if(symNode->func->isDefine || symNode->func->isDeclare) {
 				//have been defined or declared	
@@ -135,7 +135,7 @@ void ExtDefAnalyze(TreeNode parent, int num) {
 			}
 			param = param->tail;
 		}
-		symNode = lookup(Funcsymbol->name);
+		symNode = lookupByType(Funcsymbol->name, Func);
 		if(symNode) {
 			if(symNode->func->isDefine) {
 				//have been defined
@@ -181,7 +181,7 @@ void ExtDecListAnalyze(TreeNode parent, int num) {
 	}
 	parent->errorInfo = vardec->errorInfo;
 	symNode = lookup(vardec->nodevalue.str);
-	if (symNode) {
+	if (symNode && (symNode->type == Var || symNode->type == Struct)) {
 		parent->errorInfo->ErrorTypeNum = 3;
 		SemanticError(parent->errorInfo);
 	}else {
@@ -253,6 +253,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 	TreeNode tag = NULL;
 	TreeNode deflist = NULL;
 	Symbol symNode = NULL;
+	FieldList structItem = NULL;
 	//finish define
 	structdefnum--;
 	tag = parent->children[1];
@@ -286,6 +287,15 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 			parent->type->structure = deflist->fieldList;	
 		}
 		parent->errorcount += deflist->errorcount;
+		structItem = parent->type->structure;
+		while(structItem) {
+			if(lookupfieldListByName(structItem->tail, structItem->name)) {
+				structItem->errorInfo->ErrorTypeNum = 15;
+				SemanticError(structItem->errorInfo);
+			}else {
+				structItem = structItem->tail;
+			}
+		}
 		//only when OptTag has name,add it to symTable 
 		if (parent->nodevalue.str != NULL) {
 			symNode = newStruct(parent->nodevalue.str, parent->type, tag->errorInfo);
@@ -322,7 +332,7 @@ void OptTagAnalyze(TreeNode parent, int num) {
 	}
 	parent->nodevalue.str = child->nodevalue.str;
 	symNode = lookup(parent->nodevalue.str); 
-	if (symNode != NULL) {
+	if (symNode != NULL && (symNode->type == Struct || symNode->type == Var)) {
 		parent->errorInfo->ErrorTypeNum = 16;
 		SemanticError(parent->errorInfo);
 		goto OptTagDebug;
@@ -349,7 +359,7 @@ void TagAnalyze(TreeNode parent, int num) {
 	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - 1);
 	parent->errorcount = 1;
 	parent->nodevalue.str = child->nodevalue.str;
-	symNode = lookup(parent->nodevalue.str); 
+	symNode = lookupByType(parent->nodevalue.str, Struct); 
 	if (symNode == NULL) {
 		parent->errorInfo->ErrorTypeNum = 17;
 		SemanticError(parent->errorInfo);
@@ -357,13 +367,14 @@ void TagAnalyze(TreeNode parent, int num) {
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
+	/*
 	if (symNode->type != Struct) {
 		parent->errorInfo->ErrorTypeNum = 16;
 		SemanticError(parent->errorInfo);
 		parent->type = newType();
 		parent->type->kind = ERROR;
 		goto TagDebug;
-	}
+	}*/
 	parent->type = symNode->structure;
 TagDebug:
 	if(debug2) {
@@ -464,7 +475,7 @@ void FunDecAnalyze(TreeNode parent, int num) {
 
 	Funcsymbol = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
 	symNode = lookup(parent->nodevalue.str);
-	if(symNode == NULL) {
+	if(symNode == NULL || symNode->type != Func) {
 		insert(Funcsymbol);
 	}
 
@@ -724,10 +735,10 @@ void DecAnalyze(TreeNode parent, int num) {
 	parent->type = vardec->type;
 
 	symNode = lookup(parent->nodevalue.str);
-	if (symNode) {
+	if (symNode && (symNode->type == Var || symNode->type == Struct)) {
 		if (structdefnum > 0) {
-			parent->errorInfo->ErrorTypeNum = 15;
-			SemanticError(parent->errorInfo);
+//			parent->errorInfo->ErrorTypeNum = 15;
+//			SemanticError(parent->errorInfo);
 		}else {
 			parent->errorInfo->ErrorTypeNum = 3;
 			SemanticError(parent->errorInfo);

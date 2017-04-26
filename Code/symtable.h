@@ -49,10 +49,6 @@ struct Var {
 	Type type;
 	int isDefine;
 	int isDeclare;
-//	union {
-//		int intValue;
-//		float floatValue;
-//	};
 };
 
 struct Func {
@@ -111,6 +107,7 @@ void showAllSymbol(void);
 
 int insert(Symbol symNode); 
 Symbol lookup(char *name);
+Symbol lookupByType(char *name, int type); 
 Type lookupFieldListElem(FieldList fieldList, char *name);
 Type getSymType(Symbol symNode);
 

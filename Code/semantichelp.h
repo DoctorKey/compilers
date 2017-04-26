@@ -5,6 +5,7 @@
 
 int cmpType(Type type1, Type type2); 
 int cmpFieldList(FieldList fieldList1, FieldList fieldList2); 
+FieldList lookupfieldListByName(FieldList fieldList, char *name); 
 
 int cmpFuncSym(Symbol left, Symbol right); 
 int cmpFuncSymByName(Symbol left, Symbol right); 
