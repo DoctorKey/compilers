@@ -255,8 +255,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 	Symbol symNode = NULL;
 	FieldList structItem = NULL;
 	FieldList errortag = NULL;
-	//finish define
-	structdefnum--;
+	FieldList preerrortag = NULL;
 	tag = parent->children[1];
 	if (tag == NULL) {
 		parent->nodevalue.str = NULL;
@@ -291,10 +290,19 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 		
 		structItem = parent->type->structure;
 		while(structItem) {
-			errortag =lookupfieldListByName(structItem->tail, structItem->name);
-			if(errortag) {
-				errortag->errorInfo->ErrorTypeNum = 15;
-				SemanticError(errortag->errorInfo);
+			preerrortag = structItem;
+			errortag = structItem->tail;
+			while(errortag) {
+				if(strcmp(structItem->name, errortag->name) == 0) {
+					errortag->errorInfo->ErrorTypeNum = 15;
+					SemanticError(errortag->errorInfo);
+					preerrortag->tail = errortag->tail;
+					//free(errortag);
+					errortag = preerrortag->tail;
+				}else {
+					preerrortag = errortag;
+					errortag = errortag->tail;
+				}
 			}
 			structItem = structItem->tail;
 		}
@@ -370,14 +378,6 @@ void TagAnalyze(TreeNode parent, int num) {
 		parent->type->kind = ERROR;
 		goto TagDebug;
 	}
-	/*
-	if (symNode->type != Struct) {
-		parent->errorInfo->ErrorTypeNum = 16;
-		SemanticError(parent->errorInfo);
-		parent->type = newType();
-		parent->type->kind = ERROR;
-		goto TagDebug;
-	}*/
 	parent->type = symNode->structure;
 TagDebug:
 	if(debug2) {
@@ -619,19 +619,16 @@ void DefListAnalyze(TreeNode parent, int num) {
 	TreeNode def = NULL;	
 	TreeNode deflist = NULL;	
 	FieldList defFieldList = NULL;
-	FieldList predefFieldList = NULL;
 	FieldList deflistFieldList = NULL;
-	FieldList errortag = NULL;
 
 	def = parent->children[0];	
 	if (def == NULL) {
 		fprintf(stderr, "DefList's child Def is NULL\n");
 		goto DefListDebug;
 	}
-	parent->fieldList = def->fieldList;
+	defFieldList = def->fieldList;
 	parent->errorcount = def->errorcount;
 	
-	defFieldList = parent->fieldList;
 	if (defFieldList == NULL) {
 		fprintf(stderr, "DefList's child Def's fieldList is NULL\n");
 		goto DefListDebug;
@@ -644,12 +641,7 @@ void DefListAnalyze(TreeNode parent, int num) {
 		deflistFieldList = deflist->fieldList;
 		parent->errorcount += deflist->errorcount;
 	}
-	predefFieldList = defFieldList;
-	while(predefFieldList->tail != NULL) {
-		predefFieldList = predefFieldList->tail;
-	}
-	// just link Def->tail = DefList
-	predefFieldList->tail = deflistFieldList;
+	parent->fieldList = mergeFieldList(defFieldList, deflistFieldList);
 DefListDebug:
 	if (debug2) {
 		fprintf(stdout, "DefList->fieldList : \n");

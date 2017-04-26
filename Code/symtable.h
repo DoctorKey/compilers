@@ -93,6 +93,7 @@ void showType(Type type);
 void showFieldList(FieldList fieldList); 
 
 FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo); 
+FieldList mergeFieldList(FieldList front, FieldList tail); 
 void freeType(Type type); 
 void freeFieldList(FieldList fieldList); 
 

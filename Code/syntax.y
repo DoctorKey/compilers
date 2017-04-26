@@ -99,11 +99,11 @@ Specifier : TYPE
 		{ $$ = newNode(Specifier, 1, $1); }
 	;
 StructSpecifier : STRUCT OptTag LC DefList RC	
-		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, $4, $5);}
+		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, $4, $5); structdefnum--; }
 	| STRUCT Tag	
 		{ $$ = newNode(StructSpecifier, 2, $1, $2); }
 	| STRUCT OptTag LC error RC 
-		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, NULL, $5); yyerrok; }
+		{ $$ = newNode(StructSpecifier, 5, $1, $2, $3, NULL, $5); yyerrok; structdefnum--; }
 	| error LC DefList RC 
 		{ $$ = newNode(StructSpecifier, 4, NULL, $2, $3, $4); yyerrok; }
 	| error LC error RC 

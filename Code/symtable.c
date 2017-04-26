@@ -82,6 +82,14 @@ FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInf
 	fieldList->errorInfo = errorInfo;
 	return fieldList;
 }
+FieldList mergeFieldList(FieldList front, FieldList tail) {
+	FieldList temp = front;
+	while(temp->tail != NULL) {
+		temp = temp->tail;
+	}
+	temp->tail = tail;
+	return front;
+} 
 void showFieldList(FieldList fieldList) {
 	if (fieldList == NULL)
 		return;

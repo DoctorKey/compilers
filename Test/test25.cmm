@@ -1,0 +1,15 @@
+struct A {
+	int x, x, x;
+	int b;
+	int x;
+	int b;
+	struct B {
+		int b;
+		int x;
+	}b;
+	struct C {
+		int b;
+		int x;
+	}x;
+	int x;
+};
