@@ -254,6 +254,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 	TreeNode deflist = NULL;
 	Symbol symNode = NULL;
 	FieldList structItem = NULL;
+	FieldList errortag = NULL;
 	//finish define
 	structdefnum--;
 	tag = parent->children[1];
@@ -287,15 +288,17 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 			parent->type->structure = deflist->fieldList;	
 		}
 		parent->errorcount += deflist->errorcount;
+		
 		structItem = parent->type->structure;
 		while(structItem) {
-			if(lookupfieldListByName(structItem->tail, structItem->name)) {
-				structItem->errorInfo->ErrorTypeNum = 15;
-				SemanticError(structItem->errorInfo);
-			}else {
-				structItem = structItem->tail;
+			errortag =lookupfieldListByName(structItem->tail, structItem->name);
+			if(errortag) {
+				errortag->errorInfo->ErrorTypeNum = 15;
+				SemanticError(errortag->errorInfo);
 			}
+			structItem = structItem->tail;
 		}
+		
 		//only when OptTag has name,add it to symTable 
 		if (parent->nodevalue.str != NULL) {
 			symNode = newStruct(parent->nodevalue.str, parent->type, tag->errorInfo);
@@ -615,7 +618,10 @@ void DefListAnalyze(TreeNode parent, int num) {
 	// Def DefList
 	TreeNode def = NULL;	
 	TreeNode deflist = NULL;	
-	FieldList fieldList = NULL;
+	FieldList defFieldList = NULL;
+	FieldList predefFieldList = NULL;
+	FieldList deflistFieldList = NULL;
+	FieldList errortag = NULL;
 
 	def = parent->children[0];	
 	if (def == NULL) {
@@ -625,23 +631,25 @@ void DefListAnalyze(TreeNode parent, int num) {
 	parent->fieldList = def->fieldList;
 	parent->errorcount = def->errorcount;
 	
-	fieldList = parent->fieldList;
-	if (fieldList == NULL) {
+	defFieldList = parent->fieldList;
+	if (defFieldList == NULL) {
 		fprintf(stderr, "DefList's child Def's fieldList is NULL\n");
 		goto DefListDebug;
-	}
-	while(fieldList->tail != NULL) {
-		fieldList = fieldList->tail;
 	}
 	//Maybe it is NULL ?
 	deflist = parent->children[1];	// DefList
 	if (deflist == NULL) {
-		fieldList->tail = NULL;
+		deflistFieldList = NULL;
 	}else {
-		// just link Def->tail = DefList
-		fieldList->tail = deflist->fieldList;
+		deflistFieldList = deflist->fieldList;
 		parent->errorcount += deflist->errorcount;
 	}
+	predefFieldList = defFieldList;
+	while(predefFieldList->tail != NULL) {
+		predefFieldList = predefFieldList->tail;
+	}
+	// just link Def->tail = DefList
+	predefFieldList->tail = deflistFieldList;
 DefListDebug:
 	if (debug2) {
 		fprintf(stdout, "DefList->fieldList : \n");
@@ -734,18 +742,15 @@ void DecAnalyze(TreeNode parent, int num) {
 	parent->nodevalue.str = vardec->nodevalue.str;
 	parent->type = vardec->type;
 
-	symNode = lookup(parent->nodevalue.str);
-	if (symNode && (symNode->type == Var || symNode->type == Struct)) {
-		if (structdefnum > 0) {
-//			parent->errorInfo->ErrorTypeNum = 15;
-//			SemanticError(parent->errorInfo);
-		}else {
+	if(structdefnum == 0) {
+		symNode = lookup(parent->nodevalue.str);
+		if (symNode && (symNode->type == Var || symNode->type == Struct)) {
 			parent->errorInfo->ErrorTypeNum = 3;
 			SemanticError(parent->errorInfo);
+		}else {
+			symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
+			insert(symNode);
 		}
-	}else {
-		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
-		insert(symNode);
 	}
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {

@@ -31,7 +31,7 @@ void SemanticError(ErrorInfo errorInfo) {
 	case 12: fprintf(stderr, "not an integer "); break;
 	case 13: fprintf(stderr, "Illegal use of \".\" "); break;
 	case 14: fprintf(stderr, "Non-existent field "); break;
-	case 15: fprintf(stderr, "Redefined field "); break;
+	case 15: fprintf(stderr, "Redefined field or init field"); break;
 	case 16: fprintf(stderr, "Duplicated name "); break;
 	case 17: fprintf(stderr, "Undefined structure "); break;
 	case 18: fprintf(stderr, "Undefined function "); break;
