@@ -604,6 +604,8 @@ void StmtAnalyze(TreeNode parent, int num) {
 		}
 		if (exp->type->kind != BASIC || exp->type->basic != INT) {
 			//fprintf(stderr, "assumption 2\n");
+			exp->errorInfo->ErrorTypeNum = 7;
+			SemanticError(exp->errorInfo);
 		}
 	}
 	if(debug2) {
