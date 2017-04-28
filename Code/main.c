@@ -15,6 +15,7 @@ extern void syntax_init();
 
 int debug = 0;
 int debug2 = 0;
+int debug3 = 0;
 
 int main(int argc, char** argv)
 {
@@ -34,6 +35,9 @@ int main(int argc, char** argv)
 			printf("debug2 activated\n");
 //			test();
 			debug2 = 1;
+		}else if( strcmp(argv[i], "-debug3") == 0  ) {
+			printf("debug3 activated\n");
+			debug3 = 1;
 		}
 		else {
 			lexical_init();

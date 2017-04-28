@@ -45,6 +45,9 @@ struct node *newNode(int type,int num, ...)
 #if 	LAB_2 == true
 	semanticAnalyze(temp, num);
 #endif
+#if 	LAB_3 == true
+	translateIR(temp, num);
+#endif
 	return temp;
 }
 struct node *newtokenNode(int type)
