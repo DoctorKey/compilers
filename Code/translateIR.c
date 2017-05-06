@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+int boolexp = 0;
 /*--------------------------------------------------------------------------
 
 	High-level Definitions
@@ -549,54 +550,82 @@ ParamDecDebug:
 	Statements
 */
 void CompStTrans(TreeNode parent, int num) {
+	TreeNode stmtlist;
+	stmtlist = parent->children[2];
+	parent->irinfo = newIRinfo();
+	parent->irinfo->nextlist = stmtlist->irinfo->nextlist;
 }
 void StmtListTrans(TreeNode parent, int num) {
+	TreeNode stmt, stmtlist;
+	Operand Mop;
+	stmt = parent->children[0];
+	stmtlist = parent->children[1];
+	parent->irinfo = newIRinfo();
+	Mop = Mpop();
+	Opbackpatch(stmt->irinfo->nextlist, Mop);
+	if(stmtlist == NULL)
+		parent->irinfo->nextlist = NULL;
+	else
+		parent->irinfo->nextlist = stmtlist->irinfo->nextlist;
 }
 void StmtTrans(TreeNode parent, int num) {
-/*
 	TreeNode exp = NULL;
 	TreeNode stmtType = NULL;
+	TreeNode stmt = NULL;
+	Operand truelabelop = NULL, falselabelop = NULL;
+	Operand labelop, op_tmp;
+	Operand M1op, M2op;
+	Operandlist oplist;
+	InterCode result;
+	parent->irinfo = newIRinfo();
 	stmtType = parent->children[0];
-	if (stmtType == NULL) {
-		fprintf(stderr, "Stmt's child is NULL\n");
-		return;
+	//Exp SEMI
+	if (stmtType->nodetype == Exp) {
+		parent->irinfo->nextlist = NULL;
+	}
+	//CompSt
+	if (stmtType->nodetype == CompSt) {
+		parent->irinfo->nextlist = stmtType->irinfo->nextlist;
 	}
 	//RETURN Exp SEMI
 	if (stmtType->nodetype == RETURN) {
 		exp = parent->children[1];
-		if (exp == NULL) {
-			fprintf(stderr, "Stmt's child Exp is NULL\n");
-			return;
-		}
-		parent->errorInfo = exp->errorInfo;
-//		if (cmpType(GFuncReturn, exp->type)) {
-		if (cmpType(Funcsymbol->func->Return, exp->type)) {
-			parent->errorInfo->ErrorTypeNum = 8;
-			SemanticError(parent->errorInfo);
-		}
-		if(debug2) {
-			fprintf(stderr, "Stmt check return\n");	
-			showType(GFuncReturn);
-			showType(exp->type);
-		}
+		result = ReturnIR(exp->irinfo->op);
+		parent->irinfo->nextlist = NULL;
 	}
+	exp = parent->children[2];
+	stmt = parent->children[4];
 	// if; while
-	if (stmtType->nodetype == IF || stmtType->nodetype == WHILE) {
-		exp = parent->children[2];
-		if (exp == NULL) {
-			fprintf(stderr, "Stmt's child Exp is NULL\n");
-			return;
-		}
-		if (exp->type->kind != BASIC || exp->type->basic != INT) {
-			//fprintf(stderr, "assumption 2\n");
-			exp->errorInfo->ErrorTypeNum = 7;
-			SemanticError(exp->errorInfo);
+	if (stmtType->nodetype == IF ) {
+		// if lp exp rp stmt 
+		if(num == 5) {
+			M1op = Mpop();
+			Opbackpatch(exp->irinfo->truelist, M1op);
+			parent->irinfo->nextlist = Opmerge(exp->irinfo->falselist,stmt->irinfo->nextlist); 
+		}else if(num == 7) {
+//			labelop = newLabel();
+//			op_tmp = newOperand(CONSTANT_OP);
+//			op_tmp->type = Int;
+//			op_tmp->num_int = 0;
+//			result = IfIR(exp->irinfo->op, "!=", op_tmp, labelop);
+//			LabelIR(labelop->num_int);
+//		
 		}
 	}
-	if(debug2) {
-		fprintf(stderr, "Stmt\n");	
+	if (stmtType->nodetype == WHILE) {
+		M2op = Mpop();
+		M1op = Mpop();
+		Opbackpatch(stmt->irinfo->nextlist, M1op);
+		Opbackpatch(exp->irinfo->truelist, M2op);
+		parent->irinfo->nextlist = exp->irinfo->falselist;
+		result = GotoIR(M1op);
 	}
-*/
+}
+void MTrans(TreeNode parent, int num) {
+	parent->irinfo = newIRinfo();
+	parent->irinfo->op = newLabel();
+	LabelIR(parent->irinfo->op->num_int);
+	Mpush(parent->irinfo->op);
 }
 /*
 	Local Definitions
@@ -777,11 +806,13 @@ void genArgsIR(IRinfo irinfo) {
 	genArgsIR(irinfo->next);
 	ArgIR(irinfo->op);
 }
+int noif = 1;
 // update parent->type, parent->errorInfo, parent->nodevalue.str
 void ExpTrans(TreeNode parent, int num) {
 	TreeNode childleft, childright, childmid;
 	Symbol symNode = NULL;
-	Operand op_tmp;
+	Operand op_tmp, op_tmp2;
+	Operand trueop, falseop, Mop;
 	InterCode result;	
 	parent->irinfo = newIRinfo();
 	childleft = parent->children[0];
@@ -812,9 +843,16 @@ void ExpTrans(TreeNode parent, int num) {
 	childmid = parent->children[1];
 	if (num == 2) {
 		if(childleft->nodetype == MINUS) {
+			op_tmp = newTemp();
+			op_tmp2 = newOperand(CONSTANT_OP);
+			op_tmp2->type = Int;
+			op_tmp2->num_int = 0;
+			result = Assign3IR(op_tmp, op_tmp2, SUB_IR, childmid->irinfo->op);
+			parent->irinfo->op = op_tmp;
 		}
 		if(childleft->nodetype == NOT) {
-		
+			parent->irinfo->truelist = childmid->irinfo->falselist;		
+			parent->irinfo->falselist = childmid->irinfo->truelist;		
 		}
 		goto ExpDebug;
 	}
@@ -823,12 +861,18 @@ void ExpTrans(TreeNode parent, int num) {
 		// LP Exp RP
 		if (childleft->nodetype == LP && childright->nodetype == RP) {
 			parent->irinfo->op = childmid->irinfo->op;
+			parent->irinfo->truelist = childmid->irinfo->truelist;		
+			parent->irinfo->falselist = childmid->irinfo->falselist;		
 			goto ExpDebug;
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
 			op_tmp = newTemp();
-			result = CallIR(op_tmp, childleft->nodevalue.str);
+			if(strcmp(childleft->nodevalue.str, "read") == 0) {
+				result = ReadIR(op_tmp);
+			}else {
+				result = CallIR(op_tmp, childleft->nodevalue.str);
+			}
 			parent->irinfo->op = op_tmp;
 			goto ExpDebug;
 		}
@@ -875,6 +919,31 @@ void ExpTrans(TreeNode parent, int num) {
 		case DIV:
 			Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
 			break;
+		case AND:
+			Mop = Mpop();
+			Opbackpatch(childleft->irinfo->falselist, Mop);
+			parent->irinfo->truelist = childright->irinfo->truelist;
+			parent->irinfo->falselist = Opmerge(childleft->irinfo->falselist, childright->irinfo->falselist);
+			break;
+		case OR:
+			Mop = Mpop();
+			Opbackpatch(childleft->irinfo->truelist, Mop);
+			parent->irinfo->falselist = childright->irinfo->falselist;
+			parent->irinfo->truelist = Opmerge(childleft->irinfo->truelist, childright->irinfo->truelist);
+			break;
+		case RELOP:
+			trueop = newOperand(LABEL_OP);
+			trueop->type = Int;
+			trueop->num_int = -1;
+			falseop = newOperand(LABEL_OP);
+			falseop->type = Int;
+			falseop->num_int = -1;
+			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
+			GotoIR(falseop);
+			parent->irinfo->truelist = Opmakelist(trueop);
+			parent->irinfo->falselist = Opmakelist(falseop);
+			noif = 0;
+			break;
 		}
 		parent->irinfo->op = op_tmp;
 		goto ExpDebug;
@@ -883,10 +952,14 @@ void ExpTrans(TreeNode parent, int num) {
 	if (num == 4) {
 		// ID LP Args RP
 		if(childleft->nodetype == ID) {
-			genArgsIR(childright->irinfo);
-			op_tmp = newTemp();
-			result = CallIR(op_tmp, childleft->nodevalue.str);
-			parent->irinfo->op = op_tmp;
+			if(strcmp(childleft->nodevalue.str, "write") == 0) {
+				result = WriteIR(childright->irinfo->op);			
+			}else {
+				genArgsIR(childright->irinfo);
+				op_tmp = newTemp();
+				result = CallIR(op_tmp, childleft->nodevalue.str);
+				parent->irinfo->op = op_tmp;
+			}
 			goto ExpDebug;
 		}	
 		// Exp LB Exp RB
@@ -905,12 +978,26 @@ void ExpTrans(TreeNode parent, int num) {
 		goto ExpDebug;
 	}
 ExpDebug:
+	if(boolexp == 1) {
+		boolexp = 0;
+		if(noif == 1) {
+			trueop = newOperand(LABEL_OP);
+			trueop->type = Int;
+			trueop->num_int = -1;
+			falseop = newOperand(LABEL_OP);
+			falseop->type = Int;
+			falseop->num_int = -1;
+			op_tmp = newOperand(CONSTANT_OP);
+			op_tmp->type = Int;
+			op_tmp->num_int = 0;
+			result = IfIR(parent->irinfo->op, "!=", op_tmp, trueop);
+			GotoIR(falseop);
+			parent->irinfo->truelist = Opmakelist(trueop);
+			parent->irinfo->falselist = Opmakelist(falseop);
+		}
+		noif = 1;
+	}
 	if(debug2) {
-		fprintf(stdout, "Exp: ");
-		ShowErrorInfo(parent->errorInfo);
-		fprintf(stdout, "Exp->type: \n");
-		showType(parent->type);
-		fprintf(stdout, "\n");
 	}
 }
 // update parent->fieldList 
@@ -953,5 +1040,6 @@ void translateIR(TreeNode parent, int num) {
 	case Dec:		DecTrans(parent, num);			break;
 	case Exp:		ExpTrans(parent, num);			break;
 	case Args:		ArgsTrans(parent, num);			break;
+	case M:			MTrans(parent, num);			break;
 	}
 }

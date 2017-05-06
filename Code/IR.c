@@ -41,6 +41,9 @@ IRinfo newIRinfo() {
 	result->addr = NULL;
 	result->op = NULL;
 	result->next = NULL;
+	result->truelist = NULL;
+	result->falselist = NULL;
+	result->nextlist = NULL;
 	return result;
 }
 Operand newOperand(int kind) {
@@ -60,6 +63,63 @@ Operand newTemp() {
 	result->type = Int;
 	result->num_int = tempnum;
 	return result;
+}
+Operand newLabel() {
+	Operand result = NULL;
+	result = newOperand(LABEL_OP);
+	labelnum++;
+	result->type = Int;
+	result->num_int = labelnum;
+	return result;
+}
+Operandlist Mstack = NULL;
+void Mpush(Operand M) {
+	Operandlist new = NULL;
+	if(Mstack == NULL)
+		Mstack = Opmakelist(M);
+	else {
+		new = Opmakelist(M);
+		new->next = Mstack;
+		Mstack = new;
+	}
+}
+Operand Mpop() {
+	Operand result;
+	if(Mstack == NULL)
+		return NULL;
+	else {
+		result = Mstack->op;
+		Mstack = Mstack->next;
+		return result;
+	}	
+}
+Operandlist Opmakelist(Operand op) {
+	Operandlist result = NULL;
+	result = (Operandlist) malloc(sizeof(struct Operandlist_));
+	if(result == NULL) {
+		fprintf(stderr, "can't malloc\n");
+		return NULL;
+	}
+	result->op = op;
+	result->next = NULL;
+	return result;
+}
+Operandlist Opmerge(Operandlist oplist1, Operandlist oplist2) {
+	Operandlist tmp = oplist1;
+	if(tmp == NULL)
+		return oplist2;
+	while(tmp->next)
+		tmp = tmp->next;
+	tmp->next = oplist2;
+	return oplist1;
+}
+void Opbackpatch(Operandlist oplist, Operand label) {
+	if(label == NULL)
+		return;
+	while(oplist) {
+		oplist->op->num_int = label->num_int;
+		oplist = oplist->next;
+	}
 }
 char *Opvaluetostring(Operand op) {
 	static char buf[20];
@@ -188,19 +248,15 @@ InterCode Assign3IR(Operand x, Operand y, int kind, Operand z) {
 	addIR(result);
 	return result;
 }
-InterCode GotoIR(int n) {
+InterCode GotoIR(Operand n) {
 	InterCode result = NULL;
-	Operand op = NULL;
-	op = newOperand(LABEL_OP);
-	op->type = Int;
-	op->num_int = n;
 	result = newInterCode();
 	result->kind = GOTO_IR;
-	result->op1.op1 = op;
+	result->op1.op1 = n;
 	addIR(result);
 	return result;
 }
-InterCode IfIR(Operand x, char *relop, Operand y, int z) {
+InterCode IfIR(Operand x, char *relop, Operand y, Operand z) {
 	InterCode result = NULL;
 	Operand op = NULL;
 	op = newOperand(RELOP_OP);
@@ -211,10 +267,7 @@ InterCode IfIR(Operand x, char *relop, Operand y, int z) {
 	result->op4.x = x;
 	result->op4.relop = op;
 	result->op4.y = y;
-	op = newOperand(LABEL_OP);
-	op->type = Int;
-	op->num_int = z;
-	result->op4.z = op;
+	result->op4.z = z;
 	addIR(result);
 	return result;
 }
@@ -350,6 +403,7 @@ void printfallIR(FILE *tag) {
 		temp = temp->next;
 	}
 }
+/*
 void test3() {
 	Operand x,y,z;
 	InterCode temp;
@@ -401,3 +455,4 @@ void test3() {
 	fprintf(tag, "---------------all--------------\n");
 	printfallIR(tag);
 }
+*/

@@ -152,8 +152,8 @@ CompSt : LC DefList StmtList RC
 	;
 StmtList : 	
 		{ $$ = NULL; }
-	| Stmt StmtList	
-		{ $$ = newNode(StmtList, 2, $1, $2); }
+	| Stmt M StmtList	
+		{ $$ = newNode(StmtList, 2, $1, $3); }
 	;
 Stmt : Exp SEMI	
 		{ $$ = newNode(Stmt, 2, $1, $2); }
@@ -161,22 +161,23 @@ Stmt : Exp SEMI
 		{ $$ = newNode(Stmt, 1, $1); }
 	| RETURN Exp SEMI	
 		{ $$ = newNode(Stmt, 3, $1, $2, $3); }
-	| IF LP Exp RP Stmt %prec LOWER_THAN_ELSE 
-		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
-	| IF LP Exp RP Stmt ELSE Stmt
-		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $5, $6, $7); }
-	| WHILE LP Exp RP Stmt
-		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $5); }
+	| IF LP Exp RP M Stmt %prec LOWER_THAN_ELSE 
+		{ $$ = newNode(Stmt, 5, $1, $2, $3, $4, $6); }
+	| IF LP Exp RP M Stmt ELSE M Stmt
+		{ $$ = newNode(Stmt, 7, $1, $2, $3, $4, $6, $7, $9); }
+	| WHILE M LP Exp RP M Stmt
+		{ $$ = newNode(Stmt, 5, $1, $3, $4, $5, $7); }
 	| error SEMI 
 		{ $$ = newNode(Stmt, 2, NULL, $2); yyerrok; }
-	| IF LP error RP Stmt %prec LOWER_THAN_ELSE 
-		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $5); yyerrok; }
-	| IF LP error RP Stmt ELSE Stmt
-		{ $$ = newNode(Stmt, 7, $1, $2, NULL, $4, $5, $6, $7); yyerrok; }
-	| WHILE LP error RP Stmt
-		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $5); yyerrok; }
+	| IF LP error RP M Stmt %prec LOWER_THAN_ELSE 
+		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $6); yyerrok; }
+	| IF LP error RP M Stmt ELSE M Stmt
+		{ $$ = newNode(Stmt, 7, $1, $2, NULL, $4, $6, $7, $9); yyerrok; }
+	| WHILE M LP error RP M Stmt
+		{ $$ = newNode(Stmt, 5, $1, $3, NULL, $5, $7); yyerrok; }
 	;
-
+M : 		{ newNode(M, 0); }
+	;
 // Local Definitions 
 DefList :	
 		{$$ = NULL;}
@@ -201,10 +202,10 @@ Dec : VarDec
 // Expressions 
 Exp : Exp ASSIGNOP Exp 
 		{ $$ = newNode(Exp, 3, $1, $2, $3);}
-	| Exp AND Exp  
-		{ $$ = newNode(Exp, 3, $1, $2, $3);}
-	| Exp OR Exp  
-		{ $$ = newNode(Exp, 3, $1, $2, $3);}
+	| Exp AND M Exp  
+		{ $$ = newNode(Exp, 3, $1, $2, $4);}
+	| Exp OR M Exp  
+		{ $$ = newNode(Exp, 3, $1, $2, $4);}
 	| Exp RELOP Exp
 		{ $$ = newNode(Exp, 3, $1, $2, $3);}
 	| Exp PLUS Exp

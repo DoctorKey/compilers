@@ -5,12 +5,14 @@
 
 typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
 typedef struct Operand_* Operand;
+typedef struct Operandlist_* Operandlist;
 typedef struct IRinfo_* IRinfo;
 struct IRinfo_ {
 	OP_KIND kind;
 	char * addr;
 	Operand op;
 	IRinfo next;
+	Operandlist truelist, falselist, nextlist;
 };
 IRinfo newIRinfo(); 
 
@@ -23,6 +25,18 @@ struct Operand_ {
 		char *str;
 	};
 };
+
+struct Operandlist_ {
+	Operand op;
+	Operandlist next;
+};
+Operandlist Opmakelist(Operand op); 
+Operandlist Opmerge(Operandlist oplist1, Operandlist oplist2); 
+void Opbackpatch(Operandlist oplist, Operand label); 
+
+void Mpush(Operand M); 
+Operand Mpop(); 
+
 typedef enum { LABEL_IR, FUNCTION_IR, 
 		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, 
 		GOTO_IR, IF_IR, RETURN_IR, DEC_IR, 
@@ -55,6 +69,7 @@ struct InterCodes_ {
 void IR_init(); 
 Operand newOperand(int kind); 
 Operand newTemp(); 
+Operand newLabel(); 
 char *Optostring(Operand op); 
 InterCode newInterCode(); 
 void addIR(InterCode ir); 
@@ -63,8 +78,8 @@ InterCode LabelIR(int n);
 InterCode FunctionIR(char *funcname); 
 InterCode Assign2IR(Operand x, Operand y); 
 InterCode Assign3IR(Operand x, Operand y, int kind, Operand z); 
-InterCode GotoIR(int n); 
-InterCode IfIR(Operand x, char *relop, Operand y, int z); 
+InterCode GotoIR(Operand n); 
+InterCode IfIR(Operand x, char *relop, Operand y, Operand z); 
 InterCode ReturnIR(Operand x); 
 InterCode DecIR(Operand x, int size); 
 InterCode ArgIR(Operand x); 
