@@ -154,6 +154,7 @@ void FreeErrorInfo(ErrorInfo errorInfo) {
 void ShowErrorInfo(ErrorInfo errorInfo) {
 	if (errorInfo == NULL) {
 		fprintf(stderr, "errorInfo is NULL\n");
+		return;
 	}
 	fprintf(stderr, "%s\n", errorInfo->ErrorLineStr);
 }

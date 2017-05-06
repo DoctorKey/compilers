@@ -88,6 +88,7 @@ xdigit [0-9a-fA-F]
 (>|<|>=|<=|==|!=)		{ 	
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(RELOP);
+					yylval.type_node->nodevalue.str = strdup(yytext);
 					return RELOP;
 				}
 

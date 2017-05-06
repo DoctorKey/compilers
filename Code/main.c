@@ -3,6 +3,7 @@
 #include "error.h"
 #include "file.h"
 #include "symtable.h"
+#include "IR.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,49 @@ int main(int argc, char** argv)
 		printf("you must input file!\n");
 		return 1;
 	}
+	if(argc == 3) {
+		i = 0;	
+	}else if(argc == 4) {
+		i = 1;
+		if (  strcmp(argv[i], "-debug") == 0  ) {
+			printf("debugging activated\n");
+			debug = 1;
+		}else if( strcmp(argv[i], "-yydebug") == 0  ) {
+			printf("yydebug activated\n");
+			yydebug = 1;
+		}else if( strcmp(argv[i], "-debug2") == 0  ) {
+			printf("debug2 activated\n");
+//			test();
+			debug2 = 1;
+		}else if( strcmp(argv[i], "-debug3") == 0  ) {
+			printf("debug3 activated\n");
+//			test3();
+			debug3 = 1;
+		}
+	
+	}
+	//init output file;
+	if(newoutputfile(argv[i + 2])) {
+		fprintf(stderr, "newfile(%s) error!\n", argv[i + 2]);
+	}
+
+	IR_init(); 
+
+	lexical_init();
+	syntax_init();
+
+	if(newfile(argv[i + 1])) {
+		fprintf(stderr, "newfile(%s) error!\n", argv[i + 1]);
+	}else {
+		if(getNextLine() == 0)
+			yyparse();
+	}
+
+	printfallIR(stderr);
+	printfallIRtoFile();
+	closefile();
+	closeoutputfile();
+	/*
 	for(i = 1; i < argc; i++) {
 		if (  strcmp(argv[i], "-debug") == 0  ) {
 			printf("debugging activated\n");
@@ -53,6 +97,7 @@ int main(int argc, char** argv)
 			closefile();
 		}
 	}
+	*/
 	return 0;
 }
 

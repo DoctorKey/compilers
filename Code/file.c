@@ -5,10 +5,13 @@
 #include "file.h"
 #include "error.h"
 #include "syntax.tab.h"
+#include "IR.h"
 
 struct Buffer *curbuffer = NULL;
 FILE *curFile = NULL;
+FILE *outputFile = NULL;
 char *curfilename = NULL;
+char *outputfilename = NULL;
 
 extern int yylineno;
 extern int yycolumn;
@@ -48,6 +51,37 @@ closefile(void)
 	return 0;
 }
 
+int
+newoutputfile(char *fn)
+{
+	outputfilename = fn;
+	outputFile = fopen(outputfilename, "w");
+
+	if(!outputFile) {
+		fprintf(stderr, "can't open %s\n",outputfilename);
+		return 1;
+	}
+
+	return 0;
+}
+void
+printfallIRtoFile() {
+	if(outputFile)
+		printfallIR(outputFile);
+}
+int 
+closeoutputfile(void)
+{
+	if(!outputFile)
+		return 1;
+	else
+		fclose(outputFile);
+
+	outputFile = NULL;
+	outputfilename = NULL;
+
+	return 0;
+}
 struct Buffer*
 init_buffer(){
 	struct Buffer *buffer;

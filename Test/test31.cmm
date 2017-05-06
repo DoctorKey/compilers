@@ -1,0 +1,8 @@
+int func(int a, float b, int c) 
+{
+	return a + c;
+}
+int main() 
+{
+	func(1 + 5, 0.5, 2 + 3);
+}

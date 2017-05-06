@@ -3,6 +3,7 @@
 
 #include "symtable.h"
 #include "error.h"
+#include "IR.h"
 
 #define CHILD_NUM 7
 
@@ -16,6 +17,7 @@ struct node {
 	int nodetype;
 	Type type;
 	FieldList fieldList;
+	IRinfo irinfo;
 	ErrorInfo errorInfo;
 	int errorcount;
 	union value nodevalue;

@@ -22,6 +22,9 @@ extern char *curfilename;
 
 int newfile(char *fn);
 int closefile(void);
+int newoutputfile(char *fn);
+void printfallIRtoFile(); 
+int closeoutputfile(void);
 struct Buffer *init_buffer(void);
 void free_buffer(struct Buffer *buffer);
 

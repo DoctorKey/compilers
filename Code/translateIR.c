@@ -1,4 +1,13 @@
 #include "translateIR.h"
+#include "main.h"
+#include "symtable.h"
+#include "syntax.tab.h"
+#include "semantichelp.h"
+#include "name.h"
+#include "error.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 /*--------------------------------------------------------------------------
 
 	High-level Definitions
@@ -6,6 +15,7 @@
 --------------------------------------------------------------------------
 */
 void ProgramTrans(TreeNode parent, int num) {
+/*
 	struct FuncList *declist = NULL;
 	Symbol symNode = NULL;
 	Symbol tarNode = NULL;
@@ -29,11 +39,13 @@ void ProgramTrans(TreeNode parent, int num) {
 	}
 //	cleanHashTable();
 //	getHashTableInfo();
+*/
 }
 void ExtDefListTrans(TreeNode parent, int num) {
 }
 // update Gspecifier = NULL;GFuncReturn = NULL;
 void ExtDefTrans(TreeNode parent, int num) {
+/*
 	TreeNode specifier = NULL;
 	TreeNode midchild = NULL;
 	TreeNode rightchild = NULL;
@@ -145,9 +157,11 @@ ExtDefDebug:
 	if(debug2) {
 		showDecFuncList();
 	}
+	*/
 }
 // update add symbol
 void ExtDecListTrans(TreeNode parent, int num) {
+/*
 	TreeNode vardec = NULL;
 	Symbol symNode = NULL;
 
@@ -171,12 +185,14 @@ ExtDecListDebug:
 		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 /*
 	Specifiers
 */
 // update parent->type , Gspecifier
 void SpecifierTrans(TreeNode parent, int num) {
+/*
 	//TYPE; StructSpecifier
 	TreeNode child = parent->children[0];
 	if (child == NULL) {
@@ -224,9 +240,11 @@ SpecifierDebug:
 		showType(GFuncReturn);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 // new struct type; add to symTable; update parent->type, parent->nodevalue.str, structdefnum--
 void StructSpecifierTrans(TreeNode parent, int num) {
+/*
 	TreeNode tag = NULL;
 	TreeNode deflist = NULL;
 	Symbol symNode = NULL;
@@ -304,9 +322,11 @@ StructSpecifierDebug:
 		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 // update parent->nodevalue.str, parent->errorInfo
 void OptTagTrans(TreeNode parent, int num) {
+/*
 	// only when OptTag -> ID , call this function
 	TreeNode child = parent->children[0];
 	Symbol symNode = NULL;
@@ -329,9 +349,11 @@ OptTagDebug:
 	if(debug2) {
 		fprintf(stdout, "OptTag->nodevalue.str = %s\n", parent->nodevalue.str);
 	}
+*/
 }
 //update parent->nodevalue.str, parent->type, parent->errorInfo
 void TagTrans(TreeNode parent, int num) {
+/*
 	// ID
 	TreeNode child = parent->children[0];
 	Symbol symNode = NULL;
@@ -363,6 +385,7 @@ TagDebug:
 		showType(parent->type);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 
 /*
@@ -370,6 +393,7 @@ TagDebug:
 */
 // update parent->type, parent->nodevalue.str
 void VarDecTrans(TreeNode parent, int num) {
+/*
 	TreeNode id = NULL;
 	TreeNode vardec = NULL;
 	TreeNode index = NULL;
@@ -421,53 +445,33 @@ VarDecDebug:
 		showType(parent->type);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 // update GFuncReturn, parent->errorInfo
 void FunDecTrans(TreeNode parent, int num) {
-	TreeNode id = NULL;
-	TreeNode varlist = NULL;
-	Symbol symNode = NULL;
-	int errorcount;
-	int totalErrorInfo = GetTotalErrorInfo();
+	FieldList fieldlist = NULL;
+	char *funcname = NULL;
+	InterCode funcIR = NULL, paramIR = NULL;
+	Operand paramop = NULL;
 
-	id = parent->children[0];
-	if (id == NULL) {
-		fprintf(stderr, "FunDec's child ID is NULL\n");
-		parent->nodevalue.str = NULL;
-	}else {
-		parent->nodevalue.str = id->nodevalue.str;
-	}
+	// maybe NULL
+	funcname = parent->nodevalue.str;
+	// maybe NULL, NULL is no param
+	fieldlist = parent->fieldList;
 
-	if (num == 3) {
-		parent->fieldList = NULL;
-		parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
-	}else {
-		varlist = parent->children[2];
-		if (varlist == NULL) {
-			fprintf(stderr, "FunDec's child VarList is NULL\n");
-			parent->fieldList = NULL;
-		}else {
-			parent->fieldList = varlist->fieldList;
-			errorcount = varlist->errorcount;
-			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - errorcount);
-		}
-	}
-
-	Funcsymbol = newFunc(parent->nodevalue.str, GFuncReturn, parent->fieldList, parent->errorInfo);
-	symNode = lookup(parent->nodevalue.str);
-	if(symNode == NULL || symNode->type != Func) {
-		insert(Funcsymbol);
-	}
-
-FunDecDebug:
-	if(debug2) {
-		fprintf(stdout, "FunDec symbol: \n");
-		showSymbol(Funcsymbol);
-		fprintf(stdout, "\n");
+	funcIR = FunctionIR(funcname);
+	while(fieldlist) {
+		// TODO: decide kind by type 
+		paramop = newOperand(VARIABLE_OP);
+		paramop->type = String;
+		paramop->str = strdup(fieldlist->name);
+		paramIR = ParamIR(paramop);
+		fieldlist = fieldlist->tail;	
 	}
 }
 // update parent->fieldList
 void VarListTrans(TreeNode parent, int num) {
+/*
 	TreeNode paramdec = NULL;
 	TreeNode varlist = NULL;
 	FieldList fieldList = NULL;
@@ -497,9 +501,11 @@ VarListDebug:
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 //update parent->type, parent->nodevalue.str, add to symbol table
 void ParamDecTrans(TreeNode parent, int num) {
+/*
 	TreeNode specifier = NULL;	
 	TreeNode varDec = NULL;	
 	Symbol symNode = NULL;
@@ -536,6 +542,7 @@ ParamDecDebug:
 		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 
 /*
@@ -546,6 +553,7 @@ void CompStTrans(TreeNode parent, int num) {
 void StmtListTrans(TreeNode parent, int num) {
 }
 void StmtTrans(TreeNode parent, int num) {
+/*
 	TreeNode exp = NULL;
 	TreeNode stmtType = NULL;
 	stmtType = parent->children[0];
@@ -588,12 +596,14 @@ void StmtTrans(TreeNode parent, int num) {
 	if(debug2) {
 		fprintf(stderr, "Stmt\n");	
 	}
+*/
 }
 /*
 	Local Definitions
 */
 // update parent->fieldList 
 void DefListTrans(TreeNode parent, int num) {
+/*
 	// Def DefList
 	TreeNode def = NULL;	
 	TreeNode deflist = NULL;	
@@ -627,9 +637,11 @@ DefListDebug:
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 // update parent->type, parent->fieldList, Gspecifier = NULL
 void DefTrans(TreeNode parent, int num) {
+/*
 	// Specifier DefList SEMI
 	TreeNode specifier = NULL;	
 	TreeNode declist = NULL;	
@@ -660,9 +672,11 @@ DefDebug:
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 //update parent->fieldList 
 void DecListTrans(TreeNode parent, int num) {
+/*
 	TreeNode dec = NULL;
 	TreeNode declist = NULL;
 	FieldList fieldList = NULL;
@@ -694,9 +708,11 @@ DecListDebug:
 		showFieldList(parent->fieldList);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 // update parent->nodevalue.str, parent->type, add symbol
 void DecTrans(TreeNode parent, int num) {
+/*
 	TreeNode vardec = NULL;
 	TreeNode exp = NULL;
 	Symbol symNode = NULL;
@@ -749,184 +765,143 @@ DecDebug:
 		showSymbol(symNode);
 		fprintf(stdout, "\n");
 	}
+*/
 }
 
 /*
 	Expressions
 */
+void genArgsIR(IRinfo irinfo) {
+	if(irinfo == NULL) 
+		return;
+	genArgsIR(irinfo->next);
+	ArgIR(irinfo->op);
+}
 // update parent->type, parent->errorInfo, parent->nodevalue.str
 void ExpTrans(TreeNode parent, int num) {
 	TreeNode childleft, childright, childmid;
 	Symbol symNode = NULL;
-	ErrorInfo idErrorInfo = NULL;
-	int totalErrorInfo = GetTotalErrorInfo();
+	Operand op_tmp;
+	InterCode result;	
+	parent->irinfo = newIRinfo();
 	childleft = parent->children[0];
-	if (childleft == NULL) {
-		fprintf(stderr, "Exp's child Exp is NULL\n");
-		return;
-	}
 	// ID INT FLOAT
 	if (num == 1) {
 		switch(childleft->nodetype) {
 		case ID:
-			symNode = lookup(childleft->nodevalue.str);
-			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
-			if (symNode == NULL) {
-				parent->errorInfo->ErrorTypeNum = 1;
-				SemanticError(parent->errorInfo);
-				parent->type = newType();
-				parent->type->kind = ERROR;
-			}else {
-				parent->type = getSymType(symNode);
-			}
-			parent->nodevalue.str = childleft->nodevalue.str;
+			parent->irinfo->op = newOperand(VARIABLE_OP);
+			parent->irinfo->op->type = String;
+			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
 			break;
 		case INT:
-			parent->errorInfo = GetErrorInfoByNum(NumErrorInfoStackHead, totalErrorInfo);
-			parent->type = newType();
-			parent->type->kind = BASIC;
-			parent->type->basic = INT;
+			parent->nodevalue.INT = childleft->nodevalue.INT;
+			parent->irinfo->op = newOperand(CONSTANT_OP);
+			parent->irinfo->op->type = Int;
+			parent->irinfo->op->num_int = parent->nodevalue.INT;
 			break;
 		case FLOAT:
-			parent->errorInfo = GetErrorInfoByNum(NumErrorInfoStackHead, totalErrorInfo);
-			parent->type = newType();
-			parent->type->kind = BASIC;
-			parent->type->basic = FLOAT;
+			parent->nodevalue.FLOAT = childleft->nodevalue.FLOAT;
+			parent->irinfo->op = newOperand(CONSTANT_OP);
+			parent->irinfo->op->type = Float;
+			parent->irinfo->op->num_float = parent->nodevalue.FLOAT;
 			break;
 		}
 		goto ExpDebug;
 	}
 	// MINUS Exp; NOT Exp
+	childmid = parent->children[1];
 	if (num == 2) {
-		childleft = parent->children[1];
-		if (childleft == NULL) {
-			fprintf(stderr, "Exp's child Exp is NULL\n");
-			goto ExpDebug;
+		if(childleft->nodetype == MINUS) {
 		}
-		parent->errorInfo = childleft->errorInfo;
-		parent->type = childleft->type;
+		if(childleft->nodetype == NOT) {
+		
+		}
 		goto ExpDebug;
 	}
 	childright = parent->children[2];
-	if (childright == NULL) {
-		fprintf(stderr, "Exp's child Exp is NULL\n");
-		goto ExpDebug;
-	}
-	childmid = parent->children[1];
-	if (childmid == NULL) {
-		fprintf(stderr, "Exp's child mid is NULL\n");
-		goto ExpDebug;
-	}
 	if (num == 3) {
 		// LP Exp RP
 		if (childleft->nodetype == LP && childright->nodetype == RP) {
-			parent->errorInfo = childmid->errorInfo;
-			parent->type = childmid->type;
+			parent->irinfo->op = childmid->irinfo->op;
 			goto ExpDebug;
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
-			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
-			argsnum = 0;
-			symNode = lookup(childleft->nodevalue.str);
-			if (symNode == NULL || symNode->type != Func) {
-				parent->errorInfo->ErrorTypeNum = 2;
-				SemanticError(parent->errorInfo);
-			}
-			if (cmpFieldList(symNode->func->argtype, NULL)) {
-				parent->errorInfo->ErrorTypeNum = 9;
-				SemanticError(parent->errorInfo);
-			}
-			parent->type = symNode->func->Return;
+			op_tmp = newTemp();
+			result = CallIR(op_tmp, childleft->nodevalue.str);
+			parent->irinfo->op = op_tmp;
 			goto ExpDebug;
 		}
 		// Exp DOT ID
 		if (childright->nodetype == ID) {
-			parent->errorInfo = childleft->errorInfo;
-			if(childleft->type->kind != STRUCTURE){
-				parent->errorInfo->ErrorTypeNum = 13;
-				SemanticError(parent->errorInfo);
-				parent->type = newType();
-				parent->type->kind = ERROR;
-				goto ExpDebug;
-			}
-			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
-			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
-			if (parent->type == NULL) {
-				parent->errorInfo->ErrorTypeNum = 14;
-				SemanticError(parent->errorInfo);
-				parent->type = newType();
-				parent->type->kind = ERROR;
-			}else {
-				parent->nodevalue.str = childright->nodevalue.str;
-			}
+//			parent->errorInfo = childleft->errorInfo;
+//			if(childleft->type->kind != STRUCTURE){
+//				parent->errorInfo->ErrorTypeNum = 13;
+//				SemanticError(parent->errorInfo);
+//				parent->type = newType();
+//				parent->type->kind = ERROR;
+//				goto ExpDebug;
+//			}
+//			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
+//			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
+//			if (parent->type == NULL) {
+//				parent->errorInfo->ErrorTypeNum = 14;
+//				SemanticError(parent->errorInfo);
+//				parent->type = newType();
+//				parent->type->kind = ERROR;
+//			}else {
+//				parent->nodevalue.str = childright->nodevalue.str;
+//			}
 			goto ExpDebug;
 		}
 		// Exp ASSIGNOP Exp
-		if (childmid->nodetype == ASSIGNOP) {
-			parent->errorInfo = childleft->errorInfo;
-			if (childleft->type->kind == ERROR)
-				goto ExpDebug;
-			//TODO: just need name equal
-			if(cmpType(childleft->type, childright->type)) {
-				parent->errorInfo->ErrorTypeNum = 5;
-				SemanticError(parent->errorInfo);
-			}
-			if(!childleft->nodevalue.str) {
-				parent->errorInfo->ErrorTypeNum = 6;
-				SemanticError(parent->errorInfo);
-			}
+		if(childmid->nodetype == ASSIGNOP) {
+			Assign2IR(childleft->irinfo->op, childright->irinfo->op);	
+			parent->irinfo->op = childleft->irinfo->op;
 			goto ExpDebug;
 		}
 		// other Exp
-		parent->errorInfo = childleft->errorInfo;
-		if(cmpType(childleft->type, childright->type)) {
-			parent->errorInfo->ErrorTypeNum = 7;
-			SemanticError(parent->errorInfo);
+		op_tmp = newTemp();
+		switch(childmid->nodetype) {
+		case PLUS:
+			Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
+			break;
+		case MINUS:
+			Assign3IR(op_tmp, childleft->irinfo->op, SUB_IR,childright->irinfo->op);
+			break;
+		case STAR:
+			Assign3IR(op_tmp, childleft->irinfo->op, MUL_IR,childright->irinfo->op);
+			break;
+		case DIV:
+			Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
+			break;
 		}
-		//TODO: just take left type maybe error
-		parent->type = childleft->type;
+		parent->irinfo->op = op_tmp;
 		goto ExpDebug;
 	}
 	//ID LP Args RP; Exp LB Exp RB
 	if (num == 4) {
 		// ID LP Args RP
 		if(childleft->nodetype == ID) {
-			idErrorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
-			argsnum = 0;
-			parent->errorInfo = idErrorInfo;
-			symNode = lookup(childleft->nodevalue.str);
-			if (symNode == NULL) {
-				parent->errorInfo->ErrorTypeNum = 2;
-				SemanticError(parent->errorInfo);
-				goto ExpDebug;
-			}
-			if (symNode->type != Func) {
-				parent->errorInfo->ErrorTypeNum = 11;
-				SemanticError(parent->errorInfo);
-				goto ExpDebug;
-			}
-			if (cmpFieldList(symNode->func->argtype, childright->fieldList)) {
-				parent->errorInfo->ErrorTypeNum = 9;
-				SemanticError(parent->errorInfo);
-			}
-			parent->type = symNode->func->Return;
+			genArgsIR(childright->irinfo);
+			op_tmp = newTemp();
+			result = CallIR(op_tmp, childleft->nodevalue.str);
+			parent->irinfo->op = op_tmp;
 			goto ExpDebug;
 		}	
 		// Exp LB Exp RB
-		parent->errorInfo = childleft->errorInfo;
-		if(childleft->type->kind != ARRAY){
-			parent->errorInfo->ErrorTypeNum = 10;
-			SemanticError(parent->errorInfo);
-			parent->type = childleft->type;
-			goto ExpDebug;
-		}
-		if(childright->type->kind != BASIC || childright->type->basic != INT) {
-			parent->errorInfo->ErrorTypeNum = 12;
-			SemanticError(parent->errorInfo);
-		}
-		parent->type = childleft->type->array.elem;
-		parent->nodevalue.str = childleft->nodevalue.str;
+//		if(childleft->type->kind != ARRAY){
+//			parent->errorInfo->ErrorTypeNum = 10;
+//			SemanticError(parent->errorInfo);
+//			parent->type = childleft->type;
+//			goto ExpDebug;
+//		}
+//		if(childright->type->kind != BASIC || childright->type->basic != INT) {
+//			parent->errorInfo->ErrorTypeNum = 12;
+//			SemanticError(parent->errorInfo);
+//		}
+//		parent->type = childleft->type->array.elem;
+//		parent->nodevalue.str = childleft->nodevalue.str;
 		goto ExpDebug;
 	}
 ExpDebug:
@@ -942,36 +917,17 @@ ExpDebug:
 void ArgsTrans(TreeNode parent, int num) {
 	TreeNode exp = NULL;
 	TreeNode args = NULL;
-	FieldList fieldList = NULL;
-	int totalErrorInfo = GetTotalErrorInfo();
 
-	argsnum++;
-	parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
+	exp = parent->children[0];
+	parent->irinfo = newIRinfo();
+	parent->irinfo->op = exp->irinfo->op;
 	// Exp
 	if (num == 1) {
-		fieldList = NULL;
 	}
 	// Exp COMMA Args
 	if (num == 3) {
 		args = parent->children[2];	
-		if (args == NULL) {
-			fprintf(stderr, "Args's child Args is NULL\n");
-		}else {
-			fieldList = args->fieldList;
-		}
-	}
-	exp = parent->children[0];
-	if (exp == NULL) {
-		fprintf(stderr, "Args's child Exp is NULL\n");
-		parent->fieldList = fieldList;
-	}else {
-		parent->fieldList = newFieldList(NULL, exp->type, fieldList, parent->errorInfo);	
-	}
-ArgsDebug:
-	if (debug2) {
-		fprintf(stdout, "Args->fieldList :\n");
-		showFieldList(parent->fieldList);
-		fprintf(stdout, "\n");
+		parent->irinfo->next = args->irinfo;
 	}
 }
 void translateIR(TreeNode parent, int num) {

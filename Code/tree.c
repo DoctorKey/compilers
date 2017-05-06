@@ -3,6 +3,7 @@
 #include "syntax.tab.h" 
 #include "name.h"
 #include "semantic.h"
+#include "translateIR.h"
 #include <stdio.h>
 #include <stdlib.h>
 
