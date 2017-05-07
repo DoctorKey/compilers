@@ -977,14 +977,15 @@ void ExpTrans(TreeNode parent, int num) {
 			}
 			goto ExpDebug;
 		}	
+		// Exp LB Exp RB
 		op_tmp = newTemp();
 		parent->irinfo->op = newTemp();
 		op_tmp2 = newOperand(CONSTANT_OP);
 		op_tmp2->type = Int;
 		op_tmp2->num_int = childleft->type->array.size;
 		Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
+		childleft->irinfo->op->kind = VALUEINADDR_OP;
 		Assign3IR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
-		// Exp LB Exp RB
 //		if(childleft->type->kind != ARRAY){
 //			parent->errorInfo->ErrorTypeNum = 10;
 //			SemanticError(parent->errorInfo);

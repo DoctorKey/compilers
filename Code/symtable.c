@@ -33,8 +33,8 @@ void showType(Type type) {
 		break;
 	case ARRAY:
 		fprintf(stdout, " array ");
-		showType(type->array.elem);
 		fprintf(stdout, " size: %d ", type->array.size);
+		showType(type->array.elem);
 		break;
 	case STRUCTURE:
 		fprintf(stdout, " structure %s \n", type->structname);
@@ -63,15 +63,19 @@ void freeType(Type type) {
 Type addArrayElem(Type array, Type elem) {
 	Type head = array;
 	Type prev = NULL;
+	int elemsize = 0;
 	if(elem->kind != ARRAY) {
 		return NULL;
 	}	
+	elemsize = elem->array.size;
+	elem->array.size = 4;
 	if(array->kind == BASIC) {
 		elem->array.elem = array;
 		return elem;
 	}
 	while(array->kind == ARRAY) {
 		prev = array;
+		array->array.size *= elemsize;
 		array = array->array.elem;
 	}
 	prev->array.elem = elem;
