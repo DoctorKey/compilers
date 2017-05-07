@@ -91,6 +91,8 @@ extern struct HashNode symTable[HASHSIZE];
 Type newType(); 
 void showType(Type type); 
 void showFieldList(FieldList fieldList); 
+int updatearraysize(Type array);
+Type addArrayElem(Type array, Type elem); 
 
 FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo); 
 FieldList mergeFieldList(FieldList front, FieldList tail); 

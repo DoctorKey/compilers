@@ -93,6 +93,33 @@ Operand Mpop() {
 		return result;
 	}	
 }
+struct Nlist_ {
+	Operandlist oplist;
+	struct Nlist_ *next;
+};
+struct Nlist_ *Nstack = NULL;
+void Npush(Operandlist N) {
+	struct Nlist_ *new = NULL;
+	new = (struct Nlist_*)malloc(sizeof(struct Nlist_));
+	new->oplist = N;
+	new->next = NULL;
+	if(Nstack == NULL) {
+		Nstack = new;
+	}else {
+		new->next = Nstack;
+		Nstack = new;
+	}
+}
+Operandlist Npop() {
+	Operandlist result;
+	if(Nstack == NULL)
+		return NULL;
+	else {
+		result = Nstack->oplist;
+		Nstack = Nstack->next;
+		return result;
+	}	
+}
 Operandlist Opmakelist(Operand op) {
 	Operandlist result = NULL;
 	result = (Operandlist) malloc(sizeof(struct Operandlist_));
@@ -118,6 +145,12 @@ void Opbackpatch(Operandlist oplist, Operand label) {
 		return;
 	while(oplist) {
 		oplist->op->num_int = label->num_int;
+		oplist = oplist->next;
+	}
+}
+void showOplist(Operandlist oplist) {
+	while(oplist) {
+		fprintf(stdout, "%s\n", Optostring(oplist->op));
 		oplist = oplist->next;
 	}
 }
@@ -366,7 +399,7 @@ void printfIR(FILE *tag, InterCode ir) {
 			Optostring(ir->op3.result), Optostring(ir->op3.right1), Optostring(ir->op3.right2));	
 		break;
 	case GOTO_IR:
-		fprintf(tag, "GOTO %s :", Optostring(ir->op1.op1));	
+		fprintf(tag, "GOTO %s", Optostring(ir->op1.op1));	
 		break;
 	case IF_IR:
 		fprintf(tag, "IF %s %s %s GOTO %s", 

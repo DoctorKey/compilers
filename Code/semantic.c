@@ -396,6 +396,7 @@ void VarDecAnalyze(TreeNode parent, int num) {
 	TreeNode id = NULL;
 	TreeNode vardec = NULL;
 	TreeNode index = NULL;
+	Type temp = NULL;
 	int totalErrorInfo = GetTotalErrorInfo();
 	// ID
 	if (num == 1) {
@@ -413,29 +414,35 @@ void VarDecAnalyze(TreeNode parent, int num) {
 	}
 	// VarDec LB INT RB
 	if (num == 4) {
-		parent->type = newType();
-		parent->type->kind = ARRAY;
+		temp = newType();
+		temp->kind = ARRAY;
+//		parent->type = newType();
+//		parent->type->kind = ARRAY;
+		// Error type B check it is INT
+		index = parent->children[2];
+		if (index == NULL) {
+			fprintf(stderr, "VarDec's child INT is NULL\n");
+			temp->array.size = 0;
+//			parent->type->array.size = 0;
+		}else{
+			temp->array.size = index->nodevalue.INT;
+//			parent->type->array.size = index->nodevalue.INT;
+		}
 
 		vardec = parent->children[0];	// VarDec
 		if (vardec == NULL) {
 			fprintf(stderr, "VarDec's child VarDec is NULL\n");
 			parent->nodevalue.str = NULL;
-			parent->type->array.elem = NULL;
+			temp->array.elem = NULL;
+			parent->type = temp;
+//			parent->type->array.elem = NULL;
 		}else {
 			parent->nodevalue.str = vardec->nodevalue.str;	
-			parent->type->array.elem = vardec->type;
+			parent->type = addArrayElem(vardec->type, temp);
+//			parent->type->array.elem = vardec->type;
 		}
 		parent->errorInfo = vardec->errorInfo;
 		parent->errorcount = vardec->errorcount + 1;
-
-		// Error type B check it is INT
-		index = parent->children[2];
-		if (index == NULL) {
-			fprintf(stderr, "VarDec's child INT is NULL\n");
-			parent->type->array.size = 0;
-		}else{
-			parent->type->array.size = index->nodevalue.INT;
-		}
 	}
 VarDecDebug:
 	if(debug2) {

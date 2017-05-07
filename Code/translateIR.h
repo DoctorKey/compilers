@@ -3,5 +3,6 @@
 
 #include "tree.h"
 void translateIR(TreeNode parent, int num); 
+void hurrytestif(); 
 
 #endif

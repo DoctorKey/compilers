@@ -60,7 +60,26 @@ void freeType(Type type) {
 	free(type);
 	type = NULL;
 }
-
+Type addArrayElem(Type array, Type elem) {
+	Type head = array;
+	Type prev = NULL;
+	if(elem->kind != ARRAY) {
+		return NULL;
+	}	
+	if(array->kind == BASIC) {
+		elem->array.elem = array;
+		return elem;
+	}
+	while(array->kind == ARRAY) {
+		prev = array;
+		array = array->array.elem;
+	}
+	prev->array.elem = elem;
+	elem->array.elem = array;
+	return head;
+}
+int  updatearraysize(Type array) {
+}
 /*
 	FieldList
 */

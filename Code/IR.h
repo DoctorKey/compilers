@@ -33,9 +33,12 @@ struct Operandlist_ {
 Operandlist Opmakelist(Operand op); 
 Operandlist Opmerge(Operandlist oplist1, Operandlist oplist2); 
 void Opbackpatch(Operandlist oplist, Operand label); 
+void showOplist(Operandlist oplist);
 
 void Mpush(Operand M); 
 Operand Mpop(); 
+void Npush(Operandlist N); 
+Operandlist Npop(); 
 
 typedef enum { LABEL_IR, FUNCTION_IR, 
 		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, 

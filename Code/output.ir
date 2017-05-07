@@ -1,0 +1,7 @@
+FUNCTION main :
+t1 := i * #2
+t2 := a + t1
+t3 := j * #3
+t4 := t2 + t3
+t4 := #1
+LABEL label1 :

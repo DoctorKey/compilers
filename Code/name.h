@@ -5,7 +5,7 @@ enum {
 	Program, ExtDefList, ExtDef, ExtDecList,
 	Specifier, StructSpecifier, OptTag, Tag,
 	VarDec, FunDec, VarList, ParamDec,
-	CompSt, StmtList, Stmt, M,  
+	CompSt, StmtList, Stmt, M, N,  
 	DefList, Def, DecList, Dec,
 	Exp, Args
 };
