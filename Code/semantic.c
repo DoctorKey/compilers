@@ -416,15 +416,18 @@ void VarDecAnalyze(TreeNode parent, int num) {
 	if (num == 4) {
 		temp = newType();
 		temp->kind = ARRAY;
+		temp->array.upbound = 0;
+		temp->array.downbound = 0;
+		temp->array.size = 0;
 //		parent->type = newType();
 //		parent->type->kind = ARRAY;
 		// Error type B check it is INT
 		index = parent->children[2];
 		if (index == NULL) {
 			fprintf(stderr, "VarDec's child INT is NULL\n");
-			temp->array.size = 0;
 //			parent->type->array.size = 0;
 		}else{
+			temp->array.upbound = index->nodevalue.INT;
 			temp->array.size = index->nodevalue.INT;
 //			parent->type->array.size = index->nodevalue.INT;
 		}

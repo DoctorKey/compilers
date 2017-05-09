@@ -33,7 +33,9 @@ void showType(Type type) {
 		break;
 	case ARRAY:
 		fprintf(stdout, " array ");
-		fprintf(stdout, " size: %d ", type->array.size);
+		fprintf(stdout, " upbound: %d ", type->array.upbound);
+		fprintf(stdout, " downbound: %d ", type->array.downbound);
+		fprintf(stdout, " size: %d \n", type->array.size);
 		showType(type->array.elem);
 		break;
 	case STRUCTURE:
@@ -67,7 +69,7 @@ Type addArrayElem(Type array, Type elem) {
 	if(elem->kind != ARRAY) {
 		return NULL;
 	}	
-	elemsize = elem->array.size;
+	elemsize = elem->array.upbound;
 	elem->array.size = 4;
 	if(array->kind == BASIC) {
 		elem->array.elem = array;

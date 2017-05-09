@@ -27,6 +27,8 @@ struct Type_ {
 		int basic;
 		struct {
 			Type elem;
+			int downbound;
+			int upbound;
 			int size;
 		}array;
 		struct {

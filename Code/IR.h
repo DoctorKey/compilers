@@ -3,7 +3,9 @@
 
 #include "symtable.h"
 
-typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
+typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,
+		ADDRESS_OP, VALUEINADDR_OP, TEMP_ADDR_OP, TEMP_VALUE_OP, 
+		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
 typedef struct Operand_* Operand;
 typedef struct Operandlist_* Operandlist;
 typedef struct IRinfo_* IRinfo;
@@ -19,6 +21,8 @@ IRinfo newIRinfo();
 struct Operand_ {
 	OP_KIND kind;
 	enum {String, Int, Float} type;
+	int isParam;
+	int isArray;
 	union {
 		int num_int;
 		float num_float;

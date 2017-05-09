@@ -466,6 +466,7 @@ void FunDecTrans(TreeNode parent, int num) {
 	while(fieldlist) {
 		// TODO: decide kind by type 
 		paramop = newOperand(VARIABLE_OP);
+		paramop->isParam = 1;
 		paramop->type = String;
 		paramop->str = strdup(fieldlist->name);
 		paramIR = ParamIR(paramop);
@@ -754,60 +755,26 @@ DecListDebug:
 }
 // update parent->nodevalue.str, parent->type, add symbol
 void DecTrans(TreeNode parent, int num) {
-/*
-	TreeNode vardec = NULL;
 	TreeNode exp = NULL;
-	Symbol symNode = NULL;
+	Operand op_tmp, op_size;
+	InterCode result;
 
 	// VarDec
-	vardec = parent->children[0];	//VarDec
-	if (vardec == NULL) {
-		fprintf(stderr, "Dec's child VarDef is NULL\n");
-		goto DecDebug;
+	op_tmp = newOperand(VARIABLE_OP);
+	op_tmp->type = String;
+	op_tmp->str = (char*)strdup(parent->nodevalue.str);
+	if(parent->type->kind == ARRAY) {
+		op_size = newOperand(SIZE_OP);
+		op_size->type = Int;
+		op_size->num_int = parent->type->array.upbound * parent->type->array.size;
+		result = DecIR(op_tmp, op_size->num_int);
 	}
-	parent->errorInfo = vardec->errorInfo;
-	parent->errorcount = vardec->errorcount;
-
-	parent->nodevalue.str = vardec->nodevalue.str;
-	parent->type = vardec->type;
-
-	if(structdefnum == 0) {
-		symNode = lookup(parent->nodevalue.str);
-		if (symNode && (symNode->type == Var || symNode->type == Struct)) {
-			parent->errorInfo->ErrorTypeNum = 3;
-			SemanticError(parent->errorInfo);
-		}else {
-			symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
-			insert(symNode);
-		}
-	}
+	//can't init array and struct
 	// VarDec ASSIGNOP Exp
 	if (num == 3) {
-		if (structdefnum > 0) {
-			parent->errorInfo->ErrorTypeNum = 15;
-			SemanticError(parent->errorInfo);
-			goto DecDebug;
-		}
 		exp = parent->children[2];
-		if (exp == NULL) {
-			fprintf(stderr, "Dec's child Exp is NULL\n");
-			goto DecDebug;
-		}
-		if (cmpType(vardec->type, exp->type)) {
-			parent->errorInfo->ErrorTypeNum = 5;
-			SemanticError(parent->errorInfo);
-		}
+		result = Assign2IR(op_tmp, exp->irinfo->op);
 	}
-DecDebug:
-	if (debug2) {
-		fprintf(stdout, "Dec->nodevalue.str = %s\n", parent->nodevalue.str);
-		fprintf(stdout, "Dec->type : \n");
-		showType(parent->type);
-		fprintf(stdout, "\nDec add new Var symbol: \n");
-		showSymbol(symNode);
-		fprintf(stdout, "\n");
-	}
-*/
 }
 
 /*
@@ -837,6 +804,9 @@ void ExpTrans(TreeNode parent, int num) {
 			parent->irinfo->op = newOperand(VARIABLE_OP);
 			parent->irinfo->op->type = String;
 			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
+			if(parent->type->kind == ARRAY) {
+				parent->irinfo->isArray = 1;
+			}
 			break;
 		case INT:
 			parent->nodevalue.INT = childleft->nodevalue.INT;
@@ -984,20 +954,14 @@ void ExpTrans(TreeNode parent, int num) {
 		op_tmp2->type = Int;
 		op_tmp2->num_int = childleft->type->array.size;
 		Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
-		childleft->irinfo->op->kind = VALUEINADDR_OP;
+		if(childleft->irinfo->op->isParam == 1) {
+			childleft->irinfo->op->kind = VALUEINADDR_OP;
+		}else if(childleft->irinfo->op->kind == TEMP_OP) {
+			childleft->irinfo->op->kind = TEMP_ADDR_OP;
+		}else if(childleft->irinfo->op->kind == VARIABLE_OP) {
+			childleft->irinfo->op->kind = ADDRESS_OP;
+		}
 		Assign3IR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
-//		if(childleft->type->kind != ARRAY){
-//			parent->errorInfo->ErrorTypeNum = 10;
-//			SemanticError(parent->errorInfo);
-//			parent->type = childleft->type;
-//			goto ExpDebug;
-//		}
-//		if(childright->type->kind != BASIC || childright->type->basic != INT) {
-//			parent->errorInfo->ErrorTypeNum = 12;
-//			SemanticError(parent->errorInfo);
-//		}
-//		parent->type = childleft->type->array.elem;
-//		parent->nodevalue.str = childleft->nodevalue.str;
 		goto ExpDebug;
 	}
 ExpDebug:

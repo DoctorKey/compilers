@@ -184,14 +184,20 @@ char *Optostring(Operand op) {
 	case CONSTANT_OP:
 		sprintf(buf, "#%s", Opvaluetostring(op));
 		break;
-	case ADDRESS_OP:
-		sprintf(buf, "&%s", Opvaluetostring(op));
-		break;
 	case FUNC_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
+	case ADDRESS_OP:
+		sprintf(buf, "&%s", Opvaluetostring(op));
+		break;
 	case VALUEINADDR_OP:
 		sprintf(buf, "*%s", Opvaluetostring(op));
+		break;
+	case TEMP_ADDR_OP:
+		sprintf(buf, "&t%s", Opvaluetostring(op));
+		break;
+	case TEMP_VALUE_OP:
+		sprintf(buf, "*t%s", Opvaluetostring(op));
 		break;
 	case RELOP_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
@@ -412,7 +418,10 @@ void printfIR(FILE *tag, InterCode ir) {
 		fprintf(tag, "DEC %s %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	
 		break;
 	case ARG_IR:
-		fprintf(tag, "ARG %s", Optostring(ir->op1.op1));	
+		if(ir->op1.op1->isArray == 1)
+			fprintf(tag, "ARG &%s", Optostring(ir->op1.op1));	
+		else
+			fprintf(tag, "ARG %s", Optostring(ir->op1.op1));	
 		break;
 	case CALL_IR:
 		fprintf(tag, "%s := CALL %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	
