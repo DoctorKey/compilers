@@ -49,6 +49,7 @@ int main(int argc, char** argv)
 	//init output file;
 	if(newoutputfile(argv[i + 2])) {
 		fprintf(stderr, "newfile(%s) error!\n", argv[i + 2]);
+		return 0;
 	}
 
 	IR_init(); 
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
 
 	if(newfile(argv[i + 1])) {
 		fprintf(stderr, "newfile(%s) error!\n", argv[i + 1]);
+		return 0;
 	}else {
 		if(getNextLine() == 0)
 			yyparse();

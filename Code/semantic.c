@@ -557,6 +557,7 @@ void ParamDecAnalyze(TreeNode parent, int num) {
 	//only insert once
 	if(!symNode) {
 		symNode = newVar(parent->nodevalue.str, parent->type, parent->errorInfo);
+		symNode->var->isParam = 1;
 		insert(symNode);
 	}
 	

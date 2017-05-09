@@ -51,6 +51,7 @@ struct Var {
 	Type type;
 	int isDefine;
 	int isDeclare;
+	int isParam;
 };
 
 struct Func {

@@ -187,18 +187,63 @@ char *Optostring(Operand op) {
 	case FUNC_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
-	case ADDRESS_OP:
-		sprintf(buf, "&%s", Opvaluetostring(op));
+//	case ADDRESS_OP:
+//		sprintf(buf, "&%s", Opvaluetostring(op));
+//		break;
+//	case VALUEINADDR_OP:
+//		sprintf(buf, "*%s", Opvaluetostring(op));
+//		break;
+//	case TEMP_ADDR_OP:
+//		sprintf(buf, "&t%s", Opvaluetostring(op));
+//		break;
+//	case TEMP_VALUE_OP:
+//		sprintf(buf, "*t%s", Opvaluetostring(op));
+//		break;
+	case RELOP_OP:
+		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
-	case VALUEINADDR_OP:
-		sprintf(buf, "*%s", Opvaluetostring(op));
+	case LABEL_OP:
+		sprintf(buf, "label%s", Opvaluetostring(op));
 		break;
-	case TEMP_ADDR_OP:
-		sprintf(buf, "&t%s", Opvaluetostring(op));
+	case SIZE_OP:
+		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
-	case TEMP_VALUE_OP:
-		sprintf(buf, "*t%s", Opvaluetostring(op));
+	}
+	result = (char*)strdup(buf);
+	return result;
+}
+char *OptoAddrstring(Operand op) {
+	static char buf[20];
+	char *result = NULL;
+	char temp;
+	if(op->isAddr == 0) {
+		temp = '&';
+	}
+	switch(op->kind) {
+	case TEMP_OP:
+		sprintf(buf, "t%s", Opvaluetostring(op));
 		break;
+	case VARIABLE_OP:
+		sprintf(buf, "%s", Opvaluetostring(op));
+		break;
+	case CONSTANT_OP:
+		sprintf(buf, "#%s", Opvaluetostring(op));
+		break;
+	case FUNC_OP:
+		sprintf(buf, "%s", Opvaluetostring(op));
+		break;
+//	case ADDRESS_OP:
+//		sprintf(buf, "&%s", Opvaluetostring(op));
+//		break;
+//	case VALUEINADDR_OP:
+//		sprintf(buf, "*%s", Opvaluetostring(op));
+//		break;
+//	case TEMP_ADDR_OP:
+//		sprintf(buf, "&t%s", Opvaluetostring(op));
+//		break;
+//	case TEMP_VALUE_OP:
+//		sprintf(buf, "*t%s", Opvaluetostring(op));
+//		break;
 	case RELOP_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
@@ -281,6 +326,18 @@ InterCode Assign3IR(Operand x, Operand y, int kind, Operand z) {
 	InterCode result = NULL;
 	result = newInterCode();
 	result->kind = kind;
+	result->isComputeAddr = 0;
+	result->op3.result = x;
+	result->op3.right1 = y;
+	result->op3.right2 = z;
+	addIR(result);
+	return result;
+}
+InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z) {
+	InterCode result = NULL;
+	result = newInterCode();
+	result->kind = kind;
+	result->isComputeAddr = 1;
 	result->op3.result = x;
 	result->op3.right1 = y;
 	result->op3.right2 = z;
@@ -377,6 +434,52 @@ InterCode WriteIR(Operand x) {
 	return result;
 }
 
+void printfExpIR(FILE *tag, InterCode ir, int type) {
+	char comtype;
+	switch(type) {
+	case ADD_IR: comtype = '+'; break;
+	case SUB_IR: comtype = '-'; break;
+	case MUL_IR: comtype = '*'; break;
+	case DIV_IR: comtype = '/'; break;
+	}
+	if(ir->isComputeAddr == 0) {
+		if(ir->op3.result->isAddr == 0) {
+			fprintf(tag, "%s", Optostring(ir->op3.result));
+		}else {
+			fprintf(tag, "*%s", Optostring(ir->op3.result));
+		}	
+		if(ir->op3.right1->isAddr == 0) {
+			fprintf(tag, " := %s", Optostring(ir->op3.right1));
+		}else {
+			fprintf(tag, " := *%s", Optostring(ir->op3.right1));
+		}	
+		fprintf(tag, " %c ", comtype);
+		if(ir->op3.right2->isAddr == 0) {
+			fprintf(tag, "%s", Optostring(ir->op3.right2));
+		}else {
+			fprintf(tag, "*%s", Optostring(ir->op3.right2));
+		}	
+	}else {
+	//result is addr
+		if(ir->op3.result->isAddr == 0) {
+			fprintf(tag, "&%s", Optostring(ir->op3.result));
+		}else {
+			fprintf(tag, "%s", Optostring(ir->op3.result));
+		}	
+		if(ir->op3.right1->isAddr == 0) {
+			fprintf(tag, " := &%s", Optostring(ir->op3.right1));
+		}else {
+			fprintf(tag, " := %s", Optostring(ir->op3.right1));
+		}	
+		fprintf(tag, " %c ", comtype);
+		//when compute addr right2 always is constant
+		if(ir->op3.right2->isAddr == 0) {
+			fprintf(tag, "%s", Optostring(ir->op3.right2));
+		}else {
+			fprintf(tag, "*%s", Optostring(ir->op3.right2));
+		}	
+	}
+}
 void printfIR(FILE *tag, InterCode ir) {
 	switch(ir->kind) {
 	case LABEL_IR:
@@ -386,23 +489,27 @@ void printfIR(FILE *tag, InterCode ir) {
 		fprintf(tag, "FUNCTION %s :", Optostring(ir->op1.op1));	
 		break;
 	case ASSIGN_IR:
-		fprintf(tag, "%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	
+		if(ir->op2.result->isAddr == 0 && ir->op2.right->isAddr == 0) {
+			fprintf(tag, "%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
+		}else if(ir->op2.result->isAddr == 1 && ir->op2.right->isAddr == 0) {
+			fprintf(tag, "*%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
+		}else if(ir->op2.result->isAddr == 0 && ir->op2.right->isAddr == 1) {
+			fprintf(tag, "%s := *%s", Optostring(ir->op2.result), Optostring(ir->op2.right));
+		}else if(ir->op2.result->isAddr == 1 && ir->op2.right->isAddr == 1) {
+			fprintf(tag, "%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
+		}
 		break;
 	case ADD_IR:
-		fprintf(tag, "%s := %s + %s", 
-			Optostring(ir->op3.result), Optostring(ir->op3.right1), Optostring(ir->op3.right2));	
+		printfExpIR(tag, ir, ADD_IR); 
 		break;
 	case SUB_IR:
-		fprintf(tag, "%s := %s - %s", 
-			Optostring(ir->op3.result), Optostring(ir->op3.right1), Optostring(ir->op3.right2));	
+		printfExpIR(tag, ir, SUB_IR); 
 		break;
 	case MUL_IR:
-		fprintf(tag, "%s := %s * %s", 
-			Optostring(ir->op3.result), Optostring(ir->op3.right1), Optostring(ir->op3.right2));	
+		printfExpIR(tag, ir, MUL_IR); 
 		break;
 	case DIV_IR:
-		fprintf(tag, "%s := %s / %s", 
-			Optostring(ir->op3.result), Optostring(ir->op3.right1), Optostring(ir->op3.right2));	
+		printfExpIR(tag, ir, DIV_IR); 
 		break;
 	case GOTO_IR:
 		fprintf(tag, "GOTO %s", Optostring(ir->op1.op1));	
@@ -433,7 +540,10 @@ void printfIR(FILE *tag, InterCode ir) {
 		fprintf(tag, "READ %s", Optostring(ir->op1.op1));	
 		break;
 	case WRITE_IR:
-		fprintf(tag, "WRITE %s", Optostring(ir->op1.op1));	
+		if(ir->op1.op1->isAddr == 1)
+			fprintf(tag, "WRITE *%s", Optostring(ir->op1.op1));	
+		else
+			fprintf(tag, "WRITE %s", Optostring(ir->op1.op1));	
 		break;
 	}	
 }

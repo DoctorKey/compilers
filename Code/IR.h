@@ -4,7 +4,6 @@
 #include "symtable.h"
 
 typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,
-		ADDRESS_OP, VALUEINADDR_OP, TEMP_ADDR_OP, TEMP_VALUE_OP, 
 		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
 typedef struct Operand_* Operand;
 typedef struct Operandlist_* Operandlist;
@@ -21,7 +20,7 @@ IRinfo newIRinfo();
 struct Operand_ {
 	OP_KIND kind;
 	enum {String, Int, Float} type;
-	int isParam;
+	int isAddr;
 	int isArray;
 	union {
 		int num_int;
@@ -51,7 +50,7 @@ typedef enum { LABEL_IR, FUNCTION_IR,
 typedef struct InterCode_* InterCode;
 struct InterCode_ {
 	InterCodeKind kind;
-	int relop;
+	int isComputeAddr;
 	union {
 		struct {
 			Operand op1;
@@ -85,6 +84,7 @@ InterCode LabelIR(int n);
 InterCode FunctionIR(char *funcname); 
 InterCode Assign2IR(Operand x, Operand y); 
 InterCode Assign3IR(Operand x, Operand y, int kind, Operand z); 
+InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z); 
 InterCode GotoIR(Operand n); 
 InterCode IfIR(Operand x, char *relop, Operand y, Operand z); 
 InterCode ReturnIR(Operand x); 

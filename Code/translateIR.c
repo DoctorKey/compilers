@@ -466,7 +466,10 @@ void FunDecTrans(TreeNode parent, int num) {
 	while(fieldlist) {
 		// TODO: decide kind by type 
 		paramop = newOperand(VARIABLE_OP);
-		paramop->isParam = 1;
+		if(fieldlist->type->kind == ARRAY) 
+			paramop->isAddr = 1;
+		else	
+			paramop->isAddr = 0;
 		paramop->type = String;
 		paramop->str = strdup(fieldlist->name);
 		paramIR = ParamIR(paramop);
@@ -804,8 +807,11 @@ void ExpTrans(TreeNode parent, int num) {
 			parent->irinfo->op = newOperand(VARIABLE_OP);
 			parent->irinfo->op->type = String;
 			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
-			if(parent->type->kind == ARRAY) {
-				parent->irinfo->isArray = 1;
+			symNode = lookup(parent->nodevalue.str);
+			if(symNode->var->isParam == 1) {
+				if(parent->type->kind == ARRAY) {
+					parent->irinfo->op->isAddr = 1;
+				}
 			}
 			break;
 		case INT:
@@ -858,6 +864,7 @@ void ExpTrans(TreeNode parent, int num) {
 				result = CallIR(op_tmp, childleft->nodevalue.str);
 			}
 			parent->irinfo->op = op_tmp;
+			parent->irinfo->op->isAddr = 0;
 			goto ExpDebug;
 		}
 		// Exp DOT ID
@@ -890,6 +897,7 @@ void ExpTrans(TreeNode parent, int num) {
 		}
 		// other Exp
 		op_tmp = newTemp();
+		op_tmp->isAddr = 0;
 		switch(childmid->nodetype) {
 		case PLUS:
 			Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
@@ -944,24 +952,19 @@ void ExpTrans(TreeNode parent, int num) {
 				op_tmp = newTemp();
 				result = CallIR(op_tmp, childleft->nodevalue.str);
 				parent->irinfo->op = op_tmp;
+				parent->irinfo->op->isAddr = 0;
 			}
 			goto ExpDebug;
 		}	
 		// Exp LB Exp RB
 		op_tmp = newTemp();
 		parent->irinfo->op = newTemp();
+		parent->irinfo->op->isAddr = 1;
 		op_tmp2 = newOperand(CONSTANT_OP);
 		op_tmp2->type = Int;
 		op_tmp2->num_int = childleft->type->array.size;
 		Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
-		if(childleft->irinfo->op->isParam == 1) {
-			childleft->irinfo->op->kind = VALUEINADDR_OP;
-		}else if(childleft->irinfo->op->kind == TEMP_OP) {
-			childleft->irinfo->op->kind = TEMP_ADDR_OP;
-		}else if(childleft->irinfo->op->kind == VARIABLE_OP) {
-			childleft->irinfo->op->kind = ADDRESS_OP;
-		}
-		Assign3IR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
+		Assign3AddrIR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
 		goto ExpDebug;
 	}
 ExpDebug:
@@ -1019,6 +1022,9 @@ void ArgsTrans(TreeNode parent, int num) {
 	exp = parent->children[0];
 	parent->irinfo = newIRinfo();
 	parent->irinfo->op = exp->irinfo->op;
+	if(exp->type->kind == ARRAY) {
+		parent->irinfo->op->isArray = 1;
+	}
 	// Exp
 	if (num == 1) {
 	}
