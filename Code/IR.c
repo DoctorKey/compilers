@@ -1,5 +1,5 @@
 #include "IR.h"
-#include <string.h>
+//#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -303,6 +303,11 @@ void addIR(InterCode ir) {
 		IRtail = new;
 		return;
 	}
+}
+void freeIR(InterCodes ir) {
+	if(ir == NULL)
+		return;
+	free(ir);
 }
 InterCode LabelIR(int n) {
 	InterCode result = NULL;

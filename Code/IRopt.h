@@ -3,4 +3,5 @@
 
 #include "IR.h"
 
+InterCodes labelreduce(InterCodes IRhead); 
 #endif

@@ -5,9 +5,6 @@
 /* %option location */
 
 %{
-	#include <stdio.h>
-	#include <string.h>
-	#include <stdlib.h>
 	#include "syntax.tab.h"
 	#include "file.h"
 	#include "main.h"

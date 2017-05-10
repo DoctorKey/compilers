@@ -79,6 +79,7 @@ Operand newLabel();
 char *Optostring(Operand op); 
 InterCode newInterCode(); 
 void addIR(InterCode ir); 
+void freeIR(InterCodes ir);
 
 InterCode LabelIR(int n); 
 InterCode FunctionIR(char *funcname); 
