@@ -71,7 +71,7 @@ Type addArrayElem(Type array, Type elem) {
 	}	
 	elemsize = elem->array.upbound;
 	elem->array.size = 4;
-	if(array->kind == BASIC) {
+	if(array->kind != ARRAY) {
 		elem->array.elem = array;
 		return elem;
 	}

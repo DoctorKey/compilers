@@ -25,9 +25,13 @@ int main(int argc, char** argv)
 		printf("you must input file!\n");
 		return 1;
 	}
+	if(argc == 2) {
+		i = 0;	
+	}
 	if(argc == 3) {
 		i = 0;	
-	}else if(argc == 4) {
+	}
+	if(argc == 4) {
 		i = 1;
 		if (  strcmp(argv[i], "-debug") == 0  ) {
 			printf("debugging activated\n");
@@ -46,6 +50,7 @@ int main(int argc, char** argv)
 		}
 	
 	}
+#if LAB_3 == true
 	//init output file;
 	if(newoutputfile(argv[i + 2])) {
 		fprintf(stderr, "newfile(%s) error!\n", argv[i + 2]);
@@ -53,6 +58,7 @@ int main(int argc, char** argv)
 	}
 
 	IR_init(); 
+#endif
 
 	lexical_init();
 	syntax_init();
@@ -64,42 +70,13 @@ int main(int argc, char** argv)
 		if(getNextLine() == 0)
 			yyparse();
 	}
+	closefile();
 
+#if LAB_3 == true
 	printfallIR(stderr);
 	printfallIRtoFile();
-	closefile();
 	closeoutputfile();
-	/*
-	for(i = 1; i < argc; i++) {
-		if (  strcmp(argv[i], "-debug") == 0  ) {
-			printf("debugging activated\n");
-			debug = 1;
-		}else if( strcmp(argv[i], "-yydebug") == 0  ) {
-			printf("yydebug activated\n");
-			yydebug = 1;
-		}else if( strcmp(argv[i], "-debug2") == 0  ) {
-			printf("debug2 activated\n");
-//			test();
-			debug2 = 1;
-		}else if( strcmp(argv[i], "-debug3") == 0  ) {
-			printf("debug3 activated\n");
-			debug3 = 1;
-		}
-		else {
-			lexical_init();
-			syntax_init();
-
-			if(newfile(argv[i])) {
-				fprintf(stderr, "newfile(%s) error!\n", argv[i]);
-			}else {
-				if(getNextLine() == 0)
-					yyparse();
-			}
-
-			closefile();
-		}
-	}
-	*/
+#endif
 	return 0;
 }
 

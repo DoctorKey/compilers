@@ -863,8 +863,12 @@ void ExpAnalyze(TreeNode parent, int num) {
 			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo - argsnum);
 			argsnum = 0;
 			symNode = lookup(childleft->nodevalue.str);
-			if (symNode == NULL || symNode->type != Func) {
+			if (symNode == NULL) {
 				parent->errorInfo->ErrorTypeNum = 2;
+				SemanticError(parent->errorInfo);
+			}
+			if (symNode->type != Func) {
+				parent->errorInfo->ErrorTypeNum = 11;
 				SemanticError(parent->errorInfo);
 			}
 			if (cmpFieldList(symNode->func->argtype, NULL)) {
