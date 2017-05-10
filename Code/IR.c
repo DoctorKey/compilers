@@ -8,6 +8,21 @@ int varnum = 0;
 int labelnum = 0;
 InterCodes IRhead = NULL;
 InterCodes IRtail = NULL;
+int getTempnum() {
+	return tempnum;
+}
+int getVarnum() {
+	return varnum;
+}
+int getLabelnum() {
+	return labelnum;
+}
+InterCodes getIRhead() {
+	return IRhead;
+}
+InterCodes getIRtail() {
+	return IRtail;
+}
 // add read write
 void IR_init() {
 	Type tmp, arg;

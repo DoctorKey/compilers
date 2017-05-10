@@ -95,6 +95,11 @@ InterCode ParamIR(Operand x);
 InterCode ReadIR(Operand x); 
 InterCode WriteIR(Operand x); 
 
+int getTempnum(); 
+int getVarnum();
+int getLabelnum();
+InterCodes getIRhead();
+InterCodes getIRtail();
 void printfallIR(FILE *tag);
 void test3(); 
 #endif

@@ -185,7 +185,8 @@ void ExtDecListAnalyze(TreeNode parent, int num) {
 		parent->errorInfo->ErrorTypeNum = 3;
 		SemanticError(parent->errorInfo);
 	}else {
-		symNode = newVar(vardec->nodevalue.str, Gspecifier, parent->errorInfo);
+//		symNode = newVar(vardec->nodevalue.str, Gspecifier, parent->errorInfo);
+		symNode = newVar(vardec->nodevalue.str, vardec->type, parent->errorInfo);
 		insert(symNode);
 	}
 ExtDecListDebug:
@@ -419,17 +420,13 @@ void VarDecAnalyze(TreeNode parent, int num) {
 		temp->array.upbound = 0;
 		temp->array.downbound = 0;
 		temp->array.size = 0;
-//		parent->type = newType();
-//		parent->type->kind = ARRAY;
 		// Error type B check it is INT
 		index = parent->children[2];
 		if (index == NULL) {
 			fprintf(stderr, "VarDec's child INT is NULL\n");
-//			parent->type->array.size = 0;
 		}else{
 			temp->array.upbound = index->nodevalue.INT;
 			temp->array.size = index->nodevalue.INT;
-//			parent->type->array.size = index->nodevalue.INT;
 		}
 
 		vardec = parent->children[0];	// VarDec
@@ -438,11 +435,9 @@ void VarDecAnalyze(TreeNode parent, int num) {
 			parent->nodevalue.str = NULL;
 			temp->array.elem = NULL;
 			parent->type = temp;
-//			parent->type->array.elem = NULL;
 		}else {
 			parent->nodevalue.str = vardec->nodevalue.str;	
 			parent->type = addArrayElem(vardec->type, temp);
-//			parent->type->array.elem = vardec->type;
 		}
 		parent->errorInfo = vardec->errorInfo;
 		parent->errorcount = vardec->errorcount + 1;
