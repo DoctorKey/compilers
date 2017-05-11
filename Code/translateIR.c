@@ -21,7 +21,7 @@ int noif = 0;
 void ProgramTrans(TreeNode parent, int num) {
 	InterCodes IRhead = getIRhead();
 	labelreduce(IRhead);
-	assignreduce(IRhead);
+//	assignreduce(IRhead);
 }
 void ExtDefListTrans(TreeNode parent, int num) {
 }
@@ -35,6 +35,8 @@ void ExtDecListTrans(TreeNode parent, int num) {
 void SpecifierTrans(TreeNode parent, int num) {
 }
 void StructSpecifierTrans(TreeNode parent, int num) {
+	fprintf(stderr, "Cannot translate: Code contains wariables or parameters of structure type.\n");
+	exit(0);
 }
 void OptTagTrans(TreeNode parent, int num) {
 }
@@ -299,24 +301,8 @@ void ExpTrans(TreeNode parent, int num) {
 		}
 		// Exp DOT ID
 		if (childright->nodetype == ID) {
-//			parent->errorInfo = childleft->errorInfo;
-//			if(childleft->type->kind != STRUCTURE){
-//				parent->errorInfo->ErrorTypeNum = 13;
-//				SemanticError(parent->errorInfo);
-//				parent->type = newType();
-//				parent->type->kind = ERROR;
-//				goto ExpDebug;
-//			}
-//			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
-//			parent->type = lookupFieldListElem(childleft->type->structure, childright->nodevalue.str);
-//			if (parent->type == NULL) {
-//				parent->errorInfo->ErrorTypeNum = 14;
-//				SemanticError(parent->errorInfo);
-//				parent->type = newType();
-//				parent->type->kind = ERROR;
-//			}else {
-//				parent->nodevalue.str = childright->nodevalue.str;
-//			}
+			fprintf(stderr, "Cannot translate: Code contains wariables or parameters of structure type.\n");
+			exit(0);
 			goto ExpDebug;
 		}
 		// Exp ASSIGNOP Exp
@@ -398,14 +384,14 @@ void ExpTrans(TreeNode parent, int num) {
 		case AND:
 			op_tmp->isBool = 1;
 			Mop = Mpop();
-			Opbackpatch(childleft->irinfo->falselist, Mop);
+			Opbackpatch(childleft->irinfo->truelist, Mop);
 			parent->irinfo->truelist = childright->irinfo->truelist;
 			parent->irinfo->falselist = Opmerge(childleft->irinfo->falselist, childright->irinfo->falselist);
 			break;
 		case OR:
 			op_tmp->isBool = 1;
 			Mop = Mpop();
-			Opbackpatch(childleft->irinfo->truelist, Mop);
+			Opbackpatch(childleft->irinfo->falselist, Mop);
 			parent->irinfo->falselist = childright->irinfo->falselist;
 			parent->irinfo->truelist = Opmerge(childleft->irinfo->truelist, childright->irinfo->truelist);
 			break;
@@ -417,9 +403,9 @@ void ExpTrans(TreeNode parent, int num) {
 			falseop = newOperand(LABEL_OP);
 			falseop->type = Int;
 			falseop->num_int = -1;
-//			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
-//			GotoIR(falseop);
-			result = IffalseIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, falseop);
+			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
+			GotoIR(falseop);
+//			result = IffalseIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, falseop);
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);
 			noif = 0;
@@ -477,9 +463,9 @@ ExpDebug:
 			op_tmp = newOperand(CONSTANT_OP);
 			op_tmp->type = Int;
 			op_tmp->num_int = 0;
-//			result = IfIR(parent->irinfo->op, "!=", op_tmp, trueop);
-//			GotoIR(falseop);
-			result = IfIR(parent->irinfo->op, "==", op_tmp, falseop);
+			result = IfIR(parent->irinfo->op, "!=", op_tmp, trueop);
+			GotoIR(falseop);
+//			result = IfIR(parent->irinfo->op, "==", op_tmp, falseop);
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);
 			beginbool = 0;
@@ -502,9 +488,9 @@ void hurrytestif() {
 			op_tmp = newOperand(CONSTANT_OP);
 			op_tmp->type = Int;
 			op_tmp->num_int = 0;
-//			result = IfIR(thelastexp->irinfo->op, "!=", op_tmp, trueop);
-//			GotoIR(falseop);
-			result = IfIR(thelastexp->irinfo->op, "==", op_tmp, falseop);
+			result = IfIR(thelastexp->irinfo->op, "!=", op_tmp, trueop);
+			GotoIR(falseop);
+//			result = IfIR(thelastexp->irinfo->op, "==", op_tmp, falseop);
 			thelastexp->irinfo->truelist = Opmakelist(trueop);
 			thelastexp->irinfo->falselist = Opmakelist(falseop);
 			beginbool = 0;
