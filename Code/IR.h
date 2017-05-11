@@ -10,7 +10,6 @@ typedef struct Operandlist_* Operandlist;
 typedef struct IRinfo_* IRinfo;
 struct IRinfo_ {
 	OP_KIND kind;
-	char * addr;
 	Operand op;
 	IRinfo next;
 	Operandlist truelist, falselist, nextlist;
@@ -22,6 +21,8 @@ struct Operand_ {
 	enum {String, Int, Float} type;
 	int isAddr;
 	int isArray;
+	int isBool;
+	int isConstant;
 	union {
 		int num_int;
 		float num_float;
@@ -88,6 +89,7 @@ InterCode Assign3IR(Operand x, Operand y, int kind, Operand z);
 InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z); 
 InterCode GotoIR(Operand n); 
 InterCode IfIR(Operand x, char *relop, Operand y, Operand z); 
+InterCode IffalseIR(Operand x, char *relop, Operand y, Operand z); 
 InterCode ReturnIR(Operand x); 
 InterCode DecIR(Operand x, int size); 
 InterCode ArgIR(Operand x); 

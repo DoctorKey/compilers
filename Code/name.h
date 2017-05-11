@@ -11,5 +11,6 @@ enum {
 };
 
 const char *getName(int type);
+char *getfalseRelop(const char *relop);
 
 #endif

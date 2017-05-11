@@ -1,7 +1,5 @@
 #include "IR.h"
-//#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "name.h"
 
 int tempnum = 0;
 int varnum = 0;
@@ -53,7 +51,6 @@ IRinfo newIRinfo() {
 		return NULL;
 	}
 	result->kind = 0;
-	result->addr = NULL;
 	result->op = NULL;
 	result->next = NULL;
 	result->truelist = NULL;
@@ -69,6 +66,10 @@ Operand newOperand(int kind) {
 		return NULL;
 	}
 	result->kind = kind;
+	result->isAddr = 0;
+	result->isArray = 0;
+	result->isBool = 0;
+	result->isConstant = 0;
 	return result;
 }
 Operand newTemp() {
@@ -202,18 +203,6 @@ char *Optostring(Operand op) {
 	case FUNC_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
-//	case ADDRESS_OP:
-//		sprintf(buf, "&%s", Opvaluetostring(op));
-//		break;
-//	case VALUEINADDR_OP:
-//		sprintf(buf, "*%s", Opvaluetostring(op));
-//		break;
-//	case TEMP_ADDR_OP:
-//		sprintf(buf, "&t%s", Opvaluetostring(op));
-//		break;
-//	case TEMP_VALUE_OP:
-//		sprintf(buf, "*t%s", Opvaluetostring(op));
-//		break;
 	case RELOP_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
@@ -223,6 +212,9 @@ char *Optostring(Operand op) {
 	case SIZE_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
+	}
+	if(op->isConstant == 1) {
+		sprintf(buf, "#%s", Opvaluetostring(op));
 	}
 	result = (char*)strdup(buf);
 	return result;
@@ -378,6 +370,21 @@ InterCode IfIR(Operand x, char *relop, Operand y, Operand z) {
 	op = newOperand(RELOP_OP);
 	op->type = String; 
 	op->str = (char*)strdup(relop);
+	result = newInterCode();
+	result->kind = IF_IR;
+	result->op4.x = x;
+	result->op4.relop = op;
+	result->op4.y = y;
+	result->op4.z = z;
+	addIR(result);
+	return result;
+}
+InterCode IffalseIR(Operand x, char *relop, Operand y, Operand z) {
+	InterCode result = NULL;
+	Operand op = NULL;
+	op = newOperand(RELOP_OP);
+	op->type = String; 
+	op->str = getfalseRelop(relop);
 	result = newInterCode();
 	result->kind = IF_IR;
 	result->op4.x = x;

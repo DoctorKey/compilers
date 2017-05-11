@@ -1,3 +1,4 @@
+#include "main.h"
 #include "name.h"
 #include "syntax.tab.h" 
 
@@ -47,4 +48,20 @@ const char *getName(int type)
 	}else{
 		return name[type];
 	}
+}
+
+char *getfalseRelop(const char *relop) {
+	if(strcmp(relop, ">") == 0) {
+		return strdup("<=");
+	}else if(strcmp(relop, "<") == 0) {
+		return strdup(">=");
+	}else if(strcmp(relop, ">=") == 0) {
+		return strdup("<");
+	}else if(strcmp(relop, "<=") == 0) {
+		return strdup(">");
+	}else if(strcmp(relop, "==") == 0) {
+		return strdup("!=");
+	}else if(strcmp(relop, "!=") == 0) {
+		return strdup("==");
+	}	
 }

@@ -4,7 +4,6 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-ADDRESS_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
 ADD_IR	IR.h	/^		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, $/;"	e	enum:__anon10
 AND	syntax.tab.c	/^     AND = 269,$/;"	e	enum:yytokentype	file:
 AND	syntax.tab.h	/^     AND = 269,$/;"	e	enum:yytokentype
@@ -19,6 +18,7 @@ Args	syntax.y	/^Args : Exp COMMA Args	$/;"	l
 ArgsAnalyze	semantic.c	/^void ArgsAnalyze(TreeNode parent, int num) {$/;"	f
 ArgsTrans	translateIR.c	/^void ArgsTrans(TreeNode parent, int num) {$/;"	f
 Assign2IR	IR.c	/^InterCode Assign2IR(Operand x, Operand y) {$/;"	f
+Assign3AddrIR	IR.c	/^InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z) {$/;"	f
 Assign3IR	IR.c	/^InterCode Assign3IR(Operand x, Operand y, int kind, Operand z) {$/;"	f
 BASIC	symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	e	enum:Type_::__anon1
 BEGIN	lex.yy.c	126;"	d	file:
@@ -32,9 +32,9 @@ CFLAGS	Makefile	/^CFLAGS =-g -std=c99$/;"	m
 CHILD_NUM	tree.h	8;"	d
 COMMA	syntax.tab.c	/^     COMMA = 262,$/;"	e	enum:yytokentype	file:
 COMMA	syntax.tab.h	/^     COMMA = 262,$/;"	e	enum:yytokentype
-CONSTANT_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+CONSTANT_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,$/;"	e	enum:__anon7
 CallIR	IR.c	/^InterCode CallIR(Operand x, char *funcname) {$/;"	f
-CompSt	name.h	/^	CompSt, StmtList, Stmt, M,  $/;"	e	enum:__anon16
+CompSt	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 CompSt	syntax.y	/^CompSt : LC DefList StmtList RC $/;"	l
 CompStAnalyze	semantic.c	/^void CompStAnalyze(TreeNode parent, int num) {$/;"	f
 CompStTrans	translateIR.c	/^void CompStTrans(TreeNode parent, int num) {$/;"	f
@@ -103,7 +103,7 @@ FLOAT	syntax.tab.c	/^     FLOAT = 259,$/;"	e	enum:yytokentype	file:
 FLOAT	syntax.tab.h	/^     FLOAT = 259,$/;"	e	enum:yytokentype
 FLOAT	tree.h	/^	float FLOAT;$/;"	m	union:value
 FUNCTION_IR	IR.h	/^typedef enum { LABEL_IR, FUNCTION_IR, $/;"	e	enum:__anon10
-FUNC_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+FUNC_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,$/;"	e	enum:__anon7
 FieldList	symtable.h	/^typedef struct FieldList_* FieldList;$/;"	t	typeref:struct:FieldList_
 FieldList_	symtable.h	/^struct FieldList_ {$/;"	s
 Float	IR.h	/^	enum {String, Int, Float} type;$/;"	e	enum:Operand_::__anon8
@@ -123,7 +123,7 @@ GerrorInfo	error.c	/^ErrorInfo GerrorInfo = NULL;$/;"	v
 GetErrorInfoByNum	error.c	/^ErrorInfo GetErrorInfoByNum(struct ErrorInfoStack *head, int num) {$/;"	f
 GetNextChar	file.c	/^int GetNextChar(char *b, int maxBuffer) {$/;"	f
 GetTotalErrorInfo	error.c	/^int GetTotalErrorInfo() {$/;"	f
-GotoIR	IR.c	/^InterCode GotoIR(int n) {$/;"	f
+GotoIR	IR.c	/^InterCode GotoIR(Operand n) {$/;"	f
 Gspecifier	semantic.c	/^Type Gspecifier = NULL;$/;"	v
 HASHSIZE	symtable.h	18;"	d
 HashNode	symtable.h	/^struct HashNode {$/;"	s
@@ -149,7 +149,8 @@ IRinfo	IR.h	/^typedef struct IRinfo_* IRinfo;$/;"	t	typeref:struct:IRinfo_
 IRinfo_	IR.h	/^struct IRinfo_ {$/;"	s
 IRtail	IR.c	/^InterCodes IRtail = NULL;$/;"	v
 IdErrorInfoStackHead	error.c	/^struct ErrorInfoStack *IdErrorInfoStackHead = NULL;$/;"	v	typeref:struct:ErrorInfoStack
-IfIR	IR.c	/^InterCode IfIR(Operand x, char *relop, Operand y, int z) {$/;"	f
+IfIR	IR.c	/^InterCode IfIR(Operand x, char *relop, Operand y, Operand z) {$/;"	f
+IffalseIR	IR.c	/^InterCode IffalseIR(Operand x, char *relop, Operand y, Operand z) {$/;"	f
 Int	IR.h	/^	enum {String, Int, Float} type;$/;"	e	enum:Operand_::__anon8
 InterCode	IR.h	/^typedef struct InterCode_* InterCode;$/;"	t	typeref:struct:InterCode_
 InterCodeKind	IR.h	/^		ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR } InterCodeKind;$/;"	t	typeref:enum:__anon10
@@ -157,10 +158,10 @@ InterCode_	IR.h	/^struct InterCode_ {$/;"	s
 InterCodes	IR.h	/^typedef struct InterCodes_* InterCodes;$/;"	t	typeref:struct:InterCodes_
 InterCodes_	IR.h	/^struct InterCodes_ {$/;"	s
 LABEL_IR	IR.h	/^typedef enum { LABEL_IR, FUNCTION_IR, $/;"	e	enum:__anon10
-LABEL_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
-LAB_1	main.h	8;"	d
-LAB_2	main.h	9;"	d
-LAB_3	main.h	10;"	d
+LABEL_OP	IR.h	/^		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+LAB_1	main.h	11;"	d
+LAB_2	main.h	12;"	d
+LAB_3	main.h	13;"	d
 LB	syntax.tab.c	/^     LB = 276,$/;"	e	enum:yytokentype	file:
 LB	syntax.tab.h	/^     LB = 276,$/;"	e	enum:yytokentype
 LC	syntax.tab.c	/^     LC = 278,$/;"	e	enum:yytokentype	file:
@@ -173,7 +174,7 @@ LOWER_THAN_ELSE	syntax.tab.h	/^     LOWER_THAN_ELSE = 286$/;"	e	enum:yytokentype
 LP	syntax.tab.c	/^     LP = 274,$/;"	e	enum:yytokentype	file:
 LP	syntax.tab.h	/^     LP = 274,$/;"	e	enum:yytokentype
 LabelIR	IR.c	/^InterCode LabelIR(int n) {$/;"	f
-M	name.h	/^	CompSt, StmtList, Stmt, M,  $/;"	e	enum:__anon16
+M	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 MINUS	syntax.tab.c	/^     MINUS = 266,$/;"	e	enum:yytokentype	file:
 MINUS	syntax.tab.h	/^     MINUS = 266,$/;"	e	enum:yytokentype
 MTrans	translateIR.c	/^void MTrans(TreeNode parent, int num) {$/;"	f
@@ -181,11 +182,17 @@ MUL_IR	IR.h	/^		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, $/;"	e	enum:__anon10
 Mpop	IR.c	/^Operand Mpop() {$/;"	f
 Mpush	IR.c	/^void Mpush(Operand M) {$/;"	f
 Mstack	IR.c	/^Operandlist Mstack = NULL;$/;"	v
+N	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 NOT	syntax.tab.c	/^     NOT = 272,$/;"	e	enum:yytokentype	file:
 NOT	syntax.tab.h	/^     NOT = 272,$/;"	e	enum:yytokentype
+NTrans	translateIR.c	/^void NTrans(TreeNode parent, int num) {$/;"	f
+Nlist_	IR.c	/^struct Nlist_ {$/;"	s	file:
+Npop	IR.c	/^Operandlist Npop() {$/;"	f
+Npush	IR.c	/^void Npush(Operandlist N) {$/;"	f
+Nstack	IR.c	/^struct Nlist_ *Nstack = NULL;$/;"	v	typeref:struct:Nlist_
 NumErrorInfoStackHead	error.c	/^struct ErrorInfoStack *NumErrorInfoStackHead = NULL;$/;"	v	typeref:struct:ErrorInfoStack
 OBJS	Makefile	/^OBJS = $(CFILES:.c=.o)$/;"	m
-OP_KIND	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	t	typeref:enum:__anon7
+OP_KIND	IR.h	/^		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	t	typeref:enum:__anon7
 OR	syntax.tab.c	/^     OR = 270,$/;"	e	enum:yytokentype	file:
 OR	syntax.tab.h	/^     OR = 270,$/;"	e	enum:yytokentype
 Opbackpatch	IR.c	/^void Opbackpatch(Operandlist oplist, Operand label) {$/;"	f
@@ -199,6 +206,7 @@ OptTag	name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon16
 OptTag	syntax.y	/^OptTag : 	$/;"	l
 OptTagAnalyze	semantic.c	/^void OptTagAnalyze(TreeNode parent, int num) {$/;"	f
 OptTagTrans	translateIR.c	/^void OptTagTrans(TreeNode parent, int num) {$/;"	f
+OptoAddrstring	IR.c	/^char *OptoAddrstring(Operand op) {$/;"	f
 Optostring	IR.c	/^char *Optostring(Operand op) {$/;"	f
 Opvaluetostring	IR.c	/^char *Opvaluetostring(Operand op) {$/;"	f
 PARAM_IR	IR.h	/^		ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR } InterCodeKind;$/;"	e	enum:__anon10
@@ -222,7 +230,7 @@ READ_IR	IR.h	/^		ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR } InterCodeKind;$/
 REJECT	lex.yy.c	537;"	d	file:
 RELOP	syntax.tab.c	/^     RELOP = 264,$/;"	e	enum:yytokentype	file:
 RELOP	syntax.tab.h	/^     RELOP = 264,$/;"	e	enum:yytokentype
-RELOP_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+RELOP_OP	IR.h	/^		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
 RETURN	syntax.tab.c	/^     RETURN = 281,$/;"	e	enum:yytokentype	file:
 RETURN	syntax.tab.h	/^     RETURN = 281,$/;"	e	enum:yytokentype
 RETURN_IR	IR.h	/^		GOTO_IR, IF_IR, RETURN_IR, DEC_IR, $/;"	e	enum:__anon10
@@ -233,7 +241,7 @@ Return	symtable.h	/^	Type Return;$/;"	m	struct:Func
 ReturnIR	IR.c	/^InterCode ReturnIR(Operand x) {$/;"	f
 SEMI	syntax.tab.c	/^     SEMI = 261,$/;"	e	enum:yytokentype	file:
 SEMI	syntax.tab.h	/^     SEMI = 261,$/;"	e	enum:yytokentype
-SIZE_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+SIZE_OP	IR.h	/^		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
 STAR	syntax.tab.c	/^     STAR = 267,$/;"	e	enum:yytokentype	file:
 STAR	syntax.tab.h	/^     STAR = 267,$/;"	e	enum:yytokentype
 STRUCT	syntax.tab.c	/^     STRUCT = 280,$/;"	e	enum:yytokentype	file:
@@ -248,10 +256,10 @@ Specifier	name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon16
 Specifier	syntax.y	/^Specifier : TYPE $/;"	l
 SpecifierAnalyze	semantic.c	/^void SpecifierAnalyze(TreeNode parent, int num) {$/;"	f
 SpecifierTrans	translateIR.c	/^void SpecifierTrans(TreeNode parent, int num) {$/;"	f
-Stmt	name.h	/^	CompSt, StmtList, Stmt, M,  $/;"	e	enum:__anon16
+Stmt	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 Stmt	syntax.y	/^Stmt : Exp SEMI	$/;"	l
 StmtAnalyze	semantic.c	/^void StmtAnalyze(TreeNode parent, int num) {$/;"	f
-StmtList	name.h	/^	CompSt, StmtList, Stmt, M,  $/;"	e	enum:__anon16
+StmtList	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 StmtList	syntax.y	/^StmtList : 	$/;"	l
 StmtListAnalyze	semantic.c	/^void StmtListAnalyze(TreeNode parent, int num) {$/;"	f
 StmtListTrans	translateIR.c	/^void StmtListTrans(TreeNode parent, int num) {$/;"	f
@@ -264,7 +272,7 @@ StructSpecifierAnalyze	semantic.c	/^void StructSpecifierAnalyze(TreeNode parent,
 StructSpecifierTrans	translateIR.c	/^void StructSpecifierTrans(TreeNode parent, int num) {$/;"	f
 SymNode	symtable.h	/^struct SymNode {$/;"	s
 Symbol	symtable.h	/^typedef struct SymNode* Symbol;$/;"	t	typeref:struct:SymNode
-TEMP_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+TEMP_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,$/;"	e	enum:__anon7
 TYPE	syntax.tab.c	/^     TYPE = 273,$/;"	e	enum:yytokentype	file:
 TYPE	syntax.tab.h	/^     TYPE = 273,$/;"	e	enum:yytokentype
 Tag	name.h	/^	Specifier, StructSpecifier, OptTag, Tag,$/;"	e	enum:__anon16
@@ -279,8 +287,7 @@ UINT32_MAX	lex.yy.c	84;"	d	file:
 UINT8_MAX	lex.yy.c	78;"	d	file:
 UMINUS	syntax.tab.c	/^     UMINUS = 285,$/;"	e	enum:yytokentype	file:
 UMINUS	syntax.tab.h	/^     UMINUS = 285,$/;"	e	enum:yytokentype
-VALUEINADDR_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
-VARIABLE_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, ADDRESS_OP, FUNC_OP, VALUEINADDR_OP, RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;$/;"	e	enum:__anon7
+VARIABLE_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,$/;"	e	enum:__anon7
 Var	symtable.h	/^enum {Var, Func, Struct};$/;"	e	enum:__anon5
 Var	symtable.h	/^struct Var {$/;"	s
 VarDec	name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon16
@@ -348,7 +355,7 @@ YYNRULES	syntax.tab.c	410;"	d	file:
 YYNSTATES	syntax.tab.c	412;"	d	file:
 YYNTOKENS	syntax.tab.c	406;"	d	file:
 YYPACT_NINF	syntax.tab.c	605;"	d	file:
-YYPOPSTACK	syntax.tab.c	2045;"	d	file:
+YYPOPSTACK	syntax.tab.c	2032;"	d	file:
 YYPULL	syntax.tab.c	59;"	d	file:
 YYPURE	syntax.tab.c	53;"	d	file:
 YYPUSH	syntax.tab.c	56;"	d	file:
@@ -380,7 +387,7 @@ YYSTYPE_IS_DECLARED	syntax.tab.c	161;"	d	file:
 YYSTYPE_IS_DECLARED	syntax.tab.h	90;"	d
 YYSTYPE_IS_TRIVIAL	syntax.tab.c	159;"	d	file:
 YYSTYPE_IS_TRIVIAL	syntax.tab.h	88;"	d
-YYTABLES_NAME	lex.yy.c	2171;"	d	file:
+YYTABLES_NAME	lex.yy.c	2176;"	d	file:
 YYTABLE_NINF	syntax.tab.c	637;"	d	file:
 YYTERROR	syntax.tab.c	792;"	d	file:
 YYTOKENTYPE	syntax.tab.c	107;"	d	file:
@@ -408,7 +415,7 @@ YY_DECL_IS_OURS	lex.yy.c	725;"	d	file:
 YY_DO_BEFORE_ACTION	lex.yy.c	381;"	d	file:
 YY_END_OF_BUFFER	lex.yy.c	389;"	d	file:
 YY_END_OF_BUFFER_CHAR	lex.yy.c	141;"	d	file:
-YY_EXIT_FAILURE	lex.yy.c	1966;"	d	file:
+YY_EXIT_FAILURE	lex.yy.c	1971;"	d	file:
 YY_EXTRA_TYPE	lex.yy.c	581;"	d	file:
 YY_FATAL_ERROR	lex.yy.c	716;"	d	file:
 YY_FLEX_MAJOR_VERSION	lex.yy.c	10;"	d	file:
@@ -450,6 +457,7 @@ YY_USE_CONST	lex.yy.c	101;"	d	file:
 YY_USE_CONST	lex.yy.c	94;"	d	file:
 __ERROR_H_	error.h	2;"	d
 __FILE_H_	file.h	2;"	d
+__IROPT_H_	IRopt.h	2;"	d
 __IR_H_	IR.h	2;"	d
 __MAIN_H_	main.h	2;"	d
 __NAME_H_	name.h	2;"	d
@@ -459,10 +467,10 @@ __STDC_LIMIT_MACROS	lex.yy.c	40;"	d	file:
 __SYMTABLE_H_	symtable.h	2;"	d
 __TRANSLATEIR_H_	translateIR.h	2;"	d
 __TREE_H_	tree.h	2;"	d
+addArrayElem	symtable.c	/^Type addArrayElem(Type array, Type elem) {$/;"	f
 addDecFunc	semantichelp.c	/^void addDecFunc(Symbol symbol) {$/;"	f
 addFunc	semantichelp.c	/^void addFunc(struct FuncList **funcList, Symbol symbol) {$/;"	f
 addIR	IR.c	/^void addIR(InterCode ir) {$/;"	f
-addr	IR.h	/^	char * addr;$/;"	m	struct:IRinfo_
 allocTimes	symtable.h	/^	int allocTimes;$/;"	m	struct:HashTableInfo
 alloca	syntax.tab.c	282;"	d	file:
 argc	symtable.h	/^	int argc;$/;"	m	struct:Func
@@ -470,7 +478,7 @@ argsnum	semantic.c	/^int argsnum = 0;$/;"	v
 argtype	symtable.h	/^	FieldList argtype;$/;"	m	struct:Func
 array	symtable.h	/^		}array;$/;"	m	union:Type_::__anon2	typeref:struct:Type_::__anon2::__anon3
 basic	symtable.h	/^		int basic;$/;"	m	union:Type_::__anon2
-boolexp	translateIR.c	/^int boolexp = 0;$/;"	v
+beginbool	translateIR.c	/^int beginbool = 0;$/;"	v
 buffer	file.h	/^	char *buffer;$/;"	m	struct:Buffer
 children	tree.h	/^	struct node *children[CHILD_NUM];$/;"	m	struct:node	typeref:struct:node::node
 cleanHashTable	symtable.c	/^int cleanHashTable(void) {$/;"	f
@@ -493,6 +501,7 @@ debug2	main.c	/^int debug2 = 0;$/;"	v
 debug3	main.c	/^int debug3 = 0;$/;"	v
 deleteErrorInfoStack	error.c	/^void deleteErrorInfoStack(int type, int num) {$/;"	f
 depth	tree.h	/^	int depth;$/;"	m	struct:node
+downbound	symtable.h	/^			int downbound;$/;"	m	struct:Type_::__anon2::__anon3
 dumpChar	file.c	/^char dumpChar(char c) {$/;"	f	file:
 dumpString	file.c	/^char *dumpString(char *s) {$/;"	f	file:
 elem	symtable.h	/^			Type elem;$/;"	m	struct:Type_::__anon2::__anon3
@@ -504,7 +513,8 @@ errorInfo	symtable.h	/^	ErrorInfo errorInfo;$/;"	m	struct:FieldList_
 errorInfo	symtable.h	/^	ErrorInfo errorInfo;$/;"	m	struct:SymNode
 errorInfo	tree.h	/^	ErrorInfo errorInfo;$/;"	m	struct:node
 errorcount	tree.h	/^	int errorcount;$/;"	m	struct:node
-false	main.h	6;"	d
+expcount	translateIR.c	/^int expcount = 0;$/;"	v
+false	main.h	9;"	d
 falselist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 fieldList	tree.h	/^	FieldList fieldList;$/;"	m	struct:node
 first_column	syntax.tab.c	/^  int first_column;$/;"	m	struct:YYLTYPE	file:
@@ -527,6 +537,7 @@ freeDecFuncList	semantichelp.c	/^void freeDecFuncList() {$/;"	f
 freeErrorInfoStack	error.c	/^void freeErrorInfoStack(struct ErrorInfoStack *head) {$/;"	f
 freeFieldList	symtable.c	/^void freeFieldList(FieldList fieldList) {$/;"	f
 freeFunc	symtable.c	/^void freeFunc(struct Func *func) {$/;"	f
+freeIR	IR.c	/^void freeIR(InterCodes ir) {$/;"	f
 freeSymNode	symtable.c	/^int freeSymNode(Symbol symNode) {$/;"	f
 freeTimes	symtable.h	/^	int freeTimes;$/;"	m	struct:HashTableInfo
 freeType	symtable.c	/^void freeType(Type type) {$/;"	f
@@ -540,22 +551,35 @@ getErrorEnd	error.c	/^extern int getErrorEnd() {$/;"	f
 getErrorLine	error.c	/^extern int getErrorLine() {$/;"	f
 getErrorStart	error.c	/^extern int getErrorStart() {$/;"	f
 getHashTableInfo	symtable.c	/^void getHashTableInfo(void) {$/;"	f
+getIRhead	IR.c	/^InterCodes getIRhead() {$/;"	f
+getIRtail	IR.c	/^InterCodes getIRtail() {$/;"	f
+getLabelnum	IR.c	/^int getLabelnum() {$/;"	f
 getName	name.c	/^const char *getName(int type)$/;"	f
 getNextLine	file.c	/^int getNextLine() {$/;"	f
 getSymType	symtable.c	/^Type getSymType(Symbol symNode) {$/;"	f
+getTempnum	IR.c	/^int getTempnum() {$/;"	f
+getVarnum	IR.c	/^int getVarnum() {$/;"	f
+getfalseRelop	name.c	/^char *getfalseRelop(const char *relop) {$/;"	f
 hashTableInfo	symtable.c	/^struct HashTableInfo hashTableInfo;$/;"	v	typeref:struct:HashTableInfo
 hash_pjw	symtable.c	/^unsigned int hash_pjw(char *name) {$/;"	f
+hurrytestif	translateIR.c	/^void hurrytestif() {$/;"	f
+ifreduce	IRopt.c	/^InterCodes ifreduce(InterCodes IRhead) {$/;"	f
 indexNum	symtable.h	/^	int indexNum;$/;"	m	struct:HashTableInfo
 initError	error.c	/^ErrorInfo initError(int type) {$/;"	f
 init_buffer	file.c	/^init_buffer(){$/;"	f
 initerrorBuffer	error.c	/^initerrorBuffer(char *errorbuffer) {$/;"	f
 insert	symtable.c	/^int insert(Symbol symNode) {$/;"	f
 irinfo	tree.h	/^	IRinfo irinfo;$/;"	m	struct:node
+isAddr	IR.h	/^	int isAddr;$/;"	m	struct:Operand_
+isArray	IR.h	/^	int isArray;$/;"	m	struct:Operand_
+isBool	IR.h	/^	int isBool;$/;"	m	struct:Operand_
+isComputeAddr	IR.h	/^	int isComputeAddr;$/;"	m	struct:InterCode_
 isDeclare	symtable.h	/^	int isDeclare;$/;"	m	struct:Func
 isDeclare	symtable.h	/^	int isDeclare;$/;"	m	struct:Var
 isDefine	symtable.h	/^	int isDefine;$/;"	m	struct:Func
 isDefine	symtable.h	/^	int isDefine;$/;"	m	struct:Var
 isError	syntax.tab.c	/^	int isError = 0;$/;"	v
+isParam	symtable.h	/^	int isParam;$/;"	m	struct:Var
 kind	IR.h	/^	InterCodeKind kind;$/;"	m	struct:InterCode_
 kind	IR.h	/^	OP_KIND kind;$/;"	m	struct:IRinfo_
 kind	IR.h	/^	OP_KIND kind;$/;"	m	struct:Operand_
@@ -563,6 +587,7 @@ kind	symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;$/;"	m	struct:Type
 lBuffer	file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	file.c	/^int lMaxBuffer = 1000;$/;"	v
 labelnum	IR.c	/^int labelnum = 0;$/;"	v
+labelreduce	IRopt.c	/^InterCodes labelreduce(InterCodes IRhead) {$/;"	f
 last	error.h	/^	struct ErrorInfoStack *last;$/;"	m	struct:ErrorInfoStack	typeref:struct:ErrorInfoStack::ErrorInfoStack
 last_column	syntax.tab.c	/^  int last_column;$/;"	m	struct:YYLTYPE	file:
 last_column	syntax.tab.h	/^  int last_column;$/;"	m	struct:YYLTYPE
@@ -599,6 +624,7 @@ newVar	symtable.c	/^Symbol newVar(char *name, Type type, ErrorInfo errorInfo) {$
 newfile	file.c	/^newfile(char *fn)$/;"	f
 newoutputfile	file.c	/^newoutputfile(char *fn)$/;"	f
 newtokenNode	tree.c	/^struct node *newtokenNode(int type)$/;"	f
+next	IR.c	/^	struct Nlist_ *next;$/;"	m	struct:Nlist_	typeref:struct:Nlist_::Nlist_	file:
 next	IR.h	/^	IRinfo next;$/;"	m	struct:IRinfo_
 next	IR.h	/^	InterCodes prev, next;$/;"	m	struct:InterCodes_
 next	IR.h	/^	Operandlist next;$/;"	m	struct:Operandlist_
@@ -608,7 +634,7 @@ nextlist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 node	tree.h	/^struct node {$/;"	s
 nodetype	tree.h	/^	int nodetype;$/;"	m	struct:node
 nodevalue	tree.h	/^	union value nodevalue;$/;"	m	struct:node	typeref:union:node::value
-noif	translateIR.c	/^int noif = 1;$/;"	v
+noif	translateIR.c	/^int noif = 0;$/;"	v
 num	error.h	/^	int num;$/;"	m	struct:ErrorInfoStack
 num	symtable.h	/^	int num;	\/\/num of this hash node$/;"	m	struct:HashNode
 num_float	IR.h	/^		float num_float;$/;"	m	union:Operand_::__anon9
@@ -620,16 +646,18 @@ op1	IR.h	/^		}op1;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::_
 op2	IR.h	/^		}op2;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::__anon11::__anon13
 op3	IR.h	/^		}op3;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::__anon11::__anon14
 op4	IR.h	/^		}op4;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::__anon11::__anon15
+oplist	IR.c	/^	Operandlist oplist;$/;"	m	struct:Nlist_	file:
 outputFile	file.c	/^FILE *outputFile = NULL;$/;"	v
 outputfilename	file.c	/^char *outputfilename = NULL;$/;"	v
+pairscount	translateIR.c	/^int pairscount = 0;$/;"	v
 prev	IR.h	/^	InterCodes prev, next;$/;"	m	struct:InterCodes_
 printfErrorRow	error.c	/^printfErrorRow(char *errmsg, int start, int end) {$/;"	f
+printfExpIR	IR.c	/^void printfExpIR(FILE *tag, InterCode ir, int type) {$/;"	f
 printfIR	IR.c	/^void printfIR(FILE *tag, InterCode ir) {$/;"	f
 printfallIR	IR.c	/^void printfallIR(FILE *tag) {$/;"	f
 printfallIRtoFile	file.c	/^printfallIRtoFile() {$/;"	f
 pushErrorInfo	error.c	/^int pushErrorInfo(ErrorInfo errorInfo, int type) {$/;"	f
 relop	IR.h	/^			Operand x, relop, y, z;$/;"	m	struct:InterCode_::__anon11::__anon15
-relop	IR.h	/^	int relop;$/;"	m	struct:InterCode_
 result	IR.h	/^			Operand result, right1, right2;$/;"	m	struct:InterCode_::__anon11::__anon14
 result	IR.h	/^			Operand result, right;$/;"	m	struct:InterCode_::__anon11::__anon13
 right	IR.h	/^			Operand result, right;$/;"	m	struct:InterCode_::__anon11::__anon13
@@ -641,6 +669,7 @@ showAllSymbol	symtable.c	/^void showAllSymbol(void) {$/;"	f
 showDecFuncList	semantichelp.c	/^void showDecFuncList() {$/;"	f
 showFieldList	symtable.c	/^void showFieldList(FieldList fieldList) {$/;"	f
 showFunc	symtable.c	/^void showFunc(struct Func *func) {$/;"	f
+showOplist	IR.c	/^void showOplist(Operandlist oplist) {$/;"	f
 showSymList	symtable.c	/^int showSymList(Symbol head) {$/;"	f
 showSymbol	symtable.c	/^void showSymbol(Symbol symNode) {$/;"	f
 showTree	tree.c	/^void showTree(struct node *node)$/;"	f
@@ -660,11 +689,11 @@ symbolNum	symtable.h	/^	int symbolNum;$/;"	m	struct:HashTableInfo
 syntax_init	syntax.tab.c	/^void syntax_init()$/;"	f
 tail	symtable.h	/^	FieldList tail;$/;"	m	struct:FieldList_
 tempnum	IR.c	/^int tempnum = 0;$/;"	v
-test3	IR.c	/^void test3() {$/;"	f
+thelastexp	translateIR.c	/^TreeNode thelastexp = NULL;$/;"	v
 tokenName	name.c	/^const char *tokenName[] = {$/;"	v
 totalErrorInfo	error.c	/^static int totalErrorInfo = 0;$/;"	v	file:
 translateIR	translateIR.c	/^void translateIR(TreeNode parent, int num) {$/;"	f
-true	main.h	5;"	d
+true	main.h	8;"	d
 truelist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 type	IR.h	/^	enum {String, Int, Float} type;$/;"	m	struct:Operand_	typeref:enum:Operand_::__anon8
 type	symtable.h	/^	Type type;$/;"	m	struct:FieldList_
@@ -674,7 +703,9 @@ type	tree.h	/^	Type type;$/;"	m	struct:node
 type_node	syntax.tab.c	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:struct:YYSTYPE::node	file:
 type_node	syntax.tab.h	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:struct:YYSTYPE::node
 unput	lex.yy.c	202;"	d	file:
+upbound	symtable.h	/^			int upbound;$/;"	m	struct:Type_::__anon2::__anon3
 updateChildDepth	tree.c	/^void updateChildDepth(struct node *node)$/;"	f
+updatearraysize	symtable.c	/^int  updatearraysize(Type array) {$/;"	f
 usedIndex	symtable.h	/^	int usedIndex[SYMBOLMAX];$/;"	m	struct:HashTableInfo
 value	tree.h	/^union value {$/;"	u
 var	symtable.h	/^		struct Var *var;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Var
@@ -752,7 +783,7 @@ yyconst	lex.yy.c	107;"	d	file:
 yyconst	lex.yy.c	109;"	d	file:
 yydebug	syntax.tab.c	/^int yydebug;$/;"	v
 yydefact	syntax.tab.c	/^static const yytype_uint8 yydefact[] =$/;"	v	file:
-yydefgoto	syntax.tab.c	/^static const yytype_int8 yydefgoto[] =$/;"	v	file:
+yydefgoto	syntax.tab.c	/^static const yytype_int16 yydefgoto[] =$/;"	v	file:
 yydestruct	syntax.tab.c	/^yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp)$/;"	f	file:
 yyensure_buffer_stack	lex.yy.c	/^static void yyensure_buffer_stack (void)$/;"	f	file:
 yyerrok	syntax.tab.c	748;"	d	file:
@@ -768,8 +799,8 @@ yyin	lex.yy.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
 yyinput	lex.yy.c	/^    static int yyinput (void)$/;"	f	file:
 yyleng	lex.yy.c	/^int yyleng;$/;"	v
 yyless	lex.yy.c	189;"	d	file:
-yyless	lex.yy.c	1977;"	d	file:
-yyless	lex.yy.c	1978;"	d	file:
+yyless	lex.yy.c	1982;"	d	file:
+yyless	lex.yy.c	1983;"	d	file:
 yylex_destroy	lex.yy.c	/^int yylex_destroy  (void)$/;"	f
 yylineno	lex.yy.c	/^int yylineno = 1;$/;"	v
 yylloc	syntax.tab.c	/^YYLTYPE yylloc;$/;"	v
