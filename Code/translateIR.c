@@ -221,7 +221,6 @@ void ExpTrans(TreeNode parent, int num) {
 		switch(childleft->nodetype) {
 		case ID:
 			parent->irinfo->op = newOperand(VARIABLE_OP);
-			parent->irinfo->op->isConstant = 0;
 			parent->irinfo->op->type = String;
 			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
 			symNode = lookup(parent->nodevalue.str);
@@ -234,14 +233,12 @@ void ExpTrans(TreeNode parent, int num) {
 		case INT:
 			parent->nodevalue.INT = childleft->nodevalue.INT;
 			parent->irinfo->op = newOperand(CONSTANT_OP);
-			parent->irinfo->op->isConstant = 1;
 			parent->irinfo->op->type = Int;
 			parent->irinfo->op->num_int = parent->nodevalue.INT;
 			break;
 		case FLOAT:
 			parent->nodevalue.FLOAT = childleft->nodevalue.FLOAT;
 			parent->irinfo->op = newOperand(CONSTANT_OP);
-			parent->irinfo->op->isConstant = 1;
 			parent->irinfo->op->type = Float;
 			parent->irinfo->op->num_float = parent->nodevalue.FLOAT;
 			break;
@@ -258,7 +255,6 @@ void ExpTrans(TreeNode parent, int num) {
 			op_tmp2->num_int = 0;
 			result = Assign3IR(op_tmp, op_tmp2, SUB_IR, childmid->irinfo->op);
 			parent->irinfo->op = op_tmp;
-			parent->irinfo->op->isConstant = childmid->irinfo->op->isConstant;
 		}
 		if(childleft->nodetype == NOT) {
 			parent->irinfo->truelist = childmid->irinfo->falselist;		
@@ -303,71 +299,18 @@ void ExpTrans(TreeNode parent, int num) {
 		// other Exp
 		op_tmp = newTemp();
 		op_tmp->isAddr = 0;
-		op_tmp->isConstant = 0;
 		switch(childmid->nodetype) {
 		case PLUS:
-			if(childleft->irinfo->op->isConstant == 1 && childright->irinfo->op->isConstant == 1) {
-				op_tmp->isConstant = 1;
-				op_tmp->type = childleft->irinfo->op->type;
-				switch(op_tmp->type) {
-				case Int: 
-					op_tmp->num_int = childleft->irinfo->op->num_int + childright->irinfo->op->num_int;
-					break;
-				case Float: 
-					op_tmp->num_float = childleft->irinfo->op->num_float + childright->irinfo->op->num_float;
-					break;
-				}
-			}else {
-				Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
-			}
+			Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
 			break;
 		case MINUS:
-			if(childleft->irinfo->op->isConstant == 1 && childright->irinfo->op->isConstant == 1) {
-				op_tmp->isConstant = 1;
-				op_tmp->type = childleft->irinfo->op->type;
-				switch(op_tmp->type) {
-				case Int: 
-					op_tmp->num_int = childleft->irinfo->op->num_int - childright->irinfo->op->num_int;
-					break;
-				case Float: 
-					op_tmp->num_float = childleft->irinfo->op->num_float - childright->irinfo->op->num_float;
-					break;
-				}
-			}else {
-				Assign3IR(op_tmp, childleft->irinfo->op, SUB_IR,childright->irinfo->op);
-			}
+			Assign3IR(op_tmp, childleft->irinfo->op, SUB_IR,childright->irinfo->op);
 			break;
 		case STAR:
-			if(childleft->irinfo->op->isConstant == 1 && childright->irinfo->op->isConstant == 1) {
-				op_tmp->isConstant = 1;
-				op_tmp->type = childleft->irinfo->op->type;
-				switch(op_tmp->type) {
-				case Int: 
-					op_tmp->num_int = childleft->irinfo->op->num_int * childright->irinfo->op->num_int;
-					break;
-				case Float: 
-					op_tmp->num_float = childleft->irinfo->op->num_float * childright->irinfo->op->num_float;
-					break;
-				}
-			}else {
-				Assign3IR(op_tmp, childleft->irinfo->op, MUL_IR,childright->irinfo->op);
-			}
+			Assign3IR(op_tmp, childleft->irinfo->op, MUL_IR,childright->irinfo->op);
 			break;
 		case DIV:
-			if(childleft->irinfo->op->isConstant == 1 && childright->irinfo->op->isConstant == 1) {
-				op_tmp->isConstant = 1;
-				op_tmp->type = childleft->irinfo->op->type;
-				switch(op_tmp->type) {
-				case Int: 
-					op_tmp->num_int = childleft->irinfo->op->num_int / childright->irinfo->op->num_int;
-					break;
-				case Float: 
-					op_tmp->num_float = childleft->irinfo->op->num_float / childright->irinfo->op->num_float;
-					break;
-				}
-			}else {
-				Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
-			}
+			Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
 			break;
 		case AND:
 			Mop = Mpop();
@@ -390,7 +333,6 @@ void ExpTrans(TreeNode parent, int num) {
 			falseop->num_int = -1;
 			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
 			GotoIR(falseop);
-//			result = IffalseIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, falseop);
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);
 			break;
@@ -419,15 +361,8 @@ void ExpTrans(TreeNode parent, int num) {
 		parent->irinfo->op->isAddr = 1;
 		op_tmp2 = newOperand(CONSTANT_OP);
 		op_tmp2->type = Int;
-		op_tmp2->isConstant = 1;
 		op_tmp2->num_int = childleft->type->array.size;
-		if(childright->irinfo->op->isConstant == 1) {
-			op_tmp->isConstant = 1;
-			op_tmp->type = childright->irinfo->op->type;
-			op_tmp->num_int = childright->irinfo->op->num_int * op_tmp2->num_int;
-		}else {
-			Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
-		}
+		Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
 		Assign3AddrIR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
 		goto ExpDebug;
 	}
