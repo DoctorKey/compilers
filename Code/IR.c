@@ -68,7 +68,6 @@ Operand newOperand(int kind) {
 	result->kind = kind;
 	result->isAddr = 0;
 	result->isArray = 0;
-	result->isBool = 0;
 	result->isConstant = 0;
 	return result;
 }
@@ -274,6 +273,18 @@ InterCode newInterCode() {
 		return NULL;
 	}
 	return result;
+}
+InterCodes newInterCodes(InterCode ir) {
+	InterCodes new = NULL;
+	new = (InterCodes) malloc(sizeof(struct InterCodes_));
+	if(new == NULL) {
+		fprintf(stderr, "can't malloc\n");
+		return NULL;
+	}
+	new->code = ir;
+	new->prev = NULL;
+	new->next = NULL;
+	return new;
 }
 void addIR(InterCode ir) {
 	InterCodes new = NULL;

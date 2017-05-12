@@ -171,8 +171,8 @@ Stmt : Exp SEMI
 		{ $$ = newNode(Stmt, 2, NULL, $2); yyerrok; }
 	| IF LP error RP M Stmt %prec LOWER_THAN_ELSE 
 		{ $$ = newNode(Stmt, 5, $1, $2, NULL, $4, $6); yyerrok; }
-	| IF LP error RP M Stmt ELSE M Stmt
-		{ $$ = newNode(Stmt, 7, $1, $2, NULL, $4, $6, $7, $9); yyerrok; }
+	| IF LP error RP M Stmt ELSE N M Stmt
+		{ $$ = newNode(Stmt, 7, $1, $2, NULL, $4, $6, $7, $10); yyerrok; }
 	| WHILE M LP error RP M Stmt
 		{ $$ = newNode(Stmt, 5, $1, $3, NULL, $5, $7); yyerrok; }
 	;

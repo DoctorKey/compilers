@@ -3,6 +3,8 @@
 
 #include "IR.h"
 
+InterCodes ifreduce(InterCodes IRhead); 
 InterCodes labelreduce(InterCodes IRhead); 
+InterCodes labelreduce2(InterCodes IRhead); 
 InterCodes assignreduce(InterCodes IRhead); 
 #endif

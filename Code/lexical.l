@@ -10,10 +10,6 @@
 	#include "main.h"
 	#include "tree.h"
 	int lexical_isError = 0;
-	extern int pairscount;
-	extern int beginbool;
-	extern int expcount;
-	extern int noif;
 	int yycolumn = 1;
 #define YY_USER_ACTION \
 	yylloc.first_line = yylloc.last_line = yylineno; \
@@ -151,14 +147,11 @@ xdigit [0-9a-fA-F]
 "("				{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(LP);
-					pairscount++;
 					return LP;
 				}
 ")"				{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(RP);
-					pairscount--;
-					hurrytestif();
 					return RP;}
 "["				{ 
     					BeginToken(yytext); 
@@ -187,9 +180,6 @@ xdigit [0-9a-fA-F]
 "if"				{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(IF);
-					beginbool = 1;
-					noif = 1;
-					expcount = 0;
 					return IF;}
 "else"				{ 
     					BeginToken(yytext); 
@@ -198,9 +188,6 @@ xdigit [0-9a-fA-F]
 "while"				{ 
     					BeginToken(yytext); 
 					yylval.type_node = newtokenNode(WHILE);
-					beginbool = 1;
-					noif = 1;
-					expcount = 0;
 					return WHILE;}
 {letter}+({digit}|{letter})*	{ 
     					BeginToken(yytext); 

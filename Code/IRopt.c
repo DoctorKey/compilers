@@ -1,24 +1,38 @@
 #include "IRopt.h"
+#include "name.h"
 
+/*
+	reduce 
+		if x relop y GOTO label1
+		GOTO label2
+		LABEL label1 :
+	to
+		if x !relop y GOTO label2
+*/
 InterCodes ifreduce(InterCodes IRhead) {
-	int labelnum = getLabelnum();	
-	int i;
-	int labeluse[1024] = {0};
-	int index = 0;
-	int nouse;
-	InterCodes ir, tag, trueir, falseir;
+	InterCodes ir, ir3, falseir;
 	Operand truelabel, falselabel;
 	ir = IRhead;
 	while(ir) {
 		if(ir->code->kind == IF_IR) {
-			trueir = ir;
-			truelabel = trueir->code->op4.z;		
+			truelabel = ir->code->op4.z;		
 			falseir = ir->next;
-			if(falseir->code->kind == LABEL_IR)
+			if(falseir == NULL)
+				break;
+			ir3 = falseir->next;
+			if(falseir->code->kind == GOTO_IR)
 				falselabel = falseir->code->op1.op1;
-			if(falseir->next && falseir->next->code->kind == LABEL_IR 
-				&& falseir->next->code->op1.op1->num_int == truelabel->num_int) {
-				//TODO: add code to reduce if
+			if(ir3 && ir3->code->kind == LABEL_IR 
+				&& ir3->code->op1.op1->num_int == truelabel->num_int) {
+
+				ir->code->op4.relop->str = getfalseRelop(ir->code->op4.relop->str);
+				ir->code->op4.z = falselabel;
+				ir->next = ir3->next;
+				if(ir3->next) {
+					ir3->next->prev = ir;
+				}
+				freeIR(falseir);
+				freeIR(ir3);
 			}
 		} 
 		ir = ir->next;
@@ -70,6 +84,42 @@ InterCodes labelreduce(InterCodes IRhead) {
 			}
 		} 
 		ir = ir->next;
+	}
+	return IRhead;
+}
+/*
+	reduce 
+		GOTO label1
+		LABEL label1 :
+*/
+InterCodes labelreduce2(InterCodes IRhead) {
+	int labelnum = getLabelnum();	
+	int i;
+	int labeluse[1024] = {0};
+	int index = 0;
+	int nouse;
+	InterCodes ir, irnext, tag;
+	Operand label, taglabel;
+	ir = IRhead;
+	while(ir) {
+		irnext = ir->next;
+		if(irnext == NULL)
+			break;
+		label = NULL;
+		if(ir->code->kind == GOTO_IR) {
+			label = ir->code->op1.op1;		
+			if(irnext->code->kind == LABEL_IR) {
+				taglabel = irnext->code->op1.op1;	
+				if(label->num_int == taglabel->num_int) {
+					irnext->prev = ir->prev;
+					if(ir->prev != NULL)
+						ir->prev->next = irnext;
+					freeIR(ir);
+					ir = irnext->prev;
+				}
+			}
+		} 
+		ir = irnext;
 	}
 	return IRhead;
 }

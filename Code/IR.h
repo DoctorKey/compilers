@@ -21,7 +21,6 @@ struct Operand_ {
 	enum {String, Int, Float} type;
 	int isAddr;
 	int isArray;
-	int isBool;
 	int isConstant;
 	union {
 		int num_int;
@@ -70,6 +69,7 @@ struct InterCode_ {
 typedef struct InterCodes_* InterCodes;
 struct InterCodes_ {
 	InterCode code;
+	int basicblock;
 	InterCodes prev, next;
 };
 
@@ -79,6 +79,7 @@ Operand newTemp();
 Operand newLabel(); 
 char *Optostring(Operand op); 
 InterCode newInterCode(); 
+InterCodes newInterCodes(InterCode ir); 
 void addIR(InterCode ir); 
 void freeIR(InterCodes ir);
 
