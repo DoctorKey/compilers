@@ -68,7 +68,6 @@ Operand newOperand(int kind) {
 	result->kind = kind;
 	result->isAddr = 0;
 	result->isArray = 0;
-	result->isConstant = 0;
 	return result;
 }
 Operand newTemp() {
@@ -212,19 +211,12 @@ char *Optostring(Operand op) {
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
 	}
-	if(op->isConstant == 1) {
-		sprintf(buf, "#%s", Opvaluetostring(op));
-	}
 	result = (char*)strdup(buf);
 	return result;
 }
 char *OptoAddrstring(Operand op) {
 	static char buf[20];
 	char *result = NULL;
-	char temp;
-	if(op->isAddr == 0) {
-		temp = '&';
-	}
 	switch(op->kind) {
 	case TEMP_OP:
 		sprintf(buf, "t%s", Opvaluetostring(op));
@@ -238,18 +230,6 @@ char *OptoAddrstring(Operand op) {
 	case FUNC_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
-//	case ADDRESS_OP:
-//		sprintf(buf, "&%s", Opvaluetostring(op));
-//		break;
-//	case VALUEINADDR_OP:
-//		sprintf(buf, "*%s", Opvaluetostring(op));
-//		break;
-//	case TEMP_ADDR_OP:
-//		sprintf(buf, "&t%s", Opvaluetostring(op));
-//		break;
-//	case TEMP_VALUE_OP:
-//		sprintf(buf, "*t%s", Opvaluetostring(op));
-//		break;
 	case RELOP_OP:
 		sprintf(buf, "%s", Opvaluetostring(op));
 		break;
@@ -381,21 +361,6 @@ InterCode IfIR(Operand x, char *relop, Operand y, Operand z) {
 	op = newOperand(RELOP_OP);
 	op->type = String; 
 	op->str = (char*)strdup(relop);
-	result = newInterCode();
-	result->kind = IF_IR;
-	result->op4.x = x;
-	result->op4.relop = op;
-	result->op4.y = y;
-	result->op4.z = z;
-	addIR(result);
-	return result;
-}
-InterCode IffalseIR(Operand x, char *relop, Operand y, Operand z) {
-	InterCode result = NULL;
-	Operand op = NULL;
-	op = newOperand(RELOP_OP);
-	op->type = String; 
-	op->str = getfalseRelop(relop);
 	result = newInterCode();
 	result->kind = IF_IR;
 	result->op4.x = x;
@@ -593,56 +558,3 @@ void printfallIR(FILE *tag) {
 		temp = temp->next;
 	}
 }
-/*
-void test3() {
-	Operand x,y,z;
-	InterCode temp;
-	FILE *tag = stderr;
-	temp = LabelIR(1);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = FunctionIR("main");
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	x = newOperand(VARIABLE_OP);
-	x->type = String;
-	x->str = "var";
-	y = newTemp();
-	z = newTemp();
-	temp = Assign2IR(x, y);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = Assign3IR(x, y, ADD_IR, z);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = GotoIR(1);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = IfIR(x, ">", y, 2);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = ReturnIR(x);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = DecIR(x, 4);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = ArgIR(x);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = CallIR(x, "func");
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = ParamIR(x);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = ReadIR(x);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	temp = WriteIR(x);
-	printfIR(tag, temp);
-	fprintf(tag, "\n");
-	fprintf(tag, "---------------all--------------\n");
-	printfallIR(tag);
-}
-*/

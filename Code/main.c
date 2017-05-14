@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 	closefile();
 
 #if LAB_3 == true
-	printfallIR(stderr);
+//	printfallIR(stderr);
 	printfallIRtoFile();
 	closeoutputfile();
 #endif

@@ -80,6 +80,11 @@ void PrintError(char type, char *errorstring, ...) {
 	}else if(type == 'C') {
 		printfErrorRow(errmsg, start, end); 
 		fprintf(stderr, "\n");
+	}else if(type == 'D') {
+		fprintf(stderr, "\033[31m\033[1m");
+		fprintf(stderr, "Cannot translate");
+		fprintf(stderr, "\033[0m");
+		fprintf(stderr, ": Code contains wariables or parameters of structure type.\n");
 	}else{
 		fprintf(stderr, "unknow error type\n");
 	}

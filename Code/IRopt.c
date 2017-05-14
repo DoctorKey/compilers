@@ -1,5 +1,6 @@
 #include "IRopt.h"
 #include "name.h"
+#include "IR.h"
 
 /*
 	reduce 
@@ -211,6 +212,96 @@ InterCodes assignreduce(InterCodes IRhead) {
 			}
 		}
 		ir = ir->next;
+	}
+	return IRhead;
+}
+
+/*
+	reduce 
+		t1 = #4 + #3
+	to 
+		t1 = #7
+*/
+InterCodes constantreduce(InterCodes IRhead) {
+	InterCodes ir;
+	Operand right1, right2, right;
+	ir = IRhead;
+	while(ir) {
+		right1 = right2 = NULL;
+		if(ir->code->kind == ADD_IR || ir->code->kind == SUB_IR 
+			|| ir->code->kind == MUL_IR || ir->code->kind == DIV_IR) {
+			right1 = ir->code->op3.right1;
+			right2 = ir->code->op3.right2;
+		}
+		if(right1 && right2 && right1->kind == CONSTANT_OP && right2->kind == CONSTANT_OP) {
+			right = newOperand(CONSTANT_OP);
+			right->type = right1->type;
+			right->isAddr = 0;
+			right->isArray = 0;
+			switch(ir->code->kind) {
+				case ADD_IR:
+					if(right->type == Int)
+						right->num_int = right1->num_int + right2->num_int;
+					else
+						right->num_float = right1->num_float + right2->num_float;
+					break;
+				case SUB_IR:
+					if(right->type == Int)
+						right->num_int = right1->num_int - right2->num_int;
+					else
+						right->num_float = right1->num_float - right2->num_float;
+					break;
+				case MUL_IR:
+					if(right->type == Int)
+						right->num_int = right1->num_int * right2->num_int;
+					else
+						right->num_float = right1->num_float * right2->num_float;
+					break;
+				case DIV_IR:
+					if(right->type == Int)
+						right->num_int = right1->num_int / right2->num_int;
+					else
+						right->num_float = right1->num_float / right2->num_float;
+					break;
+			}
+			ir->code->op2.result = ir->code->op3.result;
+			ir->code->op2.right = right;
+			ir->code->kind = ASSIGN_IR;
+		}
+		ir = ir->next;
+	}
+	return IRhead;
+}
+InterCodes initbasicblock(InterCodes IRhead) {
+	int funcnum = 0, basicblock = 0;
+	InterCodes ir;
+	ir = IRhead;
+	while(ir) {
+		if(ir->code->kind == FUNCTION_IR) {
+			funcnum++;
+			basicblock++;
+			ir->isblockhead = 1;
+		}
+		ir->funcnum = funcnum;
+		if(ir->code->kind == LABEL_IR) {
+			ir->isblockhead = 1;
+		}
+		if(ir->code->kind == IF_IR || ir->code->kind == GOTO_IR || ir->code->kind == RETURN_IR) {
+			if(ir->next) {
+				ir->next->isblockhead = 1;
+			}
+		}
+		ir = ir->next;
+	}
+	if(debug3) {
+		ir = IRhead;
+		while(ir) {
+			if(ir->isblockhead == 1) 
+				fprintf(stdout, "---------------------\n");
+			printfIR(stdout, ir->code);
+			fprintf(stdout, "\n");
+			ir = ir->next;
+		}
 	}
 	return IRhead;
 }

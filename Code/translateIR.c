@@ -14,10 +14,13 @@
 */
 void ProgramTrans(TreeNode parent, int num) {
 	InterCodes IRhead = getIRhead();
-	ifreduce(IRhead);
-	labelreduce2(IRhead);
-	labelreduce(IRhead);
+	IRhead = ifreduce(IRhead);
+	IRhead = labelreduce2(IRhead);
+	IRhead = labelreduce(IRhead);
+	IRhead = constantreduce(IRhead);
 //	assignreduce(IRhead);
+
+	IRhead = initbasicblock(IRhead);
 }
 void ExtDefListTrans(TreeNode parent, int num) {
 }
@@ -31,7 +34,7 @@ void ExtDecListTrans(TreeNode parent, int num) {
 void SpecifierTrans(TreeNode parent, int num) {
 }
 void StructSpecifierTrans(TreeNode parent, int num) {
-	fprintf(stderr, "Cannot translate: Code contains wariables or parameters of structure type.\n");
+	PrintError('D', NULL);
 	exit(0);
 }
 void OptTagTrans(TreeNode parent, int num) {
@@ -57,7 +60,6 @@ void FunDecTrans(TreeNode parent, int num) {
 
 	funcIR = FunctionIR(funcname);
 	while(fieldlist) {
-		// TODO: decide kind by type 
 		paramop = newOperand(VARIABLE_OP);
 		if(fieldlist->type->kind == ARRAY) 
 			paramop->isAddr = 1;
@@ -207,7 +209,6 @@ void genArgsIR(IRinfo irinfo) {
 	genArgsIR(irinfo->next);
 	ArgIR(irinfo->op);
 }
-// update parent->type, parent->errorInfo, parent->nodevalue.str
 void ExpTrans(TreeNode parent, int num) {
 	TreeNode childleft, childright, childmid;
 	Symbol symNode = NULL;
@@ -280,13 +281,12 @@ void ExpTrans(TreeNode parent, int num) {
 				result = CallIR(op_tmp, childleft->nodevalue.str);
 			}
 			parent->irinfo->op = op_tmp;
-			parent->irinfo->op->isConstant = 0;
 			parent->irinfo->op->isAddr = 0;
 			goto ExpDebug;
 		}
 		// Exp DOT ID
 		if (childright->nodetype == ID) {
-			fprintf(stderr, "Cannot translate: Code contains wariables or parameters of structure type.\n");
+			PrintError('D', NULL);
 			exit(0);
 			goto ExpDebug;
 		}
@@ -369,7 +369,6 @@ void ExpTrans(TreeNode parent, int num) {
 ExpDebug:
 	return;
 }
-// update parent->fieldList 
 void ArgsTrans(TreeNode parent, int num) {
 	TreeNode exp = NULL;
 	TreeNode args = NULL;

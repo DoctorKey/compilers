@@ -21,7 +21,6 @@ struct Operand_ {
 	enum {String, Int, Float} type;
 	int isAddr;
 	int isArray;
-	int isConstant;
 	union {
 		int num_int;
 		float num_float;
@@ -69,7 +68,8 @@ struct InterCode_ {
 typedef struct InterCodes_* InterCodes;
 struct InterCodes_ {
 	InterCode code;
-	int basicblock;
+	int isblockhead;
+	int funcnum;
 	InterCodes prev, next;
 };
 
@@ -90,7 +90,6 @@ InterCode Assign3IR(Operand x, Operand y, int kind, Operand z);
 InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z); 
 InterCode GotoIR(Operand n); 
 InterCode IfIR(Operand x, char *relop, Operand y, Operand z); 
-InterCode IffalseIR(Operand x, char *relop, Operand y, Operand z); 
 InterCode ReturnIR(Operand x); 
 InterCode DecIR(Operand x, int size); 
 InterCode ArgIR(Operand x); 
@@ -104,6 +103,6 @@ int getVarnum();
 int getLabelnum();
 InterCodes getIRhead();
 InterCodes getIRtail();
+void printfIR(FILE *tag, InterCode ir); 
 void printfallIR(FILE *tag);
-void test3(); 
 #endif
