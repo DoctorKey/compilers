@@ -14,7 +14,7 @@
 */
 void ProgramTrans(TreeNode parent, int num) {
 	InterCodes IRhead = getIRhead();
-	IRhead = ifreduce(IRhead);
+//	IRhead = ifreduce(IRhead);
 	IRhead = labelreduce2(IRhead);
 	IRhead = labelreduce(IRhead);
 	IRhead = constantreduce(IRhead);
@@ -332,6 +332,7 @@ void ExpTrans(TreeNode parent, int num) {
 			falseop->type = Int;
 			falseop->num_int = -1;
 			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
+			result = getIRType(result, childleft->type);
 			GotoIR(falseop);
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);

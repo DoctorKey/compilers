@@ -32,6 +32,8 @@ struct Operandlist_ {
 	Operand op;
 	Operandlist next;
 };
+Operandlist getFall(); 
+int isFall(Operandlist fall);
 Operandlist Opmakelist(Operand op); 
 Operandlist Opmerge(Operandlist oplist1, Operandlist oplist2); 
 void Opbackpatch(Operandlist oplist, Operand label); 
@@ -65,6 +67,7 @@ struct InterCode_ {
 		}op4;
 	};
 };
+InterCode getIRType(InterCode ir, Type type);
 typedef struct InterCodes_* InterCodes;
 struct InterCodes_ {
 	InterCode code;

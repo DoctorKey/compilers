@@ -134,6 +134,8 @@ Operandlist Npop() {
 		return result;
 	}	
 }
+Operandlist getFall() {
+}
 Operandlist Opmakelist(Operand op) {
 	Operandlist result = NULL;
 	result = (Operandlist) malloc(sizeof(struct Operandlist_));
@@ -287,6 +289,14 @@ void addIR(InterCode ir) {
 		return;
 	}
 }
+InterCode getIRType(InterCode ir, Type type) {
+	if(type->kind == BASIC) {
+		ir->isComputeAddr = 0;
+	}else if(type->kind == ARRAY || type->kind == STRUCTURE) {
+		ir->isComputeAddr = 1;
+	}
+	return ir;
+}
 void freeIR(InterCodes ir) {
 	if(ir == NULL)
 		return;
@@ -367,6 +377,7 @@ InterCode IfIR(Operand x, char *relop, Operand y, Operand z) {
 	result->op4.relop = op;
 	result->op4.y = y;
 	result->op4.z = z;
+	result->isComputeAddr = 0;
 	addIR(result);
 	return result;
 }
@@ -437,6 +448,25 @@ InterCode WriteIR(Operand x) {
 	return result;
 }
 
+char *formatStr(InterCode ir, Operand op) {
+	char *result;
+	static char buffer[64];
+	if(ir->isComputeAddr == 0) {
+		if(op->isAddr == 0) {
+			sprintf(buffer, "%s", Optostring(op));	
+		}else {
+			sprintf(buffer, "*%s", Optostring(op));	
+		}
+	}else if(ir->isComputeAddr == 1) {
+		if(op->isAddr == 0) {
+			sprintf(buffer, "&%s", Optostring(op));	
+		}else {
+			sprintf(buffer, "%s", Optostring(op));	
+		}
+	}
+	result = strdup(buffer);
+	return result;
+}
 void printfExpIR(FILE *tag, InterCode ir, int type) {
 	char comtype;
 	switch(type) {
@@ -519,7 +549,8 @@ void printfIR(FILE *tag, InterCode ir) {
 		break;
 	case IF_IR:
 		fprintf(tag, "IF %s %s %s GOTO %s", 
-			Optostring(ir->op4.x), Optostring(ir->op4.relop), Optostring(ir->op4.y), Optostring(ir->op4.z));	
+//			Optostring(ir->op4.x), Optostring(ir->op4.relop), Optostring(ir->op4.y), Optostring(ir->op4.z));	
+			formatStr(ir, ir->op4.x), Optostring(ir->op4.relop), formatStr(ir, ir->op4.y), Optostring(ir->op4.z));
 		break;
 	case RETURN_IR:
 		fprintf(tag, "RETURN %s", Optostring(ir->op1.op1));	
