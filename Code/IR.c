@@ -137,15 +137,19 @@ Operandlist Npop() {
 Operandlist getFall() {
 	Operand op;
 	Operandlist result;
-	op = newOperand(FALL_OP);
+	op = newOperand(LABEL_OP);
+	op->type = Int;
+	op->num_int = -2;
 	result = Opmakelist(op);
 	return result;
 }
 int isFall(Operandlist fall) {
 	if(fall == NULL)
 		return 0;
-	if(fall->op->kind == FALL_OP)
-		return 1;
+	if(fall->op->kind == LABEL_OP) {
+		if(fall->op->num_int == -2)
+			return 1;
+	}
 	else
 		return 0;
 }

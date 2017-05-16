@@ -342,9 +342,11 @@ void ExpTrans(TreeNode parent, int num) {
 			falseop = newOperand(LABEL_OP);
 			falseop->type = Int;
 			falseop->num_int = -1;
+//			result = IfIR(childleft->irinfo->op, getfalseRelop(childmid->nodevalue.str), childright->irinfo->op, trueop);
 			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
 			result->isComputeAddr = isAddr(childleft->type);
 			GotoIR(falseop);
+//			parent->irinfo->truelist = getFall();
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);
 			break;
