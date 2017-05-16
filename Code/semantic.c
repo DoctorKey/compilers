@@ -185,7 +185,6 @@ void ExtDecListAnalyze(TreeNode parent, int num) {
 		parent->errorInfo->ErrorTypeNum = 3;
 		SemanticError(parent->errorInfo);
 	}else {
-//		symNode = newVar(vardec->nodevalue.str, Gspecifier, parent->errorInfo);
 		symNode = newVar(vardec->nodevalue.str, vardec->type, parent->errorInfo);
 		insert(symNode);
 	}
@@ -206,7 +205,7 @@ void SpecifierAnalyze(TreeNode parent, int num) {
 	if (child == NULL) {
 		fprintf(stderr, "Specifier have no child!\n");
 		parent->type = newType();
-		parent->type->kind = ERROR;
+		parent->type->kind = BASIC;
 		goto SpecifierDebug;
 	}
 	switch (child->nodetype) {
@@ -228,7 +227,7 @@ void SpecifierAnalyze(TreeNode parent, int num) {
 	default:
 		fprintf(stderr, "Specifier child type error!\n");
 		parent->type = newType();
-		parent->type->kind = ERROR;
+		parent->type->kind = BASIC;
 		break;
 	}
 	Gspecifier = parent->type;
@@ -270,7 +269,7 @@ void StructSpecifierAnalyze(TreeNode parent, int num) {
 		if (tag == NULL) {
 			fprintf(stderr, "StructSpecifier's child Tag is NULL!\n");
 			parent->type = newType();
-			parent->type->kind = ERROR;
+			parent->type->kind = STRUCTURE;
 			goto StructSpecifierDebug;
 		}
 		parent->type = tag->type;
@@ -364,7 +363,7 @@ void TagAnalyze(TreeNode parent, int num) {
 		fprintf(stderr, "Tag have no child\n");
 		parent->nodevalue.str = NULL;
 		parent->type = newType();
-		parent->type->kind = ERROR;
+		parent->type->kind = STRUCTURE;
 		goto TagDebug;
 	}
 	//TODO: just -1 may error
@@ -376,7 +375,7 @@ void TagAnalyze(TreeNode parent, int num) {
 		parent->errorInfo->ErrorTypeNum = 17;
 		SemanticError(parent->errorInfo);
 		parent->type = newType();
-		parent->type->kind = ERROR;
+		parent->type->kind = STRUCTURE;
 		goto TagDebug;
 	}
 	parent->type = symNode->structure;
@@ -609,7 +608,6 @@ void StmtAnalyze(TreeNode parent, int num) {
 			return;
 		}
 		if (exp->type->kind != BASIC || exp->type->basic != INT) {
-			//fprintf(stderr, "assumption 2\n");
 			exp->errorInfo->ErrorTypeNum = 7;
 			SemanticError(exp->errorInfo);
 		}
@@ -804,7 +802,7 @@ void ExpAnalyze(TreeNode parent, int num) {
 				parent->errorInfo->ErrorTypeNum = 1;
 				SemanticError(parent->errorInfo);
 				parent->type = newType();
-				parent->type->kind = ERROR;
+				parent->type->kind = BASIC;
 			}else {
 				parent->type = getSymType(symNode);
 			}
@@ -880,7 +878,7 @@ void ExpAnalyze(TreeNode parent, int num) {
 				parent->errorInfo->ErrorTypeNum = 13;
 				SemanticError(parent->errorInfo);
 				parent->type = newType();
-				parent->type->kind = ERROR;
+				parent->type->kind = STRUCTURE;
 				goto ExpDebug;
 			}
 			parent->errorInfo = GetErrorInfoByNum(IdErrorInfoStackHead, totalErrorInfo);
@@ -889,7 +887,7 @@ void ExpAnalyze(TreeNode parent, int num) {
 				parent->errorInfo->ErrorTypeNum = 14;
 				SemanticError(parent->errorInfo);
 				parent->type = newType();
-				parent->type->kind = ERROR;
+				parent->type->kind = STRUCTURE;
 			}else {
 				parent->nodevalue.str = childright->nodevalue.str;
 			}
@@ -898,8 +896,8 @@ void ExpAnalyze(TreeNode parent, int num) {
 		// Exp ASSIGNOP Exp
 		if (childmid->nodetype == ASSIGNOP) {
 			parent->errorInfo = childleft->errorInfo;
-			if (childleft->type->kind == ERROR)
-				goto ExpDebug;
+//			if (childleft->type->kind == ERROR)
+//				goto ExpDebug;
 			//TODO: just need name equal
 			if(cmpType(childleft->type, childright->type)) {
 				parent->errorInfo->ErrorTypeNum = 5;
@@ -917,7 +915,6 @@ void ExpAnalyze(TreeNode parent, int num) {
 			parent->errorInfo->ErrorTypeNum = 7;
 			SemanticError(parent->errorInfo);
 		}
-		//TODO: just take left type maybe error
 		parent->type = childleft->type;
 		goto ExpDebug;
 	}

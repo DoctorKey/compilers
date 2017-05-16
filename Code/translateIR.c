@@ -125,6 +125,7 @@ void StmtTrans(TreeNode parent, int num) {
 	if (stmtType->nodetype == RETURN) {
 		exp = parent->children[1];
 		result = ReturnIR(exp->irinfo->op);
+		result->isComputeAddr = isAddr(exp->type);
 		parent->irinfo->nextlist = NULL;
 	}
 	// if; while
@@ -197,17 +198,20 @@ void DecTrans(TreeNode parent, int num) {
 	if (num == 3) {
 		exp = parent->children[2];
 		result = Assign2IR(op_tmp, exp->irinfo->op);
+		result->isComputeAddr = isAddr(parent->type);
 	}
 }
 
 /*
 	Expressions
 */
-void genArgsIR(IRinfo irinfo) {
-	if(irinfo == NULL) 
+void genArgsIR(FieldList argtype, IRinfo irinfo) {
+	InterCode result;	
+	if(irinfo == NULL || argtype == NULL) 
 		return;
-	genArgsIR(irinfo->next);
-	ArgIR(irinfo->op);
+	genArgsIR(argtype->tail, irinfo->next);
+	result = ArgIR(irinfo->op);
+	result->isComputeAddr = isAddr(argtype->type);
 }
 void ExpTrans(TreeNode parent, int num) {
 	TreeNode childleft, childright, childmid;
@@ -274,14 +278,16 @@ void ExpTrans(TreeNode parent, int num) {
 		}
 		// ID LP RP
 		if (childleft->nodetype == ID) {
+			symNode = lookup(childleft->nodevalue.str);
 			op_tmp = newTemp();
 			if(strcmp(childleft->nodevalue.str, "read") == 0) {
 				result = ReadIR(op_tmp);
 			}else {
 				result = CallIR(op_tmp, childleft->nodevalue.str);
 			}
+			result->isComputeAddr = isAddr(symNode->func->Return);
 			parent->irinfo->op = op_tmp;
-			parent->irinfo->op->isAddr = 0;
+			parent->irinfo->op->isAddr = result->isComputeAddr;
 			goto ExpDebug;
 		}
 		// Exp DOT ID
@@ -292,7 +298,8 @@ void ExpTrans(TreeNode parent, int num) {
 		}
 		// Exp ASSIGNOP Exp
 		if(childmid->nodetype == ASSIGNOP) {
-			Assign2IR(childleft->irinfo->op, childright->irinfo->op);	
+			result = Assign2IR(childleft->irinfo->op, childright->irinfo->op);	
+			result->isComputeAddr = isAddr(childleft->type);
 			parent->irinfo->op = childleft->irinfo->op;
 			goto ExpDebug;
 		}
@@ -301,16 +308,20 @@ void ExpTrans(TreeNode parent, int num) {
 		op_tmp->isAddr = 0;
 		switch(childmid->nodetype) {
 		case PLUS:
-			Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
+			result = Assign3IR(op_tmp, childleft->irinfo->op, ADD_IR,childright->irinfo->op);
+			result->isComputeAddr = isAddr(childleft->type);
 			break;
 		case MINUS:
-			Assign3IR(op_tmp, childleft->irinfo->op, SUB_IR,childright->irinfo->op);
+			result = Assign3IR(op_tmp, childleft->irinfo->op, SUB_IR,childright->irinfo->op);
+			result->isComputeAddr = isAddr(childleft->type);
 			break;
 		case STAR:
-			Assign3IR(op_tmp, childleft->irinfo->op, MUL_IR,childright->irinfo->op);
+			result = Assign3IR(op_tmp, childleft->irinfo->op, MUL_IR,childright->irinfo->op);
+			result->isComputeAddr = isAddr(childleft->type);
 			break;
 		case DIV:
-			Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
+			result = Assign3IR(op_tmp, childleft->irinfo->op, DIV_IR,childright->irinfo->op);
+			result->isComputeAddr = isAddr(childleft->type);
 			break;
 		case AND:
 			Mop = Mpop();
@@ -332,7 +343,7 @@ void ExpTrans(TreeNode parent, int num) {
 			falseop->type = Int;
 			falseop->num_int = -1;
 			result = IfIR(childleft->irinfo->op, childmid->nodevalue.str, childright->irinfo->op, trueop);
-			result = getIRType(result, childleft->type);
+			result->isComputeAddr = isAddr(childleft->type);
 			GotoIR(falseop);
 			parent->irinfo->truelist = Opmakelist(trueop);
 			parent->irinfo->falselist = Opmakelist(falseop);
@@ -345,14 +356,17 @@ void ExpTrans(TreeNode parent, int num) {
 	if (num == 4) {
 		// ID LP Args RP
 		if(childleft->nodetype == ID) {
+			symNode = lookup(childleft->nodevalue.str);
 			if(strcmp(childleft->nodevalue.str, "write") == 0) {
 				result = WriteIR(childright->irinfo->op);			
+				result->isComputeAddr = isAddr(symNode->func->Return);
 			}else {
-				genArgsIR(childright->irinfo);
+				genArgsIR(symNode->func->argtype, childright->irinfo);
 				op_tmp = newTemp();
 				result = CallIR(op_tmp, childleft->nodevalue.str);
+				result->isComputeAddr = isAddr(symNode->func->Return);
 				parent->irinfo->op = op_tmp;
-				parent->irinfo->op->isAddr = 0;
+				parent->irinfo->op->isAddr = result->isComputeAddr;
 			}
 			goto ExpDebug;
 		}	
@@ -363,8 +377,10 @@ void ExpTrans(TreeNode parent, int num) {
 		op_tmp2 = newOperand(CONSTANT_OP);
 		op_tmp2->type = Int;
 		op_tmp2->num_int = childleft->type->array.size;
-		Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
-		Assign3AddrIR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
+		result = Assign3IR(op_tmp, childright->irinfo->op, MUL_IR, op_tmp2);
+		result->isComputeAddr = 0;
+		result = Assign3IR(parent->irinfo->op, childleft->irinfo->op, ADD_IR, op_tmp);
+		result->isComputeAddr = 1;
 		goto ExpDebug;
 	}
 ExpDebug:
@@ -377,9 +393,7 @@ void ArgsTrans(TreeNode parent, int num) {
 	exp = parent->children[0];
 	parent->irinfo = newIRinfo();
 	parent->irinfo->op = exp->irinfo->op;
-	if(exp->type->kind == ARRAY) {
-		parent->irinfo->op->isArray = 1;
-	}
+
 	// Exp
 	if (num == 1) {
 	}

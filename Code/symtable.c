@@ -84,8 +84,15 @@ Type addArrayElem(Type array, Type elem) {
 	elem->array.elem = array;
 	return head;
 }
-int  updatearraysize(Type array) {
+int isAddr(Type type) {
+	if(type->kind == BASIC) {
+		return 0;
+	}else if(type->kind == ARRAY || type->kind == STRUCTURE) {
+		return 1;
+	}
+	return 0;	
 }
+
 /*
 	FieldList
 */

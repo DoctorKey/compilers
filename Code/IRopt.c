@@ -237,7 +237,7 @@ InterCodes constantreduce(InterCodes IRhead) {
 			right = newOperand(CONSTANT_OP);
 			right->type = right1->type;
 			right->isAddr = 0;
-			right->isArray = 0;
+//			right->isArray = 0;
 			switch(ir->code->kind) {
 				case ADD_IR:
 					if(right->type == Int)

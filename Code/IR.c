@@ -23,22 +23,22 @@ InterCodes getIRtail() {
 }
 // add read write
 void IR_init() {
-	Type tmp, arg;
+	Type returntype, arg;
 	Symbol write, read;
-	tmp = newType();
-	tmp->kind = BASIC;
-	tmp->basic = INT;
-	read = newFunc("read", tmp, NULL, NULL);
+	returntype = newType();
+	returntype->kind = BASIC;
+	returntype->basic = INT;
+	read = newFunc("read", returntype, NULL, NULL);
 	read->func->isDefine = 1;
 	insert(read);
 
-	tmp = newType();
-	tmp->kind = BASIC;
-	tmp->basic = INT;
+	returntype = newType();
+	returntype->kind = BASIC;
+	returntype->basic = INT;
 	arg = newType();
 	arg->kind = BASIC;
 	arg->basic = INT;
-	write = newFunc("write", tmp, newFieldList(NULL, arg, NULL, NULL),NULL);
+	write = newFunc("write", returntype, newFieldList(NULL, arg, NULL, NULL),NULL);
 	write->func->isDefine = 1;
 	insert(write);
 }
@@ -67,7 +67,7 @@ Operand newOperand(int kind) {
 	}
 	result->kind = kind;
 	result->isAddr = 0;
-	result->isArray = 0;
+//	result->isArray = 0;
 	return result;
 }
 Operand newTemp() {
@@ -135,6 +135,19 @@ Operandlist Npop() {
 	}	
 }
 Operandlist getFall() {
+	Operand op;
+	Operandlist result;
+	op = newOperand(FALL_OP);
+	result = Opmakelist(op);
+	return result;
+}
+int isFall(Operandlist fall) {
+	if(fall == NULL)
+		return 0;
+	if(fall->op->kind == FALL_OP)
+		return 1;
+	else
+		return 0;
 }
 Operandlist Opmakelist(Operand op) {
 	Operandlist result = NULL;
@@ -289,6 +302,7 @@ void addIR(InterCode ir) {
 		return;
 	}
 }
+/*
 InterCode getIRType(InterCode ir, Type type) {
 	if(type->kind == BASIC) {
 		ir->isComputeAddr = 0;
@@ -297,6 +311,7 @@ InterCode getIRType(InterCode ir, Type type) {
 	}
 	return ir;
 }
+*/
 void freeIR(InterCodes ir) {
 	if(ir == NULL)
 		return;
@@ -386,6 +401,7 @@ InterCode ReturnIR(Operand x) {
 	result = newInterCode();
 	result->kind = RETURN_IR;
 	result->op1.op1 = x;
+	result->isComputeAddr = 0;
 	addIR(result);
 	return result;
 }
@@ -475,6 +491,13 @@ void printfExpIR(FILE *tag, InterCode ir, int type) {
 	case MUL_IR: comtype = '*'; break;
 	case DIV_IR: comtype = '/'; break;
 	}
+	fprintf(tag, "%s := %s %c ", formatStr(ir, ir->op3.result), formatStr(ir, ir->op3.right1), comtype);
+	if(ir->op3.right2->isAddr == 0) {
+		fprintf(tag, "%s", Optostring(ir->op3.right2));
+	}else {
+		fprintf(tag, "*%s", Optostring(ir->op3.right2));
+	}	
+	/*
 	if(ir->isComputeAddr == 0) {
 		if(ir->op3.result->isAddr == 0) {
 			fprintf(tag, "%s", Optostring(ir->op3.result));
@@ -512,6 +535,7 @@ void printfExpIR(FILE *tag, InterCode ir, int type) {
 			fprintf(tag, "*%s", Optostring(ir->op3.right2));
 		}	
 	}
+	*/
 }
 void printfIR(FILE *tag, InterCode ir) {
 	switch(ir->kind) {
@@ -522,15 +546,7 @@ void printfIR(FILE *tag, InterCode ir) {
 		fprintf(tag, "FUNCTION %s :", Optostring(ir->op1.op1));	
 		break;
 	case ASSIGN_IR:
-		if(ir->op2.result->isAddr == 0 && ir->op2.right->isAddr == 0) {
-			fprintf(tag, "%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
-		}else if(ir->op2.result->isAddr == 1 && ir->op2.right->isAddr == 0) {
-			fprintf(tag, "*%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
-		}else if(ir->op2.result->isAddr == 0 && ir->op2.right->isAddr == 1) {
-			fprintf(tag, "%s := *%s", Optostring(ir->op2.result), Optostring(ir->op2.right));
-		}else if(ir->op2.result->isAddr == 1 && ir->op2.right->isAddr == 1) {
-			fprintf(tag, "%s := %s", Optostring(ir->op2.result), Optostring(ir->op2.right));
-		}
+		fprintf(tag, "%s := %s", formatStr(ir, ir->op2.result), formatStr(ir, ir->op2.right));
 		break;
 	case ADD_IR:
 		printfExpIR(tag, ir, ADD_IR); 
@@ -549,23 +565,20 @@ void printfIR(FILE *tag, InterCode ir) {
 		break;
 	case IF_IR:
 		fprintf(tag, "IF %s %s %s GOTO %s", 
-//			Optostring(ir->op4.x), Optostring(ir->op4.relop), Optostring(ir->op4.y), Optostring(ir->op4.z));	
 			formatStr(ir, ir->op4.x), Optostring(ir->op4.relop), formatStr(ir, ir->op4.y), Optostring(ir->op4.z));
 		break;
 	case RETURN_IR:
-		fprintf(tag, "RETURN %s", Optostring(ir->op1.op1));	
+		fprintf(tag, "RETURN %s", formatStr(ir, ir->op1.op1));	
+//		fprintf(tag, "RETURN %s", Optostring(ir->op1.op1));	
 		break;
 	case DEC_IR:
 		fprintf(tag, "DEC %s %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	
 		break;
 	case ARG_IR:
-		if(ir->op1.op1->isArray == 1)
-			fprintf(tag, "ARG &%s", Optostring(ir->op1.op1));	
-		else
-			fprintf(tag, "ARG %s", Optostring(ir->op1.op1));	
+		fprintf(tag, "ARG %s", formatStr(ir, ir->op1.op1));	
 		break;
 	case CALL_IR:
-		fprintf(tag, "%s := CALL %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	
+		fprintf(tag, "%s := CALL %s", formatStr(ir, ir->op2.result), Optostring(ir->op2.right));	
 		break;
 	case PARAM_IR:
 		fprintf(tag, "PARAM %s", Optostring(ir->op1.op1));	

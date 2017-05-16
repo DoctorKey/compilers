@@ -22,7 +22,7 @@ typedef struct FieldList_* FieldList;
 typedef struct SymNode* Symbol;
 
 struct Type_ {
-	enum {BASIC, ARRAY, STRUCTURE, ERROR} kind;
+	enum {BASIC, ARRAY, STRUCTURE} kind;
 	union {
 		int basic;
 		struct {
@@ -93,8 +93,8 @@ extern struct HashNode symTable[HASHSIZE];
 
 Type newType(); 
 void showType(Type type); 
+int isAddr(Type type);
 void showFieldList(FieldList fieldList); 
-int updatearraysize(Type array);
 Type addArrayElem(Type array, Type elem); 
 
 FieldList newFieldList(char *name, Type type, FieldList tail, ErrorInfo errorInfo); 
