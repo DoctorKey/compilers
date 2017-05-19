@@ -2,6 +2,36 @@
 #include "name.h"
 #include "IR.h"
 
+#define LABEL_NUM 1024
+int labelcount[LABEL_NUM] = {0};
+InterCodes updatelabelcount(InterCodes IRhead) {
+	int labelnum = getLabelnum();	
+	int i;
+	InterCodes ir;
+	Operand label;
+	if(labelnum >= LABEL_NUM) {
+		fprintf(stderr, "too many labels\n");
+		return IRhead;
+	}
+	for(i = 0; i < LABEL_NUM; i++) {
+		labelcount[i] = 0;
+	}
+	ir = IRhead;
+	while(ir) {
+		label = NULL;
+		if(ir->code->kind == GOTO_IR) {
+			label = ir->code->op1.op1;		
+		} 
+		if(ir->code->kind == IF_IR) {
+			label = ir->code->op4.z;		
+		} 
+		if(label) {
+			labelcount[label->num_int]++;
+		}
+		ir = ir->next;
+	}
+	return IRhead;
+}
 /*
 	reduce 
 		if x relop y GOTO label1
@@ -13,6 +43,7 @@
 InterCodes ifreduce(InterCodes IRhead) {
 	InterCodes ir, ir3, falseir;
 	Operand truelabel, falselabel;
+	IRhead = updatelabelcount(IRhead);
 	ir = IRhead;
 	while(ir) {
 		if(ir->code->kind == IF_IR) {
@@ -23,8 +54,9 @@ InterCodes ifreduce(InterCodes IRhead) {
 			ir3 = falseir->next;
 			if(falseir->code->kind == GOTO_IR)
 				falselabel = falseir->code->op1.op1;
-			if(ir3 && ir3->code->kind == LABEL_IR 
-				&& ir3->code->op1.op1->num_int == truelabel->num_int) {
+			if(ir3 && ir3->code->kind == LABEL_IR
+				&& ir3->code->op1.op1->num_int == truelabel->num_int
+				&& labelcount[truelabel->num_int] == 1) {
 
 				ir->code->op4.relop->str = getfalseRelop(ir->code->op4.relop->str);
 				ir->code->op4.z = falselabel;
@@ -41,41 +73,15 @@ InterCodes ifreduce(InterCodes IRhead) {
 	return IRhead;
 }
 InterCodes labelreduce(InterCodes IRhead) {
-	int labelnum = getLabelnum();	
-	int i;
-	int labeluse[1024] = {0};
-	int index = 0;
-	int nouse;
 	InterCodes ir, tag;
 	Operand label;
-	ir = IRhead;
-	while(ir) {
-		label = NULL;
-		if(ir->code->kind == GOTO_IR) {
-			label = ir->code->op1.op1;		
-		} 
-		if(ir->code->kind == IF_IR) {
-			label = ir->code->op4.z;		
-		} 
-		if(label) {
-			labeluse[index] = label->num_int;
-			index++;
-		}
-		ir = ir->next;
-	}
+	IRhead = updatelabelcount(IRhead);
 	ir = IRhead;
 	while(ir) {
 		if(ir->code->kind == LABEL_IR) {
 			tag = ir;
 			label = ir->code->op1.op1;
-			nouse = 1;
-			for(i = 0; i < index; i++) {
-				if(label->num_int == labeluse[i]) {
-					nouse = 0;	
-					break;
-				}
-			}
-			if(nouse == 1) {
+			if(labelcount[label->num_int] == 0) {
 				ir = ir->prev;
 				if(tag->prev != NULL)
 					tag->prev->next = tag->next;
@@ -94,11 +100,6 @@ InterCodes labelreduce(InterCodes IRhead) {
 		LABEL label1 :
 */
 InterCodes labelreduce2(InterCodes IRhead) {
-	int labelnum = getLabelnum();	
-	int i;
-	int labeluse[1024] = {0};
-	int index = 0;
-	int nouse;
 	InterCodes ir, irnext, tag;
 	Operand label, taglabel;
 	ir = IRhead;
@@ -302,6 +303,53 @@ InterCodes initbasicblock(InterCodes IRhead) {
 			fprintf(stdout, "\n");
 			ir = ir->next;
 		}
+	}
+	return IRhead;
+}
+InterCodes blocktempopt(InterCodes blockhead) {
+	int i;
+	int templeft[1024] = {0};
+	int tempright[1024] = {0};
+	InterCodes tempIR[1024] = {0};
+	int flag;
+	InterCodes ir, tag;
+	InterCode thiscode, tagcode;
+	Operand leftop, right1, right2;
+	ir = blockhead;
+	while(ir && ir->isblockhead == 0) {
+		thiscode = ir->code;
+		leftop = NULL;
+		if(thiscode->kind == ASSIGN_IR) {
+			leftop = thiscode->op2.result;	
+			right1 = thiscode->op2.right;
+		}
+		if(thiscode->kind == ADD_IR || thiscode->kind == SUB_IR 
+			|| thiscode->kind == MUL_IR || thiscode->kind == DIV_IR) {
+			leftop = thiscode->op3.result;
+			right1 = thiscode->op3.right1;
+			right2 = thiscode->op3.right2;
+		}
+		if(thiscode->kind == IF_IR) {
+			right1 = thiscode->op4.x;
+			right2 = thiscode->op4.y;
+		}
+		if(leftop && leftop->kind == TEMP_OP) {
+			templeft[leftop->num_int]++;
+			tempIR[leftop->num_int] = ir;
+		}
+		ir = ir->next;
+	}
+	return blockhead;
+
+}
+InterCodes blockinteropt(InterCodes IRhead) {
+	InterCodes ir;
+	ir = IRhead;
+	while(ir) {
+		if(ir->isblockhead == 1) {
+			blocktempopt(ir);
+		}
+		ir = ir->next;
 	}
 	return IRhead;
 }
