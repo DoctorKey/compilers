@@ -112,7 +112,7 @@ InterCodes labelreduce2(InterCodes IRhead) {
 			label = ir->code->op1.op1;		
 			if(irnext->code->kind == LABEL_IR) {
 				taglabel = irnext->code->op1.op1;	
-				if(label->num_int == taglabel->num_int) {
+				if(label->num_int == taglabel->num_int && labelcount[label->num_int] == 1) {
 					irnext->prev = ir->prev;
 					if(ir->prev != NULL)
 						ir->prev->next = irnext;
