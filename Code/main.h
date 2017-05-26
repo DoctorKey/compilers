@@ -11,6 +11,7 @@
 #define LAB_1 false
 #define LAB_2 true
 #define LAB_3 true
+#define LAB_4 true
 
 extern int debug;
 extern int debug2;

@@ -4,6 +4,7 @@
 #include "file.h"
 #include "symtable.h"
 #include "IR.h"
+#include "asm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,9 +73,16 @@ int main(int argc, char** argv)
 	}
 	closefile();
 
-#if LAB_3 == true
+#if LAB_3 == true && LAB_4 == false
 //	printfallIR(stderr);
 	printfallIRtoFile();
+	closeoutputfile();
+#endif
+
+#if LAB_4 == true
+	transAllAsm(getIRhead());
+	printfAllAsm(stdout);
+	printfallAsmtoFile();
 	closeoutputfile();
 #endif
 	return 0;

@@ -6,6 +6,7 @@
 #include "error.h"
 #include "syntax.tab.h"
 #include "IR.h"
+#include "asm.h"
 
 struct Buffer *curbuffer = NULL;
 FILE *curFile = NULL;
@@ -68,6 +69,11 @@ void
 printfallIRtoFile() {
 	if(outputFile)
 		printfallIR(outputFile);
+}
+void
+printfallAsmtoFile() {
+	if(outputFile)
+		printfAllAsm(outputFile);
 }
 int 
 closeoutputfile(void)

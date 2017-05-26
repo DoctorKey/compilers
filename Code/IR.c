@@ -501,45 +501,6 @@ void printfExpIR(FILE *tag, InterCode ir, int type) {
 	}else {
 		fprintf(tag, "*%s", Optostring(ir->op3.right2));
 	}	
-	/*
-	if(ir->isComputeAddr == 0) {
-		if(ir->op3.result->isAddr == 0) {
-			fprintf(tag, "%s", Optostring(ir->op3.result));
-		}else {
-			fprintf(tag, "*%s", Optostring(ir->op3.result));
-		}	
-		if(ir->op3.right1->isAddr == 0) {
-			fprintf(tag, " := %s", Optostring(ir->op3.right1));
-		}else {
-			fprintf(tag, " := *%s", Optostring(ir->op3.right1));
-		}	
-		fprintf(tag, " %c ", comtype);
-		if(ir->op3.right2->isAddr == 0) {
-			fprintf(tag, "%s", Optostring(ir->op3.right2));
-		}else {
-			fprintf(tag, "*%s", Optostring(ir->op3.right2));
-		}	
-	}else {
-	//result is addr
-		if(ir->op3.result->isAddr == 0) {
-			fprintf(tag, "&%s", Optostring(ir->op3.result));
-		}else {
-			fprintf(tag, "%s", Optostring(ir->op3.result));
-		}	
-		if(ir->op3.right1->isAddr == 0) {
-			fprintf(tag, " := &%s", Optostring(ir->op3.right1));
-		}else {
-			fprintf(tag, " := %s", Optostring(ir->op3.right1));
-		}	
-		fprintf(tag, " %c ", comtype);
-		//when compute addr right2 always is constant
-		if(ir->op3.right2->isAddr == 0) {
-			fprintf(tag, "%s", Optostring(ir->op3.right2));
-		}else {
-			fprintf(tag, "*%s", Optostring(ir->op3.right2));
-		}	
-	}
-	*/
 }
 void printfIR(FILE *tag, InterCode ir) {
 	switch(ir->kind) {
