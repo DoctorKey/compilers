@@ -15,7 +15,7 @@ AsmCode newAsmCode(AsmCodeKind kind) {
 	result->y = 0;
 	result->z = 0;
 	result->k = 0;
-	result->f = NULL;
+	result->label = NULL;
 	return result;
 }
 AsmCodes newAsmCodes(AsmCode asmcode) {
@@ -42,13 +42,75 @@ void addAsmCode(AsmCode code) {
 		return;
 	}
 }
+void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = T0;
+	ry = T1;
+	rz = T2;
+	code = newAsmCode(A_LW);
+	code->x = ry;
+	code->y = SP;
+	code->k = 0;
+	addAsmCode(code);
+	code = newAsmCode(A_LW);
+	code->x = rz;
+	code->y = SP;
+	code->k = 0;
+	addAsmCode(code);
+	code = newAsmCode(kind);
+	code->x = rx;
+	code->y = ry; 
+	code->z = rz;
+	addAsmCode(code);
+	code = newAsmCode(A_SW);
+	code->x = ry;
+	code->y = SP;
+	code->k = 0;
+	addAsmCode(code);
+	code = newAsmCode(A_SW);
+	code->x = rz;
+	code->y = SP;
+	code->k = 0;
+	addAsmCode(code);
+}
+void transIR3(int kind, Operand x, Operand y, Operand z) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = getReg(x);
+	ry = getReg(y);
+	rz = getReg(z);
+	if(isOpInReg(y, ry) == false){
+		code = newAsmCode(A_LW);
+		code->x = ry;
+		code->y = SP;
+		code->k = 0;
+		addAsmCode(code);
+	}
+	if(isOpInReg(z, rz) == false){
+		code = newAsmCode(A_LW);
+		code->x = rz;
+		code->y = SP;
+		code->k = 0;
+		addAsmCode(code);
+	}
+	code = newAsmCode(kind);
+	code->x = rx;
+	code->y = ry; 
+	code->z = rz;
+	addAsmCode(code);
+}
 void translabel(InterCode ir) {
 	AsmCode code;
 	code = newAsmCode(A_LABEL);
-	code->x = ir->op1.op1->num_int;
+	code->label = Optostring(ir->op1.op1);
 	addAsmCode(code);
 }
 void transfunc(InterCode ir) {
+	AsmCode code;
+	code = newAsmCode(A_LABEL);
+	code->label = Optostring(ir->op1.op1);
+	addAsmCode(code);
 }
 void transassign(InterCode ir) {
 	AsmCode code;
@@ -148,7 +210,7 @@ void transdiv(InterCode ir) {
 void transgoto(InterCode ir) {
 	AsmCode code;
 	code = newAsmCode(A_J);
-	code->x = ir->op1.op1->num_int;
+	code->label = Optostring(ir->op1.op1);
 	addAsmCode(code);
 }
 void transif(InterCode ir) {
@@ -171,7 +233,7 @@ void transif(InterCode ir) {
 	}
 	code->x = rx;
 	code->y = ry;
-	code->z = ir->op4.z->num_int;
+	code->label = Optostring(ir->op4.z);
 	addAsmCode(code);
 	Free(rx);
 	Free(ry);
@@ -197,7 +259,7 @@ void transcall(InterCode ir) {
 	int rx;
 	rx = Ensure(ir->op2.result);
 	code = newAsmCode(A_JAL);
-	code->f = strdup(ir->op2.right->str);
+	code->label = strdup(ir->op2.right->str);
 	addAsmCode(code);
 	code = newAsmCode(A_MOVE);
 	code->x = rx;
@@ -233,8 +295,8 @@ void transAsm(InterCode ir) {
 }
 void transAllAsm(InterCodes IRhead) {
 	InterCodes temp = IRhead;
-	initmap(temp);
-	initRegMap();
+//	initmap(temp);
+//	initRegMap();
 	while(temp) {
 		transAsm(temp->code);
 		temp = temp->next;
@@ -243,7 +305,7 @@ void transAllAsm(InterCodes IRhead) {
 void printfAsm(FILE *tag, AsmCode asmcode) {
 	switch(asmcode->kind) {
 	case A_LABEL:
-		fprintf(tag, "label%d:", asmcode->x);
+		fprintf(tag, "%s:", asmcode->label);
 		break;
 	case A_LI:
 		fprintf(tag, "li %s, %d", getRegName(asmcode->x), asmcode->k);
@@ -276,31 +338,31 @@ void printfAsm(FILE *tag, AsmCode asmcode) {
 		fprintf(tag, "sw %s, %d(%s)", getRegName(asmcode->y), asmcode->k, getRegName(asmcode->x));
 		break;
 	case A_J:
-		fprintf(tag, "j label%d", asmcode->x);
+		fprintf(tag, "j %s", asmcode->label);
 		break;
 	case A_JAL:
-		fprintf(tag, "jal %s", asmcode->f);
+		fprintf(tag, "jal %s", asmcode->label);
 		break;
 	case A_JR:
 		fprintf(tag, "jr %s", getRegName(RA));
 		break;
 	case A_BEQ:
-		fprintf(tag, "beq %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "beq %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BNE:
-		fprintf(tag, "bne %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "bne %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BGT:
-		fprintf(tag, "bgt %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "bgt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BLT:
-		fprintf(tag, "blt %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "blt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BGE:
-		fprintf(tag, "bge %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "bge %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BLE:
-		fprintf(tag, "ble %s, %s, label%d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->z);
+		fprintf(tag, "ble %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	}
 }

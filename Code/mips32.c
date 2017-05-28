@@ -14,6 +14,17 @@ void initRegMap() {
 		}
 	}
 }
+int isOpInReg(Operand op, int reg) {
+	int varnum = op->varnum;
+	int dim = getDim(varnum);
+	int vec = getVec(varnum);
+	vec = vec & regMap[getRegindex(reg)].varvec[dim];	
+	if(vec == 0) {
+		return false;
+	}else {
+		return true;
+	}
+}
 int getRegindex(int reg) {
 	int index = 1;
 	while(reg & 0x1 != 0x1) {

@@ -15,7 +15,7 @@ struct AsmCode_ {
 	int y;
 	int z;
 	int k;
-	char *f;
+	char *label;
 };
 
 void transAllAsm(InterCodes IRhead);

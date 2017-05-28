@@ -2,7 +2,7 @@
 #include "mips32.h"
 #include "asm.h"
 
-#define DEBUG3 1
+//#define DEBUG3 1
 int allvarnum = 0;
 int dimension = 0;
 varregmap var2regtable = NULL;
@@ -20,10 +20,14 @@ void initVar2RegTable() {
 void getdimension() {
 	int count = allvarnum;
 	dimension = 0;
-	if(count != 0){
+	while(count != 0){
 		count = count/32;
 		dimension++;
 	}
+#ifdef DEBUG3
+	fprintf(stdout, "allvarnum is %d\n", allvarnum);
+	fprintf(stdout, "dimension is %d\n", dimension);
+#endif
 }
 void updatemap(Operand op) {
 	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
@@ -33,6 +37,22 @@ void updatemap(Operand op) {
 	allvarnum++;
 	op->varnum = allvarnum;
 	return;
+}
+int getDim(int num) {
+	int i = -1;
+	num--;
+	if(num == 0)
+		return 0;
+	while(num != 0) {
+		num = num / 32;
+		i++;
+	}
+	return i;
+}
+int getVec(int num) {
+	int i;
+	i = (num - 1) % 32;
+	return 1 << i;
 }
 void updatemap2(Operand op) {
 	int temp = 0, i, vec;
@@ -45,15 +65,11 @@ void updatemap2(Operand op) {
 	op->map->reg = 0;
 	op->map->num = op->varnum;
 	op->map->varvec = (int*) malloc(sizeof(int)*dimension);
-	temp = op->map->num;
 	for(i = 0; i < dimension; i++) {
-		vec = temp % 32 - 1;
-		temp = temp / 32;
-		if(vec >= 0)
-			op->map->varvec[i] = 1 << vec; 
-		else
-			op->map->varvec[i] = 0;
+		op->map->varvec[i] = 0;
 	}
+	temp = op->map->num;
+	op->map->varvec[getDim(temp)] = getVec(temp);
 #ifdef DEBUG3
 	fprintf(stdout, "%s num:%d ", Optostring(op), op->map->num);	
 	for(i = 0; i < dimension; i++) {
@@ -62,6 +78,72 @@ void updatemap2(Operand op) {
 	fprintf(stdout, "\n");
 #endif
 	return;
+}
+int getVarNum(int *varvec) {
+	int i, count = 0, vec, j;
+	for(i = 0;i < dimension; i++) {
+		vec = varvec[i];
+		for(j = 0; j < 32; j++) {
+			if(vec & 0x1 == 0x1) {
+				count++;
+			}
+			vec = vec >> 1;
+		}
+	}
+	return count;
+}
+void VecCompute(int *varvec1, char compute, int *varvec2) {
+	int i, vec;
+	if(compute == '=') {
+		for(i = 0; i < dimension; i++) {
+			varvec1[i] = varvec2[i];	
+		}
+	}else if(compute == '&') {
+		for(i = 0; i < dimension; i++) {
+			varvec1[i] = varvec1[i] & varvec2[i];	
+		}
+	}else if(compute == '|') {
+		for(i = 0; i < dimension; i++) {
+			varvec1[i] = varvec1[i] | varvec2[i];	
+		}
+	}else if(compute == '^') {
+		for(i = 0; i < dimension; i++) {
+			varvec1[i] = varvec1[i] ^ varvec2[i];	
+		}
+	}else if(compute == '$') {
+	// 1 $ 1 = 0, 1 $ 0 = 1, 0 $ 0 = 0, 0 $ 1 = 0;
+		for(i = 0; i < dimension; i++) {
+			vec = varvec1[i];
+			varvec1[i] = varvec1[i] ^ varvec2[i];	
+			varvec1[i] = varvec1[i] & vec;
+		}
+	}
+}
+int VecIs0(int *varvec) {
+	int i;
+	for(i = 0; i < dimension; i++) {
+		if(varvec[i] != 0)
+			return false;
+	}
+	return true;
+}
+int pow(int n,int i) {
+	int result = 1;
+	if(i == 0)
+		return 1;
+	while(i != 0) {
+		result = result * n;
+		i--;
+	}
+	return result;
+}
+int Vec2Index(int *varvec) {
+	int result = 0, i, j;
+	for(i = 0; i < dimension; i++) {
+		j = getRegindex(varvec[i]);	
+		result = result + pow(32, i) * j;
+	}
+	return result;
 }
 void initmap(InterCodes IRhead) {
 	InterCodes temp = IRhead;
@@ -160,18 +242,49 @@ void initmap(InterCodes IRhead) {
 		temp = temp->next;
 	}
 }
-//int getReg(Operand op) {
-//	int r = 1, i;
-//	if(op->map->reg != 0) 
-//		return getOneReg(op->map->reg);
-//	else if(idleReg != 0) 
-//		return getOneReg(idleReg);
-//	else{
-//		for(i = 0; i < REG_NUM; i++) {
-//			r = 1 << i;
-//		}	
-//	}
-//}
+int vInOther(int reg) {
+	int *v = (int*) malloc(sizeof(int) * dimension);
+	int i;
+	VecCompute(v, '=', regMap[getRegindex(reg)].varvec);
+	for(i = 0; i < REG_NUM; i++) {
+		if(i == getRegindex(reg))
+			continue;
+		VecCompute(v, '$', regMap[i].varvec);
+	}
+	if(VecIs0(v)) {
+		free(v);
+		return true;
+	}else {
+		free(v);
+		return false;
+	}
+}
+void spill(int reg) {
+
+}
+int getReg(Operand op) {
+	int r = 1, i, min = 9999, this;
+	if(op->map->reg != 0) 
+		return getOneReg(op->map->reg);
+	else if(idleReg != 0) 
+		return getOneReg(idleReg);
+	else{
+		for(i = 0; i < REG_NUM; i++) {
+			r = 1 << i;
+			if(vInOther(r))
+				return r;
+		}	
+		for(i = 0; i < REG_NUM; i++) {
+			this = getVarNum(regMap[i].varvec);
+			if(this < min) {
+				min = this;
+				r = 1 << i;
+			}
+		}	
+		spill(r);
+		return r;
+	}
+}
 int Allocate(Operand op) {
 	if(idleReg != 0) 
 		return getOneReg(idleReg);

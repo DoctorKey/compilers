@@ -48,6 +48,7 @@ struct RegMap {
 	int reg;
 	int *varvec;
 };
+extern struct RegMap regMap[REG_NUM];
 void initRegMap(); 
 int getOneReg(int reg);
 char *getRegName(int reg); 
