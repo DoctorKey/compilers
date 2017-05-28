@@ -20,6 +20,7 @@ IRinfo newIRinfo();
 struct Operand_ {
 	OP_KIND kind;
 	struct varregmap_* map;
+	int varnum;
 	enum {String, Int, Float} type;
 	int isAddr;
 	union {

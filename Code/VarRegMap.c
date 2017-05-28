@@ -1,19 +1,21 @@
 #include "VarRegMap.h"
+#include "mips32.h"
+#include "asm.h"
 
 #define DEBUG3 1
 int allvarnum = 0;
 int dimension = 0;
+varregmap var2regtable = NULL;
 
-varregmap newMap(Operand op) {
-	varregmap result = NULL;
-	result = (varregmap) malloc(sizeof(struct varregmap_));
-	if(result == NULL) {
+int getDimension() {
+	return dimension;
+}
+void initVar2RegTable() {
+	var2regtable = (varregmap) malloc(sizeof(struct varregmap_) * allvarnum);
+	if(var2regtable == NULL) {
 		fprintf(stderr, "can't malloc\n");
-		return NULL;
+		return;
 	}
-	result->op = op;
-	result->varvec = NULL;
-	return result;
 }
 void getdimension() {
 	int count = allvarnum;
@@ -26,19 +28,22 @@ void getdimension() {
 void updatemap(Operand op) {
 	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
 		return;
-	if(op->map != NULL)
+	if(op->varnum != 0)
 		return;
-	op->map = newMap(op);
 	allvarnum++;
-	op->map->num = allvarnum;
+	op->varnum = allvarnum;
 	return;
 }
 void updatemap2(Operand op) {
 	int temp = 0, i, vec;
 	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
 		return;
-	if(op->map == NULL)
+	if(op->map != NULL)
 		return;
+	op->map = var2regtable + op->varnum;
+	op->map->op = op;
+	op->map->reg = 0;
+	op->map->num = op->varnum;
 	op->map->varvec = (int*) malloc(sizeof(int)*dimension);
 	temp = op->map->num;
 	for(i = 0; i < dimension; i++) {
@@ -107,6 +112,7 @@ void initmap(InterCodes IRhead) {
 		temp = temp->next;
 	}
 	getdimension();
+	initVar2RegTable();
 	temp = IRhead;
 	while(temp) {
 		ir = temp->code;
@@ -153,4 +159,40 @@ void initmap(InterCodes IRhead) {
 		}	
 		temp = temp->next;
 	}
+}
+//int getReg(Operand op) {
+//	int r = 1, i;
+//	if(op->map->reg != 0) 
+//		return getOneReg(op->map->reg);
+//	else if(idleReg != 0) 
+//		return getOneReg(idleReg);
+//	else{
+//		for(i = 0; i < REG_NUM; i++) {
+//			r = 1 << i;
+//		}	
+//	}
+//}
+int Allocate(Operand op) {
+	if(idleReg != 0) 
+		return getOneReg(idleReg);
+	else {
+		
+	}
+}
+int Ensure(Operand op) {
+	int result;
+	AsmCode code;
+	return T0;
+	if(op->map->reg != 0) 
+		result = getOneReg(op->map->reg);
+	else {
+		result = Allocate(op);	
+		code = newAsmCode(A_LW);
+		code->x = result;
+//		code->y = 
+		addAsmCode(code);
+	}
+}
+void Free(int reg) {
+	idleReg = idleReg | reg;
 }

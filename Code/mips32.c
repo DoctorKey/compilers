@@ -1,6 +1,41 @@
 #include "main.h"
 #include "mips32.h"
+#include "VarRegMap.h"
 
+struct RegMap regMap[REG_NUM];
+int idleReg = 0xffffffff;
+void initRegMap() {
+	int i, j;
+	for(i = 0; i < REG_NUM; i++) {
+		regMap[i].reg = 1 << i;
+		regMap[i].varvec = (int*) malloc(sizeof(int)*dimension);
+		for(j = 0; j < dimension; j++) {
+			regMap[i].varvec[j] = 0;
+		}
+	}
+}
+int getRegindex(int reg) {
+	int index = 1;
+	while(reg & 0x1 != 0x1) {
+		index++;
+		reg = reg >> 1;
+	}
+	return index;
+}
+void addVar2Reg(int reg, Operand op) {
+	int i = getRegindex(reg);	
+	int j;
+	for(j = 0; j < dimension; j++) {
+		regMap[i].varvec[j] = regMap[i].varvec[j] | op->map->varvec[j];
+	}
+}
+int getOneReg(int reg) {
+	int result = 1;
+	while(reg & result == 0) {
+		result = result << 1;
+	}
+	return result;
+}
 char *getRegName(int reg) {
 	switch(reg) {
 	case ZERO: return strdup("$zero");

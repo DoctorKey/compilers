@@ -41,6 +41,15 @@
 #define FP 0x40000000
 #define RA 0x80000000
 
+#define REG_NUM 32
+extern int idleReg;
+
+struct RegMap {
+	int reg;
+	int *varvec;
+};
+void initRegMap(); 
+int getOneReg(int reg);
 char *getRegName(int reg); 
 #endif
 

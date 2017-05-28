@@ -51,26 +51,159 @@ void translabel(InterCode ir) {
 void transfunc(InterCode ir) {
 }
 void transassign(InterCode ir) {
+	AsmCode code;
+	int rx, ry;
+	rx = Ensure(ir->op2.result);
+	if(ir->op2.right->kind == CONSTANT_OP) {
+		code = newAsmCode(A_LI);
+		code->x = rx;
+		//TODO: may be float
+		code->k = ir->op2.right->num_int;
+	}else {
+		ry = Ensure(ir->op2.right);
+		code = newAsmCode(A_LI);
+		code->x = rx;
+		code->y = ry; 
+	}
+	Free(rx);
+	Free(ry);
+	addAsmCode(code);
 }
 void transadd(InterCode ir) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = Ensure(ir->op3.result);
+	ry = Ensure(ir->op3.right1);
+	if(ir->op3.right2->kind == CONSTANT_OP) {
+		code = newAsmCode(A_ADDI);
+		code->x = rx;
+		code->y = ry; 
+		//TODO: may be float
+		code->k = ir->op3.right2->num_int;
+	}else {
+		rz = Ensure(ir->op3.right2);
+		code = newAsmCode(A_ADD);
+		code->x = rx;
+		code->y = ry; 
+		code->z = rz;
+		Free(rz);
+	}
+	Free(rx);
+	Free(ry);
+	addAsmCode(code);
 }
 void transsub(InterCode ir) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = Ensure(ir->op3.result);
+	ry = Ensure(ir->op3.right1);
+	if(ir->op3.right2->kind == CONSTANT_OP) {
+		code = newAsmCode(A_ADDI);
+		code->x = rx;
+		code->y = ry; 
+		//TODO: may be float
+		code->k = -ir->op3.right2->num_int;
+	}else {
+		rz = Ensure(ir->op3.right2);
+		code = newAsmCode(A_SUB);
+		code->x = rx;
+		code->y = ry; 
+		code->z = rz;
+		Free(rz);
+	}
+	Free(rx);
+	Free(ry);
+	addAsmCode(code);
 }
 void transmul(InterCode ir) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = Ensure(ir->op3.result);
+	ry = Ensure(ir->op3.right1);
+	rz = Ensure(ir->op3.right2);
+	code = newAsmCode(A_MUL);
+	code->x = rx;
+	code->y = ry; 
+	code->z = rz;
+	Free(rz);
+	Free(rx);
+	Free(ry);
+	addAsmCode(code);
 }
 void transdiv(InterCode ir) {
+	AsmCode code;
+	int rx, ry, rz;
+	rx = Ensure(ir->op3.result);
+	ry = Ensure(ir->op3.right1);
+	rz = Ensure(ir->op3.right2);
+	code = newAsmCode(A_DIV);
+	code->x = rx;
+	code->y = ry; 
+	code->z = rz;
+	Free(rz);
+	Free(rx);
+	Free(ry);
+	addAsmCode(code);
 }
 void transgoto(InterCode ir) {
+	AsmCode code;
+	code = newAsmCode(A_J);
+	code->x = ir->op1.op1->num_int;
+	addAsmCode(code);
 }
 void transif(InterCode ir) {
+	AsmCode code;
+	int rx, ry;
+	rx = Ensure(ir->op4.x);
+	ry = Ensure(ir->op4.y);
+	if(strcmp(ir->op4.relop->str, "==") == 0) {
+		code = newAsmCode(A_BEQ);
+	}else if(strcmp(ir->op4.relop->str, "!=") == 0) {
+		code = newAsmCode(A_BNE);
+	}else if(strcmp(ir->op4.relop->str, ">") == 0) {
+		code = newAsmCode(A_BGT);
+	}else if(strcmp(ir->op4.relop->str, "<") == 0) {
+		code = newAsmCode(A_BLT);
+	}else if(strcmp(ir->op4.relop->str, ">=") == 0) {
+		code = newAsmCode(A_BGE);
+	}else if(strcmp(ir->op4.relop->str, "<=") == 0) {
+		code = newAsmCode(A_BLE);
+	}
+	code->x = rx;
+	code->y = ry;
+	code->z = ir->op4.z->num_int;
+	addAsmCode(code);
+	Free(rx);
+	Free(ry);
 }
 void transreturn(InterCode ir) {
+	AsmCode code;
+	int rx;
+	rx = Ensure(ir->op1.op1);
+	code = newAsmCode(A_MOVE);
+	code->x = V0;
+	code->y = rx; 
+	addAsmCode(code);
+	code = newAsmCode(A_JR);
+	Free(rx);
+	addAsmCode(code);
 }
 void transdec(InterCode ir) {
 }
 void transarg(InterCode ir) {
 }
 void transcall(InterCode ir) {
+	AsmCode code;
+	int rx;
+	rx = Ensure(ir->op2.result);
+	code = newAsmCode(A_JAL);
+	code->f = strdup(ir->op2.right->str);
+	addAsmCode(code);
+	code = newAsmCode(A_MOVE);
+	code->x = rx;
+	code->y = V0;
+	Free(rx);
+	addAsmCode(code);
 }
 void transparam(InterCode ir) {
 }
@@ -101,6 +234,7 @@ void transAsm(InterCode ir) {
 void transAllAsm(InterCodes IRhead) {
 	InterCodes temp = IRhead;
 	initmap(temp);
+	initRegMap();
 	while(temp) {
 		transAsm(temp->code);
 		temp = temp->next;
@@ -136,10 +270,10 @@ void printfAsm(FILE *tag, AsmCode asmcode) {
 		fprintf(tag, "mflo %s", getRegName(asmcode->x));
 		break;
 	case A_LW:
-		fprintf(tag, "lw %s, 0(%s)", getRegName(asmcode->x), getRegName(asmcode->y));
+		fprintf(tag, "lw %s, %d(%s)", getRegName(asmcode->x), asmcode->k, getRegName(asmcode->y));
 		break;
 	case A_SW:
-		fprintf(tag, "sw %s, 0(%s)", getRegName(asmcode->y), getRegName(asmcode->x));
+		fprintf(tag, "sw %s, %d(%s)", getRegName(asmcode->y), asmcode->k, getRegName(asmcode->x));
 		break;
 	case A_J:
 		fprintf(tag, "j label%d", asmcode->x);
