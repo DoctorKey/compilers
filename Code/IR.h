@@ -2,9 +2,10 @@
 #define __IR_H_
 
 #include "symtable.h"
+//#include "VarRegMap.h"
 
 typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,
-		RELOP_OP, LABEL_OP, SIZE_OP, FALL_OP} OP_KIND;
+		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
 typedef struct Operand_* Operand;
 typedef struct Operandlist_* Operandlist;
 typedef struct IRinfo_* IRinfo;
@@ -18,6 +19,7 @@ IRinfo newIRinfo();
 
 struct Operand_ {
 	OP_KIND kind;
+	struct varregmap_* map;
 	enum {String, Int, Float} type;
 	int isAddr;
 	union {
@@ -89,7 +91,6 @@ InterCode LabelIR(int n);
 InterCode FunctionIR(char *funcname); 
 InterCode Assign2IR(Operand x, Operand y); 
 InterCode Assign3IR(Operand x, Operand y, int kind, Operand z); 
-//InterCode Assign3AddrIR(Operand x, Operand y, int kind, Operand z); 
 InterCode GotoIR(Operand n); 
 InterCode IfIR(Operand x, char *relop, Operand y, Operand z); 
 InterCode ReturnIR(Operand x); 

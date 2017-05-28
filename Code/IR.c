@@ -67,7 +67,7 @@ Operand newOperand(int kind) {
 	}
 	result->kind = kind;
 	result->isAddr = 0;
-//	result->isArray = 0;
+	result->map = NULL;
 	return result;
 }
 Operand newTemp() {
@@ -534,7 +534,6 @@ void printfIR(FILE *tag, InterCode ir) {
 		break;
 	case RETURN_IR:
 		fprintf(tag, "RETURN %s", formatStr(ir, ir->op1.op1));	
-//		fprintf(tag, "RETURN %s", Optostring(ir->op1.op1));	
 		break;
 	case DEC_IR:
 		fprintf(tag, "DEC %s %s", Optostring(ir->op2.result), Optostring(ir->op2.right));	

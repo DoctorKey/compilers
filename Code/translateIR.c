@@ -49,6 +49,7 @@ void VarDecTrans(TreeNode parent, int num) {
 }
 void FunDecTrans(TreeNode parent, int num) {
 	FieldList fieldlist = NULL;
+	Symbol symNode = NULL;
 	char *funcname = NULL;
 	InterCode funcIR = NULL, paramIR = NULL;
 	Operand paramop = NULL;
@@ -60,13 +61,12 @@ void FunDecTrans(TreeNode parent, int num) {
 
 	funcIR = FunctionIR(funcname);
 	while(fieldlist) {
-		paramop = newOperand(VARIABLE_OP);
+		symNode = lookup(fieldlist->name);
+		paramop = getOpBySymbol(symNode);
 		if(fieldlist->type->kind == ARRAY) 
 			paramop->isAddr = 1;
 		else	
 			paramop->isAddr = 0;
-		paramop->type = String;
-		paramop->str = strdup(fieldlist->name);
 		paramIR = ParamIR(paramop);
 		fieldlist = fieldlist->tail;	
 	}
@@ -225,10 +225,11 @@ void ExpTrans(TreeNode parent, int num) {
 	if (num == 1) {
 		switch(childleft->nodetype) {
 		case ID:
-			parent->irinfo->op = newOperand(VARIABLE_OP);
-			parent->irinfo->op->type = String;
-			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
+//			parent->irinfo->op = newOperand(VARIABLE_OP);
+//			parent->irinfo->op->type = String;
+//			parent->irinfo->op->str = (char*)strdup(parent->nodevalue.str);
 			symNode = lookup(parent->nodevalue.str);
+			parent->irinfo->op = getOpBySymbol(symNode);
 			if(symNode->var->isParam == 1) {
 				if(parent->type->kind == ARRAY) {
 					parent->irinfo->op->isAddr = 1;

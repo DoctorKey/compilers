@@ -1,6 +1,7 @@
 #include "symtable.h"
 #include "main.h"
 #include "semantichelp.h"
+#include "IR.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -257,6 +258,16 @@ void showFunc(struct Func *func) {
 	fprintf(stdout, "\n");
 }
 
+Operand getOpBySymbol(Symbol symNode) {
+	if(symNode->op != NULL)
+		return symNode->op;
+	else {
+		symNode->op = newOperand(VARIABLE_OP);
+		symNode->op->type = String;
+		symNode->op->str = (char*)strdup(symNode->name);
+		return symNode->op;
+	}
+}
 int freeSymNode(Symbol symNode) {
 	if (symNode == NULL) {
 		return 0;

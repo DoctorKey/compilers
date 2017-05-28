@@ -1,5 +1,6 @@
 #include "asm.h"
 #include "mips32.h"
+#include "VarRegMap.h"
 AsmCodes AsmHead = NULL;
 AsmCodes AsmTail = NULL;
 AsmCode newAsmCode(AsmCodeKind kind) {
@@ -99,6 +100,7 @@ void transAsm(InterCode ir) {
 }
 void transAllAsm(InterCodes IRhead) {
 	InterCodes temp = IRhead;
+	initmap(temp);
 	while(temp) {
 		transAsm(temp->code);
 		temp = temp->next;

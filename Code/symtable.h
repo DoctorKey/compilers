@@ -13,6 +13,7 @@
 */
 
 #include "error.h"
+#include "IR.h"
 
 #define SYMBOLMAX 100
 #define HASHSIZE 0x3fff
@@ -64,6 +65,7 @@ struct Func {
 struct SymNode {
 	int type;
 	char *name;
+	struct Operand_* op;
 	union {
 		struct Var *var;
 		struct Func *func;
@@ -106,6 +108,7 @@ Symbol newStruct(char *name, Type type, ErrorInfo errorInfo);
 Symbol newVar(char *name, Type type, ErrorInfo errorInfo); 
 Symbol newFunc(char *name, Type Return, FieldList argtype, ErrorInfo errorInfo); 
 
+struct Operand_* getOpBySymbol(Symbol symNode);
 int freeSymNode(Symbol symNode); 
 
 void showSymbol(Symbol symNode);
