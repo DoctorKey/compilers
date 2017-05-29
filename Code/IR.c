@@ -67,6 +67,7 @@ Operand newOperand(int kind) {
 	}
 	result->kind = kind;
 	result->isAddr = 0;
+	result->varnum = -1;
 	result->map = NULL;
 	return result;
 }

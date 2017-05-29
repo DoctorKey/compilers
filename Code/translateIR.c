@@ -181,12 +181,15 @@ void DecListTrans(TreeNode parent, int num) {
 void DecTrans(TreeNode parent, int num) {
 	TreeNode exp = NULL;
 	Operand op_tmp, op_size;
+	Symbol symNode = NULL;
 	InterCode result;
 
 	// VarDec
-	op_tmp = newOperand(VARIABLE_OP);
-	op_tmp->type = String;
-	op_tmp->str = (char*)strdup(parent->nodevalue.str);
+	symNode = lookup(parent->nodevalue.str);
+	op_tmp = getOpBySymbol(symNode);
+//	op_tmp = newOperand(VARIABLE_OP);
+//	op_tmp->type = String;
+//	op_tmp->str = (char*)strdup(parent->nodevalue.str);
 	if(parent->type->kind == ARRAY) {
 		op_size = newOperand(SIZE_OP);
 		op_size->type = Int;

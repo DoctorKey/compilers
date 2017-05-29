@@ -42,6 +42,14 @@ void addAsmCode(AsmCode code) {
 		return;
 	}
 }
+void spill(int reg, Operand op) {
+	AsmCode code;
+	code = newAsmCode(A_SW);
+	code->y = reg;
+//	code->x = op->mem->reg;
+//	code->k = op->mem->k;
+	addAsmCode(code);
+}
 void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {
 	AsmCode code;
 	int rx, ry, rz;
@@ -119,7 +127,6 @@ void transassign(InterCode ir) {
 	if(ir->op2.right->kind == CONSTANT_OP) {
 		code = newAsmCode(A_LI);
 		code->x = rx;
-		//TODO: may be float
 		code->k = ir->op2.right->num_int;
 	}else {
 		ry = Ensure(ir->op2.right);
@@ -140,7 +147,6 @@ void transadd(InterCode ir) {
 		code = newAsmCode(A_ADDI);
 		code->x = rx;
 		code->y = ry; 
-		//TODO: may be float
 		code->k = ir->op3.right2->num_int;
 	}else {
 		rz = Ensure(ir->op3.right2);
@@ -153,6 +159,12 @@ void transadd(InterCode ir) {
 	Free(rx);
 	Free(ry);
 	addAsmCode(code);
+#ifdef DEBUG4
+	printfAsm(stdout, code); 
+	fprintf(stdout, "\n");
+	printfRegMap(stdout); 
+	printfVar2RegTable(stdout); 
+#endif
 }
 void transsub(InterCode ir) {
 	AsmCode code;
@@ -163,7 +175,6 @@ void transsub(InterCode ir) {
 		code = newAsmCode(A_ADDI);
 		code->x = rx;
 		code->y = ry; 
-		//TODO: may be float
 		code->k = -ir->op3.right2->num_int;
 	}else {
 		rz = Ensure(ir->op3.right2);
@@ -252,11 +263,34 @@ void transreturn(InterCode ir) {
 }
 void transdec(InterCode ir) {
 }
+int argnum = 0;
 void transarg(InterCode ir) {
+	AsmCode code;
+	int k;
+	argnum++;
+	if(argnum <= 4) {
+		code = newAsmCode(A_MOVE);
+		switch(argnum) {
+		case 1: code->x = A0; break;
+		case 2: code->x = A1; break;
+		case 3: code->x = A2; break;
+		case 4: code->x = A3; break;
+		}
+		//code->y = ir->op1.op1->mem->reg;
+		//code->k = ir->op1.op1->mem->k;
+	}else {
+		k = (argnum - 5) * 4;
+		code = newAsmCode(A_SW);
+		code->y = getReg(ir->op1.op1);
+		code->k = k;
+		code->x = SP;
+	}
+	addAsmCode(code);
 }
 void transcall(InterCode ir) {
 	AsmCode code;
 	int rx;
+	argnum = 0;
 	rx = Ensure(ir->op2.result);
 	code = newAsmCode(A_JAL);
 	code->label = strdup(ir->op2.right->str);
@@ -295,8 +329,8 @@ void transAsm(InterCode ir) {
 }
 void transAllAsm(InterCodes IRhead) {
 	InterCodes temp = IRhead;
-//	initmap(temp);
-//	initRegMap();
+	initmap(temp);
+	initRegMap();
 	while(temp) {
 		transAsm(temp->code);
 		temp = temp->next;
@@ -308,66 +342,95 @@ void printfAsm(FILE *tag, AsmCode asmcode) {
 		fprintf(tag, "%s:", asmcode->label);
 		break;
 	case A_LI:
-		fprintf(tag, "li %s, %d", getRegName(asmcode->x), asmcode->k);
+		fprintf(tag, "\tli %s, %d", getRegName(asmcode->x), asmcode->k);
 		break;
 	case A_MOVE:
-		fprintf(tag, "move %s, %s", getRegName(asmcode->x), getRegName(asmcode->y));
+		fprintf(tag, "\tmove %s, %s", getRegName(asmcode->x), getRegName(asmcode->y));
 		break;
 	case A_ADDI:
-		fprintf(tag, "addi %s, %s, %d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->k);
+		fprintf(tag, "\taddi %s, %s, %d", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->k);
 		break;
 	case A_ADD:
-		fprintf(tag, "add %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
+		fprintf(tag, "\tadd %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
 		break;
 	case A_SUB:
-		fprintf(tag, "sub %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
+		fprintf(tag, "\tsub %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
 		break;
 	case A_MUL:
-		fprintf(tag, "mul %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
+		fprintf(tag, "\tmul %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), getRegName(asmcode->z));
 		break;
 	case A_DIV:
-		fprintf(tag, "div %s, %s", getRegName(asmcode->y), getRegName(asmcode->z));
+		fprintf(tag, "\tdiv %s, %s", getRegName(asmcode->y), getRegName(asmcode->z));
 		break;
 	case A_MFLO:
-		fprintf(tag, "mflo %s", getRegName(asmcode->x));
+		fprintf(tag, "\tmflo %s", getRegName(asmcode->x));
 		break;
 	case A_LW:
-		fprintf(tag, "lw %s, %d(%s)", getRegName(asmcode->x), asmcode->k, getRegName(asmcode->y));
+		fprintf(tag, "\tlw %s, %d(%s)", getRegName(asmcode->x), asmcode->k, getRegName(asmcode->y));
 		break;
 	case A_SW:
-		fprintf(tag, "sw %s, %d(%s)", getRegName(asmcode->y), asmcode->k, getRegName(asmcode->x));
+		fprintf(tag, "\tsw %s, %d(%s)", getRegName(asmcode->y), asmcode->k, getRegName(asmcode->x));
 		break;
 	case A_J:
-		fprintf(tag, "j %s", asmcode->label);
+		fprintf(tag, "\tj %s", asmcode->label);
 		break;
 	case A_JAL:
-		fprintf(tag, "jal %s", asmcode->label);
+		fprintf(tag, "\tjal %s", asmcode->label);
 		break;
 	case A_JR:
-		fprintf(tag, "jr %s", getRegName(RA));
+		fprintf(tag, "\tjr %s", getRegName(RA));
 		break;
 	case A_BEQ:
-		fprintf(tag, "beq %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tbeq %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BNE:
-		fprintf(tag, "bne %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tbne %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BGT:
-		fprintf(tag, "bgt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tbgt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BLT:
-		fprintf(tag, "blt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tblt %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BGE:
-		fprintf(tag, "bge %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tbge %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	case A_BLE:
-		fprintf(tag, "ble %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
+		fprintf(tag, "\tble %s, %s, %s", getRegName(asmcode->x), getRegName(asmcode->y), asmcode->label);
 		break;
 	}
 }
+void printfAsmHead(FILE *tag) {
+	fprintf(tag, ".data\n");
+	fprintf(tag, "_prompt: .asciiz \"Enter an integer:\"\n");
+	fprintf(tag, "_ret: .asciiz \"\\n\"\n");
+	fprintf(tag, ".globl main\n");
+	fprintf(tag, ".text\n");
+}
+void printfReadAsm(FILE *tag) {
+	fprintf(tag, "read:\n");
+	fprintf(tag, "\tli $v0, 4\n");
+	fprintf(tag, "\tla $a0, _prompt\n");
+	fprintf(tag, "\tsyscall\n");
+	fprintf(tag, "\tli $v0, 5\n");
+	fprintf(tag, "\tsyscall\n");
+	fprintf(tag, "\tjr $ra\n");
+}
+void printfWriteAsm(FILE *tag) {
+	fprintf(tag, "write:\n");
+	fprintf(tag, "\tli $v0, 1\n");
+	fprintf(tag, "\tsyscall\n");
+	fprintf(tag, "\tli $v0, 4\n");
+	fprintf(tag, "\tla $a0, _ret\n");
+	fprintf(tag, "\tsyscall\n");
+	fprintf(tag, "\tmove $v0, $0\n");
+	fprintf(tag, "\tjr $ra\n");
+}
 void printfAllAsm(FILE *tag) {
 	AsmCodes temp = AsmHead;
+	printfAsmHead(tag);
+	printfReadAsm(tag);
+	printfWriteAsm(tag);
 	while(temp) {
 		printfAsm(tag, temp->code);
 		fprintf(tag, "\n");

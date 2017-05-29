@@ -2,7 +2,7 @@
 #define __IR_H_
 
 #include "symtable.h"
-//#include "VarRegMap.h"
+#include "mips32.h"
 
 typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,
 		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;

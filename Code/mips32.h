@@ -50,7 +50,16 @@ struct RegMap {
 };
 extern struct RegMap regMap[REG_NUM];
 void initRegMap(); 
+void printfRegMap(FILE *tag); 
 int getOneReg(int reg);
 char *getRegName(int reg); 
+void printfAllReg(FILE *tag, int regvec); 
+
+typedef struct Mem_* Mem;
+struct Mem_ {
+	int reg;
+	int k;
+};
+void printfMem(FILE *tag, Mem mem); 
 #endif
 

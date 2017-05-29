@@ -13,6 +13,8 @@
 #define LAB_3 true
 #define LAB_4 true
 
+#define DEBUG4 true
+
 extern int debug;
 extern int debug2;
 extern int debug3;

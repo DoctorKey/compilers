@@ -81,5 +81,55 @@ char *getRegName(int reg) {
 	case SP: return strdup("$sp");
 	case FP: return strdup("$fp");
 	case RA: return strdup("$ra");
+	default: return strdup("null");
 	}
+}
+void printfAllReg(FILE *tag, int regvec) {
+	int i, reg;
+	for(i = 0; i < REG_NUM; i++) {
+		reg = 1 << i;
+		if((reg & regvec) != 0) {
+			fprintf(tag, "%s,", getRegName(reg));
+		}
+	}
+}
+void printfRegMap(FILE *tag) {
+	int i, j;
+	fprintf(tag, "------------------------Reg Map-------------------------\n");
+	fprintf(tag, "idle Reg: %08x\n", idleReg);
+	fprintf(tag, "[index]\tReg\tvec\t[index]\tReg\tvec\n");
+	for(i = 0; i < REG_NUM / 2; i++) {
+		if(regMap[i].reg & idleReg == 0) {
+			fprintf(tag, "\033[31m\033[1m");
+			fprintf(tag, "[%d]", i);	
+			fprintf(tag, "\033[0m");
+		}else {
+			fprintf(tag, "[%d]", i);	
+		}
+		fprintf(tag, "\t%s", getRegName(regMap[i].reg));
+		fprintf(tag, "\t");
+		printfVarByVec(tag, regMap[i].varvec);
+		fprintf(tag, "\t");
+		j = i + REG_NUM / 2;
+		if(regMap[j].reg & idleReg == 0) {
+			fprintf(tag, "\033[31m\033[1m");
+			fprintf(tag, "[%d]", j);	
+			fprintf(tag, "\033[0m");
+		}else {
+			fprintf(tag, "[%d]", j);	
+		}
+		fprintf(tag, "\t%s", getRegName(regMap[j].reg));
+		fprintf(tag, "\t");
+		printfVarByVec(tag, regMap[j].varvec);
+		fprintf(tag, "\n");
+	}
+	fprintf(tag, "------------------------End-----------------------------\n");
+}
+/*---------------------------------------------------
+	MEM
+
+-----------------------------------------------------
+*/
+void printfMem(FILE *tag, Mem mem) {
+	fprintf(tag, "%d(%s)", mem->k, getRegName(mem->reg));	
 }

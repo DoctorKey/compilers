@@ -2,7 +2,7 @@
 #include "mips32.h"
 #include "asm.h"
 
-//#define DEBUG3 1
+#define DEBUG3 1
 int allvarnum = 0;
 int dimension = 0;
 varregmap var2regtable = NULL;
@@ -32,18 +32,16 @@ void getdimension() {
 void updatemap(Operand op) {
 	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
 		return;
-	if(op->varnum != 0)
+	if(op->varnum != -1)
 		return;
-	allvarnum++;
+	//from 0
 	op->varnum = allvarnum;
+	allvarnum++;
 	return;
 }
 int getDim(int num) {
-	int i = -1;
-	num--;
-	if(num == 0)
-		return 0;
-	while(num != 0) {
+	int i = 0;
+	while(num / 32 != 0) {
 		num = num / 32;
 		i++;
 	}
@@ -51,7 +49,7 @@ int getDim(int num) {
 }
 int getVec(int num) {
 	int i;
-	i = (num - 1) % 32;
+	i = num % 32;
 	return 1 << i;
 }
 void updatemap2(Operand op) {
@@ -64,6 +62,9 @@ void updatemap2(Operand op) {
 	op->map->op = op;
 	op->map->reg = 0;
 	op->map->num = op->varnum;
+	op->map->mem = (Mem) malloc(sizeof(struct Mem_));
+	op->map->mem->reg = 0;
+	op->map->mem->k = 0;
 	op->map->varvec = (int*) malloc(sizeof(int)*dimension);
 	for(i = 0; i < dimension; i++) {
 		op->map->varvec[i] = 0;
@@ -72,12 +73,26 @@ void updatemap2(Operand op) {
 	op->map->varvec[getDim(temp)] = getVec(temp);
 #ifdef DEBUG3
 	fprintf(stdout, "%s num:%d ", Optostring(op), op->map->num);	
-	for(i = 0; i < dimension; i++) {
-		fprintf(stdout, "%8x ", op->map->varvec[i]);
-	}
+	printfVec(stdout, op->map->varvec);
 	fprintf(stdout, "\n");
 #endif
 	return;
+}
+void printfVec(FILE *tag, int *varvec) {
+	int i;
+	for(i = 0; i < dimension; i++) {
+		fprintf(tag, "%08x ", varvec[i]);
+	}
+}
+void printfVarByVec(FILE *tag, int *varvec) {
+	int i;
+	for(i = 0; i < allvarnum; i++) {
+		if((varvec[getDim(i)] & getVec(i)) == 0) {
+		
+		}else {
+			fprintf(tag, "%s,", Optostring(var2regtable[i].op));
+		}
+	}
 }
 int getVarNum(int *varvec) {
 	int i, count = 0, vec, j;
@@ -259,10 +274,38 @@ int vInOther(int reg) {
 		return false;
 	}
 }
-void spill(int reg) {
-
+RegSet getReg1(Operand op) {
+	static struct RegSet_ regset;
+	int r = 1, i, min = 9999, this;
+	if(op->map->reg != 0) {
+		regset.rx = getOneReg(op->map->reg);
+		return &regset;
+	}else if(idleReg != 0) {
+		regset.rx = getOneReg(idleReg);
+		idleReg = idleReg ^ regset.rx;
+		return &regset;
+	}else{
+		for(i = 0; i < REG_NUM; i++) {
+			r = 1 << i;
+			if(vInOther(r)) {
+				regset.rx = r;
+				return &regset;
+			}
+		}	
+		for(i = 0; i < REG_NUM; i++) {
+			this = getVarNum(regMap[i].varvec);
+			if(this < min) {
+				min = this;
+				r = 1 << i;
+			}
+		}	
+//		spillAll(r);
+		regset.rx = r;
+		return &regset;
+	}
 }
-int getReg(Operand op) {
+RegSet getReg(Operand op) {
+	static struct RegSet_ regset;
 	int r = 1, i, min = 9999, this;
 	if(op->map->reg != 0) 
 		return getOneReg(op->map->reg);
@@ -281,7 +324,7 @@ int getReg(Operand op) {
 				r = 1 << i;
 			}
 		}	
-		spill(r);
+//		spill(r);
 		return r;
 	}
 }
@@ -308,4 +351,21 @@ int Ensure(Operand op) {
 }
 void Free(int reg) {
 	idleReg = idleReg | reg;
+}
+void printfVar2RegTable(FILE *tag) {
+	int num = allvarnum, dim = dimension;
+	int i, j;
+	fprintf(tag, "------------------Var to Reg----------------------------\n");
+	fprintf(tag, "[index]\top\tmem\treg\n");
+	for(i = 0; i < num; i++) {
+		fprintf(tag, "[%d]", i);
+		fprintf(tag, "\t%s\t", Optostring(var2regtable[i].op));
+//		fprintf(tag, "\t%d\t", var2regtable[i].num);
+//		printfVec(tag, var2regtable[i].varvec);
+		printfMem(tag, var2regtable[i].mem);
+//		fprintf(tag, "\t%08x\n", var2regtable[i].reg);
+		printfAllReg(tag, var2regtable[i].reg);
+		fprintf(tag, "\n");
+	}
+	fprintf(tag, "------------------End-----------------------------------\n");
 }
