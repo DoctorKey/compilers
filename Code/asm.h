@@ -18,6 +18,8 @@ struct AsmCode_ {
 	char *label;
 };
 
+AsmCode genSW(int y, int k, int x);
+
 void transAllAsm(InterCodes IRhead);
 
 typedef struct AsmCodes_* AsmCodes;
@@ -25,6 +27,7 @@ struct AsmCodes_ {
 	AsmCode code;
 	AsmCodes prev, next;
 };
+void printfAsm(FILE *tag, AsmCode asmcode); 
 void printfAllAsm(FILE *tag); 
 #endif
 

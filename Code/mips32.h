@@ -49,9 +49,13 @@ struct RegMap {
 	int *varvec;
 };
 extern struct RegMap regMap[REG_NUM];
+void addVar2Reg(int reg, int varindex); 
+void setRegDes(int reg, int varindex);
 void initRegMap(); 
 void printfRegMap(FILE *tag); 
 int getOneReg(int reg);
+int isVarInReg(int var, int reg); 
+int getRegindex(int reg); 
 char *getRegName(int reg); 
 void printfAllReg(FILE *tag, int regvec); 
 
@@ -60,6 +64,8 @@ struct Mem_ {
 	int reg;
 	int k;
 };
+Mem newMem(int reg, int k);
+void spillAll(int reg); 
 void printfMem(FILE *tag, Mem mem); 
 #endif
 

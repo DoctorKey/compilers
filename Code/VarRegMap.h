@@ -2,28 +2,45 @@
 #define __VARREGMAP_H_
 
 #include "IR.h"
+#include "mips32.h"
 
-typedef struct varregmap_* varregmap;
-struct varregmap_ {
+int getAllVarNum(); 
+int getDimension(); 
+int updateDimension(int varnum); 
+int *newVarVec(); 
+void freeVarVec(int *varvec); 
+int Vec2Index(int *varvec); 
+int countVar(int *varvec); 
+int VecIs0(int *varvec); 
+int* VecCompute(int *varvec1, char compute, int *varvec2); 
+int getVarNum(int *varvec); 
+int getDim(int num); 
+int getVec(int num); 
+
+typedef struct AddrDescrip_* AddrDescrip;
+struct AddrDescrip_ {
 	struct Operand_* op;
-	int num;
+	int index;
 	int *varvec;
 	int reg;
+	int memvilid;
 	Mem mem;
 };
-extern int dimension;
+int getMemk(int varindex); 
+int getMemReg(int varindex); 
 
-void printfVar2RegTable(FILE *tag); 
+void printfAddrDescripTable(FILE *tag); 
 void printfVarByVec(FILE *tag, int *varvec);
 int getDimension();
 void initmap(InterCodes IRhead);
-void Free(int reg); 
-int Ensure(Operand op); 
+//void Free(int reg); 
+//int Ensure(Operand op); 
 
-typedef struct RegSet_* RegSet;
-struct RegSet_ {
-	int rx;
-	int ry;
-	int rz;
-};
+void spill(int varindex);
+int getReg(int varindex);
+
+void updateDesLW(int reg, int varindex);
+void updateDesSW(int reg, int varindex);
+void updateDesIR3(int reg, int varindex);
+void updateDesIReq(int reg, int varindex);
 #endif

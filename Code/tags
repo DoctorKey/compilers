@@ -37,7 +37,9 @@ A_MOVE	asm.h	/^	A_LABEL, A_LI, A_MOVE,$/;"	e	enum:__anon17
 A_MUL	asm.h	/^	A_ADDI, A_ADD, A_SUB, A_MUL, A_DIV,$/;"	e	enum:__anon17
 A_SUB	asm.h	/^	A_ADDI, A_ADD, A_SUB, A_MUL, A_DIV,$/;"	e	enum:__anon17
 A_SW	asm.h	/^	A_MFLO, A_LW, A_SW, A_J, A_JAL, A_JR,$/;"	e	enum:__anon17
-Allocate	VarRegMap.c	/^int Allocate(Operand op) {$/;"	f
+AddrDescrip	VarRegMap.h	/^typedef struct AddrDescrip_* AddrDescrip;$/;"	t	typeref:struct:AddrDescrip_
+AddrDescripTable	VarRegMap.c	/^AddrDescrip AddrDescripTable = NULL;$/;"	v
+AddrDescrip_	VarRegMap.h	/^struct AddrDescrip_ {$/;"	s
 ArgIR	IR.c	/^InterCode ArgIR(Operand x) {$/;"	f
 Args	name.h	/^	Exp, Args$/;"	e	enum:__anon16
 Args	syntax.y	/^Args : Exp COMMA Args	$/;"	l
@@ -72,6 +74,7 @@ CompSt	syntax.y	/^CompSt : LC DefList StmtList RC $/;"	l
 CompStAnalyze	semantic.c	/^void CompStAnalyze(TreeNode parent, int num) {$/;"	f
 CompStTrans	translateIR.c	/^void CompStTrans(TreeNode parent, int num) {$/;"	f
 DEBUG3	VarRegMap.c	5;"	d	file:
+DEBUG4	main.h	16;"	d
 DEC_IR	IR.h	/^		GOTO_IR, IF_IR, RETURN_IR, DEC_IR, $/;"	e	enum:__anon10
 DIV	syntax.tab.c	/^     DIV = 268,$/;"	e	enum:yytokentype	file:
 DIV	syntax.tab.h	/^     DIV = 268,$/;"	e	enum:yytokentype
@@ -105,7 +108,6 @@ EOB_ACT_END_OF_FILE	lex.yy.c	170;"	d	file:
 EOB_ACT_LAST_MATCH	lex.yy.c	171;"	d	file:
 EXIT_SUCCESS	syntax.tab.c	289;"	d	file:
 EXIT_SUCCESS	syntax.tab.c	317;"	d	file:
-Ensure	VarRegMap.c	/^int Ensure(Operand op) {$/;"	f
 ErrorInfo	error.h	/^typedef struct ErrorInfo_* ErrorInfo;$/;"	t	typeref:struct:ErrorInfo_
 ErrorInfoStack	error.h	/^struct ErrorInfoStack {$/;"	s
 ErrorInfo_	error.h	/^struct ErrorInfo_ {$/;"	s
@@ -142,7 +144,6 @@ FUNC_OP	IR.h	/^typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,$/;"	e	e
 FieldList	symtable.h	/^typedef struct FieldList_* FieldList;$/;"	t	typeref:struct:FieldList_
 FieldList_	symtable.h	/^struct FieldList_ {$/;"	s
 Float	IR.h	/^	enum {String, Int, Float} type;$/;"	e	enum:Operand_::__anon8
-Free	VarRegMap.c	/^void Free(int reg) {$/;"	f
 FreeErrorInfo	error.c	/^void FreeErrorInfo(ErrorInfo errorInfo) {$/;"	f
 FunDec	name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon16
 FunDec	syntax.y	/^FunDec : ID LP VarList RP $/;"	l
@@ -219,6 +220,8 @@ MINUS	syntax.tab.c	/^     MINUS = 266,$/;"	e	enum:yytokentype	file:
 MINUS	syntax.tab.h	/^     MINUS = 266,$/;"	e	enum:yytokentype
 MTrans	translateIR.c	/^void MTrans(TreeNode parent, int num) {$/;"	f
 MUL_IR	IR.h	/^		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, $/;"	e	enum:__anon10
+Mem	mips32.h	/^typedef struct Mem_* Mem;$/;"	t	typeref:struct:Mem_
+Mem_	mips32.h	/^struct Mem_ {$/;"	s
 Mpop	IR.c	/^Operand Mpop() {$/;"	f
 Mpush	IR.c	/^void Mpush(Operand M) {$/;"	f
 Mstack	IR.c	/^Operandlist Mstack = NULL;$/;"	v
@@ -362,6 +365,9 @@ VarList	name.h	/^	VarDec, FunDec, VarList, ParamDec,$/;"	e	enum:__anon16
 VarList	syntax.y	/^VarList : ParamDec COMMA VarList	$/;"	l
 VarListAnalyze	semantic.c	/^void VarListAnalyze(TreeNode parent, int num) {$/;"	f
 VarListTrans	translateIR.c	/^void VarListTrans(TreeNode parent, int num) {$/;"	f
+Vec2Index	VarRegMap.c	/^int Vec2Index(int *varvec) {$/;"	f
+VecCompute	VarRegMap.c	/^int *VecCompute(int *varvec1, char compute, int *varvec2) {$/;"	f
+VecIs0	VarRegMap.c	/^int VecIs0(int *varvec) {$/;"	f
 WHILE	syntax.tab.c	/^     WHILE = 284,$/;"	e	enum:yytokentype	file:
 WHILE	syntax.tab.h	/^     WHILE = 284,$/;"	e	enum:yytokentype
 WRITE_IR	IR.h	/^		ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR } InterCodeKind;$/;"	e	enum:__anon10
@@ -540,21 +546,19 @@ addAsmCode	asm.c	/^void addAsmCode(AsmCode code) {$/;"	f
 addDecFunc	semantichelp.c	/^void addDecFunc(Symbol symbol) {$/;"	f
 addFunc	semantichelp.c	/^void addFunc(struct FuncList **funcList, Symbol symbol) {$/;"	f
 addIR	IR.c	/^void addIR(InterCode ir) {$/;"	f
-addVar2Reg	mips32.c	/^void addVar2Reg(int reg, Operand op) {$/;"	f
-addi	output.s	/^addi $t0, (null), -1$/;"	l
+addVar2Reg	mips32.c	/^void addVar2Reg(int reg, int varindex) {$/;"	f
 allocTimes	symtable.h	/^	int allocTimes;$/;"	m	struct:HashTableInfo
 alloca	syntax.tab.c	282;"	d	file:
 allvarnum	VarRegMap.c	/^int allvarnum = 0;$/;"	v
 argc	symtable.h	/^	int argc;$/;"	m	struct:Func
+argnum	asm.c	/^int argnum = 0;$/;"	v
 argsnum	semantic.c	/^int argsnum = 0;$/;"	v
 argtype	symtable.h	/^	FieldList argtype;$/;"	m	struct:Func
 array	symtable.h	/^		}array;$/;"	m	union:Type_::__anon2	typeref:struct:Type_::__anon2::__anon3
 assignreduce	IRopt.c	/^InterCodes assignreduce(InterCodes IRhead) {$/;"	f
 basic	symtable.h	/^		int basic;$/;"	m	union:Type_::__anon2
-ble	output.s	/^ble $t0, $t0, label6$/;"	l
 blockinteropt	IRopt.c	/^InterCodes blockinteropt(InterCodes IRhead) {$/;"	f
 blocktempopt	IRopt.c	/^InterCodes blocktempopt(InterCodes blockhead) {$/;"	f
-bne	output.s	/^bne $t0, $t0, label2$/;"	l
 buffer	file.h	/^	char *buffer;$/;"	m	struct:Buffer
 children	tree.h	/^	struct node *children[CHILD_NUM];$/;"	m	struct:node	typeref:struct:node::node
 cleanHashTable	symtable.c	/^int cleanHashTable(void) {$/;"	f
@@ -570,6 +574,7 @@ cmpType	semantichelp.c	/^int cmpType(Type type1, Type type2) {$/;"	f
 code	IR.h	/^	InterCode code;$/;"	m	struct:InterCodes_
 code	asm.h	/^	AsmCode code;$/;"	m	struct:AsmCodes_
 constantreduce	IRopt.c	/^InterCodes constantreduce(InterCodes IRhead) {$/;"	f
+countVar	VarRegMap.c	/^int countVar(int *varvec) {$/;"	f
 createSymNode	symtable.c	/^Symbol createSymNode(int type, char *name, ErrorInfo errorInfo) {$/;"	f
 curFile	file.c	/^FILE *curFile = NULL;$/;"	v
 curbuffer	file.c	/^struct Buffer *curbuffer = NULL;$/;"	v	typeref:struct:Buffer
@@ -592,7 +597,6 @@ errorInfo	symtable.h	/^	ErrorInfo errorInfo;$/;"	m	struct:FieldList_
 errorInfo	symtable.h	/^	ErrorInfo errorInfo;$/;"	m	struct:SymNode
 errorInfo	tree.h	/^	ErrorInfo errorInfo;$/;"	m	struct:node
 errorcount	tree.h	/^	int errorcount;$/;"	m	struct:node
-f	asm.h	/^	char *f;$/;"	m	struct:AsmCode_
 false	main.h	9;"	d
 falselist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 fieldList	tree.h	/^	FieldList fieldList;$/;"	m	struct:node
@@ -622,12 +626,16 @@ freeSymNode	symtable.c	/^int freeSymNode(Symbol symNode) {$/;"	f
 freeTimes	symtable.h	/^	int freeTimes;$/;"	m	struct:HashTableInfo
 freeType	symtable.c	/^void freeType(Type type) {$/;"	f
 freeVar	symtable.c	/^void freeVar(struct Var *var) {$/;"	f
+freeVarVec	VarRegMap.c	/^void freeVarVec(int *varvec) {$/;"	f
 free_buffer	file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
 func	symtable.h	/^		struct Func *func;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Func
 funcSymbol	semantichelp.h	/^	struct SymNode *funcSymbol;$/;"	m	struct:FuncList	typeref:struct:FuncList::SymNode
 funcnum	IR.h	/^	int funcnum;$/;"	m	struct:InterCodes_
 genArgsIR	translateIR.c	/^void genArgsIR(FieldList argtype, IRinfo irinfo) {$/;"	f
+genSW	asm.c	/^void genSW(int y, int k, int x) {$/;"	f
+getAllVarNum	VarRegMap.c	/^int getAllVarNum() {$/;"	f
 getDecFuncList	semantichelp.c	/^struct FuncList *getDecFuncList() {$/;"	f
+getDim	VarRegMap.c	/^int getDim(int num) {$/;"	f
 getDimension	VarRegMap.c	/^int getDimension() {$/;"	f
 getErrorEnd	error.c	/^extern int getErrorEnd() {$/;"	f
 getErrorLine	error.c	/^extern int getErrorLine() {$/;"	f
@@ -641,21 +649,23 @@ getName	name.c	/^const char *getName(int type)$/;"	f
 getNextLine	file.c	/^int getNextLine() {$/;"	f
 getOneReg	mips32.c	/^int getOneReg(int reg) {$/;"	f
 getOpBySymbol	symtable.c	/^Operand getOpBySymbol(Symbol symNode) {$/;"	f
+getReg	VarRegMap.c	/^int getReg(int varindex) {$/;"	f
 getRegName	mips32.c	/^char *getRegName(int reg) {$/;"	f
 getRegindex	mips32.c	/^int getRegindex(int reg) {$/;"	f
 getSymType	symtable.c	/^Type getSymType(Symbol symNode) {$/;"	f
 getTempnum	IR.c	/^int getTempnum() {$/;"	f
 getVarnum	IR.c	/^int getVarnum() {$/;"	f
-getdimension	VarRegMap.c	/^void getdimension() {$/;"	f
+getVec	VarRegMap.c	/^int getVec(int num) {$/;"	f
 getfalseRelop	name.c	/^char *getfalseRelop(const char *relop) {$/;"	f
 hashTableInfo	symtable.c	/^struct HashTableInfo hashTableInfo;$/;"	v	typeref:struct:HashTableInfo
 hash_pjw	symtable.c	/^unsigned int hash_pjw(char *name) {$/;"	f
-idleReg	mips32.c	/^int idleReg = 0xffffffff;$/;"	v
+idleReg	mips32.c	/^int idleReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;$/;"	v
 ifreduce	IRopt.c	/^InterCodes ifreduce(InterCodes IRhead) {$/;"	f
+index	VarRegMap.h	/^	int index;$/;"	m	struct:AddrDescrip_
 indexNum	symtable.h	/^	int indexNum;$/;"	m	struct:HashTableInfo
+initAddrDescripTable	VarRegMap.c	/^void initAddrDescripTable(int varnum) {$/;"	f
 initError	error.c	/^ErrorInfo initError(int type) {$/;"	f
 initRegMap	mips32.c	/^void initRegMap() {$/;"	f
-initVar2RegTable	VarRegMap.c	/^void initVar2RegTable() {$/;"	f
 init_buffer	file.c	/^init_buffer(){$/;"	f
 initbasicblock	IRopt.c	/^InterCodes initbasicblock(InterCodes IRhead) {$/;"	f
 initerrorBuffer	error.c	/^initerrorBuffer(char *errorbuffer) {$/;"	f
@@ -672,12 +682,10 @@ isDefine	symtable.h	/^	int isDefine;$/;"	m	struct:Var
 isError	syntax.tab.c	/^	int isError = 0;$/;"	v
 isFall	IR.c	/^int isFall(Operandlist fall) {$/;"	f
 isParam	symtable.h	/^	int isParam;$/;"	m	struct:Var
+isVarInReg	mips32.c	/^int isVarInReg(int var, int reg) {$/;"	f
 isblockhead	IR.h	/^	int isblockhead;$/;"	m	struct:InterCodes_
-j	output.s	/^j label3$/;"	l
-j	output.s	/^j label7$/;"	l
-jal	output.s	/^jal fact$/;"	l
-jr	output.s	/^jr $ra$/;"	l
 k	asm.h	/^	int k;$/;"	m	struct:AsmCode_
+k	mips32.h	/^	int k;$/;"	m	struct:Mem_
 kind	IR.h	/^	InterCodeKind kind;$/;"	m	struct:InterCode_
 kind	IR.h	/^	OP_KIND kind;$/;"	m	struct:IRinfo_
 kind	IR.h	/^	OP_KIND kind;$/;"	m	struct:Operand_
@@ -685,10 +693,7 @@ kind	asm.h	/^	AsmCodeKind kind;$/;"	m	struct:AsmCode_
 kind	symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	m	struct:Type_	typeref:enum:Type_::__anon1
 lBuffer	file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	file.c	/^int lMaxBuffer = 1000;$/;"	v
-label2	output.s	/^label2:$/;"	l
-label3	output.s	/^label3:$/;"	l
-label6	output.s	/^label6:$/;"	l
-label7	output.s	/^label7:$/;"	l
+label	asm.h	/^	char *label;$/;"	m	struct:AsmCode_
 labelcount	IRopt.c	/^int labelcount[LABEL_NUM] = {0};$/;"	v
 labelnum	IR.c	/^int labelnum = 0;$/;"	v
 labelreduce	IRopt.c	/^InterCodes labelreduce(InterCodes IRhead) {$/;"	f
@@ -700,24 +705,21 @@ last_line	syntax.tab.c	/^  int last_line;$/;"	m	struct:YYLTYPE	file:
 last_line	syntax.tab.h	/^  int last_line;$/;"	m	struct:YYLTYPE
 lexical_init	lex.yy.c	/^void lexical_init()$/;"	f
 lexical_isError	lex.yy.c	/^	int lexical_isError = 0;$/;"	v
-li	output.s	/^li $t0, 0$/;"	l
-li	output.s	/^li $t0, 1$/;"	l
 lineno	tree.h	/^	int lineno;$/;"	m	struct:node
 lookup	symtable.c	/^Symbol lookup(char *name) {$/;"	f
 lookupByType	symtable.c	/^Symbol lookupByType(char *name, int type) {$/;"	f
 lookupFieldListElem	symtable.c	/^Type lookupFieldListElem(FieldList fieldList, char *name) {$/;"	f
 lookupfieldListByName	semantichelp.c	/^FieldList lookupfieldListByName(FieldList fieldList, char *name) {$/;"	f
 main	main.c	/^int main(int argc, char** argv)$/;"	f
-map	IR.h	/^	struct varregmap_* map;$/;"	m	struct:Operand_	typeref:struct:Operand_::varregmap_
+mem	VarRegMap.h	/^	Mem mem;$/;"	m	struct:AddrDescrip_
 mergeFieldList	symtable.c	/^FieldList mergeFieldList(FieldList front, FieldList tail) {$/;"	f
-move	output.s	/^move $t0, $v0$/;"	l
-move	output.s	/^move $v0, $t0$/;"	l
-mul	output.s	/^mul $t0, $t0, $t0$/;"	l
+my_pow	VarRegMap.c	/^int my_pow(int n,int i) {$/;"	f
 nBuffer	file.h	/^	int nBuffer;$/;"	m	struct:Buffer
 nRow	file.h	/^	int nRow;$/;"	m	struct:Buffer
 nTokenLength	file.h	/^	int nTokenLength;$/;"	m	struct:Buffer
 nTokenNextStart	file.h	/^	int nTokenNextStart;$/;"	m	struct:Buffer
 nTokenStart	file.h	/^	int nTokenStart;$/;"	m	struct:Buffer
+naiveTransIR3	asm.c	/^void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {$/;"	f
 name	name.c	/^const char *name[] = {$/;"	v
 name	symtable.h	/^	char *name;$/;"	m	struct:FieldList_
 name	symtable.h	/^	char *name;$/;"	m	struct:SymNode
@@ -729,12 +731,14 @@ newIRinfo	IR.c	/^IRinfo newIRinfo() {$/;"	f
 newInterCode	IR.c	/^InterCode newInterCode() {$/;"	f
 newInterCodes	IR.c	/^InterCodes newInterCodes(InterCode ir) {$/;"	f
 newLabel	IR.c	/^Operand newLabel() {$/;"	f
+newMem	mips32.c	/^Mem newMem(int reg, int k) {$/;"	f
 newNode	tree.c	/^struct node *newNode(int type,int num, ...)$/;"	f
 newOperand	IR.c	/^Operand newOperand(int kind) {$/;"	f
 newStruct	symtable.c	/^Symbol newStruct(char *name, Type type, ErrorInfo errorInfo) {$/;"	f
 newTemp	IR.c	/^Operand newTemp() {$/;"	f
 newType	symtable.c	/^Type newType() {$/;"	f
 newVar	symtable.c	/^Symbol newVar(char *name, Type type, ErrorInfo errorInfo) {$/;"	f
+newVarVec	VarRegMap.c	/^int *newVarVec() {$/;"	f
 newfile	file.c	/^newfile(char *fn)$/;"	f
 newoutputfile	file.c	/^newoutputfile(char *fn)$/;"	f
 newtokenNode	tree.c	/^struct node *newtokenNode(int type)$/;"	f
@@ -749,14 +753,13 @@ nextlist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 node	tree.h	/^struct node {$/;"	s
 nodetype	tree.h	/^	int nodetype;$/;"	m	struct:node
 nodevalue	tree.h	/^	union value nodevalue;$/;"	m	struct:node	typeref:union:node::value
-num	VarRegMap.h	/^	int num;$/;"	m	struct:varregmap_
 num	error.h	/^	int num;$/;"	m	struct:ErrorInfoStack
 num	symtable.h	/^	int num;	\/\/num of this hash node$/;"	m	struct:HashNode
 num_float	IR.h	/^		float num_float;$/;"	m	union:Operand_::__anon9
 num_int	IR.h	/^		int num_int;$/;"	m	union:Operand_::__anon9
 op	IR.h	/^	Operand op;$/;"	m	struct:IRinfo_
 op	IR.h	/^	Operand op;$/;"	m	struct:Operandlist_
-op	VarRegMap.h	/^	struct Operand_* op;$/;"	m	struct:varregmap_	typeref:struct:varregmap_::Operand_
+op	VarRegMap.h	/^	struct Operand_* op;$/;"	m	struct:AddrDescrip_	typeref:struct:AddrDescrip_::Operand_
 op	symtable.h	/^	struct Operand_* op;$/;"	m	struct:SymNode	typeref:struct:SymNode::Operand_
 op1	IR.h	/^			Operand op1;$/;"	m	struct:InterCode_::__anon11::__anon12
 op1	IR.h	/^		}op1;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::__anon11::__anon12
@@ -768,16 +771,26 @@ outputFile	file.c	/^FILE *outputFile = NULL;$/;"	v
 outputfilename	file.c	/^char *outputfilename = NULL;$/;"	v
 prev	IR.h	/^	InterCodes prev, next;$/;"	m	struct:InterCodes_
 prev	asm.h	/^	AsmCodes prev, next;$/;"	m	struct:AsmCodes_
+printfAddrDescripTable	VarRegMap.c	/^void printfAddrDescripTable(FILE *tag) {$/;"	f
 printfAllAsm	asm.c	/^void printfAllAsm(FILE *tag) {$/;"	f
+printfAllReg	mips32.c	/^void printfAllReg(FILE *tag, int regvec) {$/;"	f
 printfAsm	asm.c	/^void printfAsm(FILE *tag, AsmCode asmcode) {$/;"	f
+printfAsmHead	asm.c	/^void printfAsmHead(FILE *tag) {$/;"	f
 printfErrorRow	error.c	/^printfErrorRow(char *errmsg, int start, int end) {$/;"	f
 printfExpIR	IR.c	/^void printfExpIR(FILE *tag, InterCode ir, int type) {$/;"	f
 printfIR	IR.c	/^void printfIR(FILE *tag, InterCode ir) {$/;"	f
+printfMem	mips32.c	/^void printfMem(FILE *tag, Mem mem) {$/;"	f
+printfReadAsm	asm.c	/^void printfReadAsm(FILE *tag) {$/;"	f
+printfRegMap	mips32.c	/^void printfRegMap(FILE *tag) {$/;"	f
+printfVarByVec	VarRegMap.c	/^void printfVarByVec(FILE *tag, int *varvec) {$/;"	f
+printfVec	VarRegMap.c	/^void printfVec(FILE *tag, int *varvec) {$/;"	f
+printfWriteAsm	asm.c	/^void printfWriteAsm(FILE *tag) {$/;"	f
 printfallAsmtoFile	file.c	/^printfallAsmtoFile() {$/;"	f
 printfallIR	IR.c	/^void printfallIR(FILE *tag) {$/;"	f
 printfallIRtoFile	file.c	/^printfallIRtoFile() {$/;"	f
 pushErrorInfo	error.c	/^int pushErrorInfo(ErrorInfo errorInfo, int type) {$/;"	f
-reg	VarRegMap.h	/^	int reg;$/;"	m	struct:varregmap_
+reg	VarRegMap.h	/^	int reg;$/;"	m	struct:AddrDescrip_
+reg	mips32.h	/^	int reg;$/;"	m	struct:Mem_
 reg	mips32.h	/^	int reg;$/;"	m	struct:RegMap
 regMap	mips32.c	/^struct RegMap regMap[REG_NUM];$/;"	v	typeref:struct:RegMap
 relop	IR.h	/^			Operand x, relop, y, z;$/;"	m	struct:InterCode_::__anon11::__anon15
@@ -800,6 +813,8 @@ showType	symtable.c	/^void showType(Type type) {$/;"	f
 showVar	symtable.c	/^void showVar(struct Var *var) {$/;"	f
 size	symtable.h	/^			int size;$/;"	m	struct:Type_::__anon2::__anon3
 specifierLock	semantic.c	/^int specifierLock = 0;$/;"	v
+spill	VarRegMap.c	/^void spill(int varindex) {$/;"	f
+spillAll	mips32.c	/^void spillAll(int reg) {$/;"	f
 str	IR.h	/^		char *str;$/;"	m	union:Operand_::__anon9
 str	tree.h	/^	char *str;$/;"	m	union:value
 structdefnum	semantic.c	/^int structdefnum = 0;$/;"	v
@@ -816,6 +831,7 @@ tokenName	name.c	/^const char *tokenName[] = {$/;"	v
 totalErrorInfo	error.c	/^static int totalErrorInfo = 0;$/;"	v	file:
 transAllAsm	asm.c	/^void transAllAsm(InterCodes IRhead) {$/;"	f
 transAsm	asm.c	/^void transAsm(InterCode ir) {$/;"	f
+transIR3	asm.c	/^void transIR3(int kind, Operand x, Operand y, Operand z) {$/;"	f
 transadd	asm.c	/^void transadd(InterCode ir) {$/;"	f
 transarg	asm.c	/^void transarg(InterCode ir) {$/;"	f
 transassign	asm.c	/^void transassign(InterCode ir) {$/;"	f
@@ -845,18 +861,16 @@ type_node	syntax.tab.h	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:st
 unput	lex.yy.c	202;"	d	file:
 upbound	symtable.h	/^			int upbound;$/;"	m	struct:Type_::__anon2::__anon3
 updateChildDepth	tree.c	/^void updateChildDepth(struct node *node)$/;"	f
+updateDimension	VarRegMap.c	/^int updateDimension(int varnum) {$/;"	f
 updatelabelcount	IRopt.c	/^InterCodes updatelabelcount(InterCodes IRhead) {$/;"	f
 updatemap	VarRegMap.c	/^void updatemap(Operand op) {$/;"	f
 updatemap2	VarRegMap.c	/^void updatemap2(Operand op) {$/;"	f
 usedIndex	symtable.h	/^	int usedIndex[SYMBOLMAX];$/;"	m	struct:HashTableInfo
 value	tree.h	/^union value {$/;"	u
 var	symtable.h	/^		struct Var *var;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Var
-var2regtable	VarRegMap.c	/^varregmap var2regtable = NULL;$/;"	v
 varnum	IR.c	/^int varnum = 0;$/;"	v
 varnum	IR.h	/^	int varnum;$/;"	m	struct:Operand_
-varregmap	VarRegMap.h	/^typedef struct varregmap_* varregmap;$/;"	t	typeref:struct:varregmap_
-varregmap_	VarRegMap.h	/^struct varregmap_ {$/;"	s
-varvec	VarRegMap.h	/^	int *varvec;$/;"	m	struct:varregmap_
+varvec	VarRegMap.h	/^	int *varvec;$/;"	m	struct:AddrDescrip_
 varvec	mips32.h	/^	int *varvec;$/;"	m	struct:RegMap
 x	IR.h	/^			Operand x, relop, y, z;$/;"	m	struct:InterCode_::__anon11::__anon15
 x	asm.h	/^	int x;$/;"	m	struct:AsmCode_

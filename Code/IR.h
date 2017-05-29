@@ -2,7 +2,6 @@
 #define __IR_H_
 
 #include "symtable.h"
-#include "mips32.h"
 
 typedef enum {TEMP_OP, VARIABLE_OP, CONSTANT_OP, FUNC_OP,
 		RELOP_OP, LABEL_OP, SIZE_OP} OP_KIND;
@@ -19,7 +18,6 @@ IRinfo newIRinfo();
 
 struct Operand_ {
 	OP_KIND kind;
-	struct varregmap_* map;
 	int varnum;
 	enum {String, Int, Float} type;
 	int isAddr;

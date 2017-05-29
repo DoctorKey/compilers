@@ -42,13 +42,23 @@ void addAsmCode(AsmCode code) {
 		return;
 	}
 }
-void spill(int reg, Operand op) {
+AsmCode genLW(int x, int k, int y) {
+	AsmCode code;
+	code = newAsmCode(A_LW);
+	code->x = x;
+	code->k = k;
+	code->y = y;
+	addAsmCode(code);
+	return code;
+}
+AsmCode genSW(int y, int k, int x) {
 	AsmCode code;
 	code = newAsmCode(A_SW);
-	code->y = reg;
-//	code->x = op->mem->reg;
-//	code->k = op->mem->k;
+	code->y = y;
+	code->x = x;
+	code->k = k;
 	addAsmCode(code);
+	return code;
 }
 void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {
 	AsmCode code;
@@ -84,29 +94,42 @@ void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {
 }
 void transIR3(int kind, Operand x, Operand y, Operand z) {
 	AsmCode code;
+	int xindex, yindex, zindex;
 	int rx, ry, rz;
-	rx = getReg(x);
-	ry = getReg(y);
-	rz = getReg(z);
-	if(isOpInReg(y, ry) == false){
-		code = newAsmCode(A_LW);
-		code->x = ry;
-		code->y = SP;
-		code->k = 0;
-		addAsmCode(code);
+	xindex = x->varnum;
+	yindex = y->varnum;
+	zindex = z->varnum;
+	rx = getReg(xindex);
+	ry = getReg(yindex);
+	rz = getReg(zindex);
+	if(isVarInReg(yindex, ry) == false){
+		code = genLW(ry, getMemk(yindex), getMemReg(yindex));
+		updateDesLW(ry, yindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
 	}
-	if(isOpInReg(z, rz) == false){
-		code = newAsmCode(A_LW);
-		code->x = rz;
-		code->y = SP;
-		code->k = 0;
-		addAsmCode(code);
+	if(isVarInReg(zindex, rz) == false){
+		code = genLW(rz, getMemk(zindex), getMemReg(zindex));
+		updateDesLW(rz, zindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
 	}
 	code = newAsmCode(kind);
 	code->x = rx;
 	code->y = ry; 
 	code->z = rz;
 	addAsmCode(code);
+	updateDesIR3(rx, xindex);
+#ifdef DEBUG4
+	printfAsm(stdout, code); 
+	fprintf(stdout, "\n");
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
 void translabel(InterCode ir) {
 	AsmCode code;
@@ -123,100 +146,119 @@ void transfunc(InterCode ir) {
 void transassign(InterCode ir) {
 	AsmCode code;
 	int rx, ry;
-	rx = Ensure(ir->op2.result);
+	int xindex, yindex;
 	if(ir->op2.right->kind == CONSTANT_OP) {
+		xindex = ir->op2.result->varnum;
+		rx = getReg(xindex);
 		code = newAsmCode(A_LI);
 		code->x = rx;
 		code->k = ir->op2.right->num_int;
+		addAsmCode(code);
+		updateDesIR3(rx, xindex);
 	}else {
-		ry = Ensure(ir->op2.right);
-		code = newAsmCode(A_LI);
-		code->x = rx;
-		code->y = ry; 
+		xindex = ir->op2.result->varnum;
+		yindex = ir->op2.right->varnum;
+		ry = getReg(yindex);
+		if(isVarInReg(yindex, ry) == false){
+			code = genLW(ry, getMemk(yindex), getMemReg(yindex));
+			updateDesLW(ry, yindex);
+#ifdef DEBUG4
+			printfAsm(stdout, code); 
+			fprintf(stdout, "\n");
+#endif
+		}
+		updateDesIReq(ry, xindex);
 	}
-	Free(rx);
-	Free(ry);
-	addAsmCode(code);
 }
-void transadd(InterCode ir) {
+AsmCode genADDI(Operand x, Operand y, int k) {
 	AsmCode code;
-	int rx, ry, rz;
-	rx = Ensure(ir->op3.result);
-	ry = Ensure(ir->op3.right1);
-	if(ir->op3.right2->kind == CONSTANT_OP) {
-		code = newAsmCode(A_ADDI);
-		code->x = rx;
-		code->y = ry; 
-		code->k = ir->op3.right2->num_int;
-	}else {
-		rz = Ensure(ir->op3.right2);
-		code = newAsmCode(A_ADD);
-		code->x = rx;
-		code->y = ry; 
-		code->z = rz;
-		Free(rz);
+	int xindex, yindex;
+	int rx, ry;
+	xindex = x->varnum;
+	yindex = y->varnum;
+	rx = getReg(xindex);
+	ry = getReg(yindex);
+	if(isVarInReg(yindex, ry) == false){
+		code = genLW(ry, getMemk(yindex), getMemReg(yindex));
+		updateDesLW(ry, yindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
 	}
-	Free(rx);
-	Free(ry);
+	code = newAsmCode(A_ADDI);
+	code->x = rx;
+	code->y = ry; 
+	code->k = k;
 	addAsmCode(code);
+	updateDesIR3(rx, xindex);
 #ifdef DEBUG4
 	printfAsm(stdout, code); 
 	fprintf(stdout, "\n");
 	printfRegMap(stdout); 
-	printfVar2RegTable(stdout); 
+	printfAddrDescripTable(stdout); 
 #endif
+}
+void transadd(InterCode ir) {
+	AsmCode code;
+	if(ir->op3.right2->kind == CONSTANT_OP) {
+		code = genADDI(ir->op3.result, ir->op3.right1, ir->op3.right2->num_int);
+	}else {
+		transIR3(A_ADD, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+	}
 }
 void transsub(InterCode ir) {
 	AsmCode code;
-	int rx, ry, rz;
-	rx = Ensure(ir->op3.result);
-	ry = Ensure(ir->op3.right1);
 	if(ir->op3.right2->kind == CONSTANT_OP) {
-		code = newAsmCode(A_ADDI);
-		code->x = rx;
-		code->y = ry; 
-		code->k = -ir->op3.right2->num_int;
+		code = genADDI(ir->op3.result, ir->op3.right1, -ir->op3.right2->num_int);
 	}else {
-		rz = Ensure(ir->op3.right2);
-		code = newAsmCode(A_SUB);
-		code->x = rx;
-		code->y = ry; 
-		code->z = rz;
-		Free(rz);
+		transIR3(A_SUB, ir->op3.result, ir->op3.right1, ir->op3.right2); 
 	}
-	Free(rx);
-	Free(ry);
-	addAsmCode(code);
 }
 void transmul(InterCode ir) {
 	AsmCode code;
-	int rx, ry, rz;
-	rx = Ensure(ir->op3.result);
-	ry = Ensure(ir->op3.right1);
-	rz = Ensure(ir->op3.right2);
-	code = newAsmCode(A_MUL);
-	code->x = rx;
-	code->y = ry; 
-	code->z = rz;
-	Free(rz);
-	Free(rx);
-	Free(ry);
-	addAsmCode(code);
+	transIR3(A_MUL, ir->op3.result, ir->op3.right1, ir->op3.right2); 
 }
 void transdiv(InterCode ir) {
 	AsmCode code;
+	int xindex, yindex, zindex;
 	int rx, ry, rz;
-	rx = Ensure(ir->op3.result);
-	ry = Ensure(ir->op3.right1);
-	rz = Ensure(ir->op3.right2);
+	xindex = ir->op3.result->varnum;
+	yindex = ir->op3.right1->varnum;
+	zindex = ir->op3.right2->varnum;
+	rx = getReg(xindex);
+	ry = getReg(yindex);
+	rz = getReg(zindex);
+	if(isVarInReg(yindex, ry) == false){
+		code = genLW(ry, getMemk(yindex), getMemReg(yindex));
+		updateDesLW(ry, yindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
+	}
+	if(isVarInReg(zindex, rz) == false){
+		code = genLW(rz, getMemk(zindex), getMemReg(zindex));
+		updateDesLW(rz, zindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
+	}
 	code = newAsmCode(A_DIV);
-	code->x = rx;
 	code->y = ry; 
 	code->z = rz;
-	Free(rz);
-	Free(rx);
-	Free(ry);
 	addAsmCode(code);
+	code = newAsmCode(A_MFLO);
+	code->x = rx;
+	addAsmCode(code);
+	updateDesIR3(rx, xindex);
+#ifdef DEBUG4
+	printfAsm(stdout, code); 
+	fprintf(stdout, "\n");
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
 void transgoto(InterCode ir) {
 	AsmCode code;
@@ -226,9 +268,28 @@ void transgoto(InterCode ir) {
 }
 void transif(InterCode ir) {
 	AsmCode code;
+	int xindex, yindex;
 	int rx, ry;
-	rx = Ensure(ir->op4.x);
-	ry = Ensure(ir->op4.y);
+	xindex = ir->op4.x->varnum;
+	yindex = ir->op4.y->varnum;
+	rx = getReg(xindex);
+	ry = getReg(yindex);
+	if(isVarInReg(yindex, ry) == false){
+		code = genLW(ry, getMemk(yindex), getMemReg(yindex));
+		updateDesLW(ry, yindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
+	}
+	if(isVarInReg(xindex, rx) == false){
+		code = genLW(rx, getMemk(xindex), getMemReg(xindex));
+		updateDesLW(rx, xindex);
+#ifdef DEBUG4
+		printfAsm(stdout, code); 
+		fprintf(stdout, "\n");
+#endif
+	}
 	if(strcmp(ir->op4.relop->str, "==") == 0) {
 		code = newAsmCode(A_BEQ);
 	}else if(strcmp(ir->op4.relop->str, "!=") == 0) {
@@ -246,19 +307,16 @@ void transif(InterCode ir) {
 	code->y = ry;
 	code->label = Optostring(ir->op4.z);
 	addAsmCode(code);
-	Free(rx);
-	Free(ry);
 }
 void transreturn(InterCode ir) {
 	AsmCode code;
 	int rx;
-	rx = Ensure(ir->op1.op1);
+	rx = getReg(ir->op1.op1->varnum);
 	code = newAsmCode(A_MOVE);
 	code->x = V0;
 	code->y = rx; 
 	addAsmCode(code);
 	code = newAsmCode(A_JR);
-	Free(rx);
 	addAsmCode(code);
 }
 void transdec(InterCode ir) {
@@ -281,7 +339,7 @@ void transarg(InterCode ir) {
 	}else {
 		k = (argnum - 5) * 4;
 		code = newAsmCode(A_SW);
-		code->y = getReg(ir->op1.op1);
+//		code->y = getReg(ir->op1.op1);
 		code->k = k;
 		code->x = SP;
 	}
@@ -291,14 +349,13 @@ void transcall(InterCode ir) {
 	AsmCode code;
 	int rx;
 	argnum = 0;
-	rx = Ensure(ir->op2.result);
+	rx = getReg(ir->op2.result->varnum);
 	code = newAsmCode(A_JAL);
 	code->label = strdup(ir->op2.right->str);
 	addAsmCode(code);
 	code = newAsmCode(A_MOVE);
 	code->x = rx;
 	code->y = V0;
-	Free(rx);
 	addAsmCode(code);
 }
 void transparam(InterCode ir) {

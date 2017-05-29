@@ -3,41 +3,48 @@
 #include "asm.h"
 
 #define DEBUG3 1
+AddrDescrip AddrDescripTable = NULL;
+/*--------------------------------------------------
+	VarVec
+----------------------------------------------------*/
 int allvarnum = 0;
 int dimension = 0;
-varregmap var2regtable = NULL;
-
+int getAllVarNum() {
+	return allvarnum;
+}
 int getDimension() {
 	return dimension;
 }
-void initVar2RegTable() {
-	var2regtable = (varregmap) malloc(sizeof(struct varregmap_) * allvarnum);
-	if(var2regtable == NULL) {
-		fprintf(stderr, "can't malloc\n");
-		return;
-	}
-}
-void getdimension() {
-	int count = allvarnum;
-	dimension = 0;
+int updateDimension(int varnum) {
+	int count = varnum;
+	int dim = 0;
+	dim = 0;
 	while(count != 0){
 		count = count/32;
-		dimension++;
+		dim++;
 	}
 #ifdef DEBUG3
-	fprintf(stdout, "allvarnum is %d\n", allvarnum);
-	fprintf(stdout, "dimension is %d\n", dimension);
+	fprintf(stdout, "allvarnum is %d\n", varnum);
+	fprintf(stdout, "dimension is %d\n", dim);
 #endif
 }
-void updatemap(Operand op) {
-	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
+int *newVarVec() {
+	int *varvec = NULL;
+	int dim = getDimension();
+	varvec = (int*) malloc(sizeof(int)*dim);
+	if(varvec == NULL){
+		fprintf(stderr, "can't malloc\n");
+		return NULL;
+	}
+	while(--dim >= 0) {
+		varvec[dim] = 0;
+	}
+	return varvec;
+}
+void freeVarVec(int *varvec) {
+	if(varvec == NULL)
 		return;
-	if(op->varnum != -1)
-		return;
-	//from 0
-	op->varnum = allvarnum;
-	allvarnum++;
-	return;
+	free(varvec);
 }
 int getDim(int num) {
 	int i = 0;
@@ -52,49 +59,7 @@ int getVec(int num) {
 	i = num % 32;
 	return 1 << i;
 }
-void updatemap2(Operand op) {
-	int temp = 0, i, vec;
-	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
-		return;
-	if(op->map != NULL)
-		return;
-	op->map = var2regtable + op->varnum;
-	op->map->op = op;
-	op->map->reg = 0;
-	op->map->num = op->varnum;
-	op->map->mem = (Mem) malloc(sizeof(struct Mem_));
-	op->map->mem->reg = 0;
-	op->map->mem->k = 0;
-	op->map->varvec = (int*) malloc(sizeof(int)*dimension);
-	for(i = 0; i < dimension; i++) {
-		op->map->varvec[i] = 0;
-	}
-	temp = op->map->num;
-	op->map->varvec[getDim(temp)] = getVec(temp);
-#ifdef DEBUG3
-	fprintf(stdout, "%s num:%d ", Optostring(op), op->map->num);	
-	printfVec(stdout, op->map->varvec);
-	fprintf(stdout, "\n");
-#endif
-	return;
-}
-void printfVec(FILE *tag, int *varvec) {
-	int i;
-	for(i = 0; i < dimension; i++) {
-		fprintf(tag, "%08x ", varvec[i]);
-	}
-}
-void printfVarByVec(FILE *tag, int *varvec) {
-	int i;
-	for(i = 0; i < allvarnum; i++) {
-		if((varvec[getDim(i)] & getVec(i)) == 0) {
-		
-		}else {
-			fprintf(tag, "%s,", Optostring(var2regtable[i].op));
-		}
-	}
-}
-int getVarNum(int *varvec) {
+int countVar(int *varvec) {
 	int i, count = 0, vec, j;
 	for(i = 0;i < dimension; i++) {
 		vec = varvec[i];
@@ -107,8 +72,12 @@ int getVarNum(int *varvec) {
 	}
 	return count;
 }
-void VecCompute(int *varvec1, char compute, int *varvec2) {
+int *VecCompute(int *varvec1, char compute, int *varvec2) {
 	int i, vec;
+	int *result = newVarVec();
+	if(varvec2 == 0) {
+		varvec2 = newVarVec();
+	}
 	if(compute == '=') {
 		for(i = 0; i < dimension; i++) {
 			varvec1[i] = varvec2[i];	
@@ -142,7 +111,7 @@ int VecIs0(int *varvec) {
 	}
 	return true;
 }
-int pow(int n,int i) {
+int my_pow(int n,int i) {
 	int result = 1;
 	if(i == 0)
 		return 1;
@@ -156,9 +125,87 @@ int Vec2Index(int *varvec) {
 	int result = 0, i, j;
 	for(i = 0; i < dimension; i++) {
 		j = getRegindex(varvec[i]);	
-		result = result + pow(32, i) * j;
+		result = result + my_pow(32, i) * j;
 	}
 	return result;
+}
+void printfVec(FILE *tag, int *varvec) {
+	int dim = getDimension();
+	int i;
+	for(i = 0; i < dim; i++) {
+		fprintf(tag, "%08x ", varvec[i]);
+	}
+}
+void printfVarByVec(FILE *tag, int *varvec) {
+	int varnum = getAllVarNum();
+	int i;
+	for(i = 0; i < varnum; i++) {
+		if((varvec[getDim(i)] & getVec(i)) != 0) {
+			fprintf(tag, "%s,", Optostring(AddrDescripTable[i].op));
+		}
+	}
+}
+
+void initAddrDescripTable(int varnum) {
+	AddrDescripTable = (AddrDescrip) malloc(sizeof(struct AddrDescrip_) * varnum);
+	if(AddrDescripTable == NULL) {
+		fprintf(stderr, "can't malloc\n");
+		return;
+	}
+	while(--varnum >= 0) {
+		AddrDescripTable[varnum].op = NULL;
+		AddrDescripTable[varnum].index = varnum;
+		AddrDescripTable[varnum].varvec = newVarVec();
+		AddrDescripTable[varnum].reg = 0;
+		AddrDescripTable[varnum].mem = newMem(0, 0);
+		AddrDescripTable[varnum].varvec[getDim(varnum)] = getVec(varnum);
+	}
+}
+int getMemk(int varindex) {
+	return AddrDescripTable[varindex].mem->k;
+}
+int getMemReg(int varindex) {
+	return AddrDescripTable[varindex].mem->reg;
+}
+void printfAddrDescripTable(FILE *tag) {
+	int num = getAllVarNum();
+	int dim = getDimension();
+	int i;
+	fprintf(tag, "------------------addr descrip table--------------------\n");
+	fprintf(tag, "[index]\top\tmem\treg\n");
+	for(i = 0; i < num; i++) {
+		fprintf(tag, "[%d]", i);
+		fprintf(tag, "\t%s\t", Optostring(AddrDescripTable[i].op));
+		if(AddrDescripTable[i].memvilid = 1) {
+			fprintf(tag, "\033[31m\033[1m");
+			printfMem(tag, AddrDescripTable[i].mem);
+			fprintf(tag, "\033[0m");
+		}else {
+			printfMem(tag, AddrDescripTable[i].mem);
+		}
+		fprintf(tag, ",");
+		printfAllReg(tag, AddrDescripTable[i].reg);
+		fprintf(tag, "\n");
+	}
+	fprintf(tag, "------------------End-----------------------------------\n");
+}
+//TODO: this function isn't good
+// shouldn't modify op in this step
+void updatemap(Operand op) {
+	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
+		return;
+	if(op->varnum != -1)
+		return;
+	//from 0
+	op->varnum = allvarnum;
+	allvarnum++;
+	return;
+}
+void updatemap2(Operand op) {
+	if(op->kind != TEMP_OP && op->kind != VARIABLE_OP)
+		return;
+	AddrDescripTable[op->varnum].op = op;
+	return;
 }
 void initmap(InterCodes IRhead) {
 	InterCodes temp = IRhead;
@@ -208,8 +255,8 @@ void initmap(InterCodes IRhead) {
 		}	
 		temp = temp->next;
 	}
-	getdimension();
-	initVar2RegTable();
+	updateDimension(getAllVarNum());
+	initAddrDescripTable(getAllVarNum());
 	temp = IRhead;
 	while(temp) {
 		ir = temp->code;
@@ -257,115 +304,112 @@ void initmap(InterCodes IRhead) {
 		temp = temp->next;
 	}
 }
-int vInOther(int reg) {
-	int *v = (int*) malloc(sizeof(int) * dimension);
-	int i;
-	VecCompute(v, '=', regMap[getRegindex(reg)].varvec);
-	for(i = 0; i < REG_NUM; i++) {
-		if(i == getRegindex(reg))
-			continue;
-		VecCompute(v, '$', regMap[i].varvec);
-	}
-	if(VecIs0(v)) {
-		free(v);
-		return true;
-	}else {
-		free(v);
-		return false;
-	}
+//int vInOther(int reg) {
+//	int *v = (int*) malloc(sizeof(int) * dimension);
+//	int i;
+//	VecCompute(v, '=', regMap[getRegindex(reg)].varvec);
+//	for(i = 0; i < REG_NUM; i++) {
+//		if(i == getRegindex(reg))
+//			continue;
+//		VecCompute(v, '$', regMap[i].varvec);
+//	}
+//	if(VecIs0(v)) {
+//		free(v);
+//		return true;
+//	}else {
+//		free(v);
+//		return false;
+//	}
+//}
+void spill(int varindex) {
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	genSW(getOneReg(addrdescrip->reg), addrdescrip->mem->k, addrdescrip->mem->reg);	
+	updateDesSW(addrdescrip->reg, varindex);
 }
-RegSet getReg1(Operand op) {
-	static struct RegSet_ regset;
+int getReg(int varindex) {
 	int r = 1, i, min = 9999, this;
-	if(op->map->reg != 0) {
-		regset.rx = getOneReg(op->map->reg);
-		return &regset;
-	}else if(idleReg != 0) {
-		regset.rx = getOneReg(idleReg);
-		idleReg = idleReg ^ regset.rx;
-		return &regset;
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	if(addrdescrip->reg != 0) 
+		return getOneReg(addrdescrip->reg);
+	else if(idleReg != 0) {
+		r = getOneReg(idleReg);
+		idleReg = idleReg ^ r;
+		return r;
 	}else{
+//		for(i = 0; i < REG_NUM; i++) {
+//			r = 1 << i;
+//			if(vInOther(r))
+//				return r;
+//		}	
 		for(i = 0; i < REG_NUM; i++) {
-			r = 1 << i;
-			if(vInOther(r)) {
-				regset.rx = r;
-				return &regset;
-			}
-		}	
-		for(i = 0; i < REG_NUM; i++) {
-			this = getVarNum(regMap[i].varvec);
+			this = countVar(regMap[i].varvec);
 			if(this < min) {
 				min = this;
 				r = 1 << i;
 			}
 		}	
-//		spillAll(r);
-		regset.rx = r;
-		return &regset;
-	}
-}
-RegSet getReg(Operand op) {
-	static struct RegSet_ regset;
-	int r = 1, i, min = 9999, this;
-	if(op->map->reg != 0) 
-		return getOneReg(op->map->reg);
-	else if(idleReg != 0) 
-		return getOneReg(idleReg);
-	else{
-		for(i = 0; i < REG_NUM; i++) {
-			r = 1 << i;
-			if(vInOther(r))
-				return r;
-		}	
-		for(i = 0; i < REG_NUM; i++) {
-			this = getVarNum(regMap[i].varvec);
-			if(this < min) {
-				min = this;
-				r = 1 << i;
-			}
-		}	
-//		spill(r);
+		spillAll(r);
 		return r;
 	}
 }
-int Allocate(Operand op) {
-	if(idleReg != 0) 
-		return getOneReg(idleReg);
-	else {
-		
+//int Allocate(Operand op) {
+//	if(idleReg != 0) 
+//		return getOneReg(idleReg);
+//	else {
+//		
+//	}
+//}
+//int Ensure(Operand op) {
+//	int result;
+//	AsmCode code;
+//	return T0;
+//	if(op->map->reg != 0) 
+//		result = getOneReg(op->map->reg);
+//	else {
+////		result = Allocate(op);	
+////		code = newAsmCode(A_LW);
+////		code->x = result;
+//////		code->y = 
+////		addAsmCode(code);
+//	}
+//}
+//void Free(int reg) {
+//	idleReg = idleReg | reg;
+//}
+void updateDesLW(int reg, int varindex) {
+	int varnum = getAllVarNum(), i;
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	setRegDes(reg, varindex);
+	addrdescrip->reg = addrdescrip->reg | reg;
+	for(i = 0; i < varnum; i++) {
+		if(i == varindex)
+			continue;
+		if((AddrDescripTable[i].reg | reg) != 0) {
+			AddrDescripTable[i].reg = AddrDescripTable[i].reg ^ reg;
+		}
 	}
 }
-int Ensure(Operand op) {
-	int result;
-	AsmCode code;
-	return T0;
-	if(op->map->reg != 0) 
-		result = getOneReg(op->map->reg);
-	else {
-		result = Allocate(op);	
-		code = newAsmCode(A_LW);
-		code->x = result;
-//		code->y = 
-		addAsmCode(code);
+void updateDesSW(int reg, int varindex) {
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	addrdescrip->memvilid = 1;
+}
+void updateDesIR3(int reg, int varindex){
+	int varnum = getAllVarNum(), i;
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	setRegDes(reg, varindex);
+	addrdescrip->reg = reg;
+	addrdescrip->memvilid = 0;
+	for(i = 0; i < varnum; i++) {
+		if(i == varindex)
+			continue;
+		if((AddrDescripTable[i].reg | reg) != 0) {
+			AddrDescripTable[i].reg = AddrDescripTable[i].reg ^ reg;
+		}
 	}
 }
-void Free(int reg) {
-	idleReg = idleReg | reg;
-}
-void printfVar2RegTable(FILE *tag) {
-	int num = allvarnum, dim = dimension;
-	int i, j;
-	fprintf(tag, "------------------Var to Reg----------------------------\n");
-	fprintf(tag, "[index]\top\tmem\treg\n");
-	for(i = 0; i < num; i++) {
-		fprintf(tag, "[%d]", i);
-		fprintf(tag, "\t%s\t", Optostring(var2regtable[i].op));
-//		fprintf(tag, "\t%d\t", var2regtable[i].num);
-//		printfVec(tag, var2regtable[i].varvec);
-		printfMem(tag, var2regtable[i].mem);
-//		fprintf(tag, "\t%08x\n", var2regtable[i].reg);
-		printfAllReg(tag, var2regtable[i].reg);
-		fprintf(tag, "\n");
-	}
-	fprintf(tag, "------------------End-----------------------------------\n");
+void updateDesIReq(int reg, int varindex) {
+	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	addVar2Reg(reg, varindex);
+	addrdescrip->reg = reg;
+	addrdescrip->memvilid = 0;
 }
