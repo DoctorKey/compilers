@@ -2,7 +2,7 @@
 #include "mips32.h"
 #include "asm.h"
 
-#define DEBUG3 1
+//#define DEBUG3 1
 AddrDescrip AddrDescripTable = NULL;
 /*--------------------------------------------------
 	VarVec
@@ -11,9 +11,15 @@ int allvarnum = 0;
 int dimension = 0;
 int getAllVarNum() {
 	return allvarnum;
+#ifdef DEBUG3
+	fprintf(stdout, "allvarnum is %d\n", allvarnum);
+#endif
 }
 int getDimension() {
 	return dimension;
+#ifdef DEBUG3
+	fprintf(stdout, "dimension is %d\n", dimension);
+#endif
 }
 int updateDimension(int varnum) {
 	int count = varnum;
@@ -23,10 +29,7 @@ int updateDimension(int varnum) {
 		count = count/32;
 		dim++;
 	}
-#ifdef DEBUG3
-	fprintf(stdout, "allvarnum is %d\n", varnum);
-	fprintf(stdout, "dimension is %d\n", dim);
-#endif
+	return dim;
 }
 int *newVarVec() {
 	int *varvec = NULL;
@@ -45,6 +48,12 @@ void freeVarVec(int *varvec) {
 	if(varvec == NULL)
 		return;
 	free(varvec);
+}
+void clearVec(int *varvec) {
+	int dim = getDimension();
+	while(--dim >= 0) {
+		varvec[dim] = 0;
+	}
 }
 int getDim(int num) {
 	int i = 0;
@@ -255,7 +264,7 @@ void initmap(InterCodes IRhead) {
 		}	
 		temp = temp->next;
 	}
-	updateDimension(getAllVarNum());
+	dimension = updateDimension(getAllVarNum());
 	initAddrDescripTable(getAllVarNum());
 	temp = IRhead;
 	while(temp) {
@@ -328,8 +337,13 @@ void spill(int varindex) {
 }
 int getReg(int varindex) {
 	int r = 1, i, min = 9999, this;
-	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
-	if(addrdescrip->reg != 0) 
+	AddrDescrip addrdescrip = NULL;
+	if(varindex == -1) {
+		// the op isn't var. it just a constant, but it needs a reg to save its value.
+	}else {
+		addrdescrip = &(AddrDescripTable[varindex]);
+	}
+	if(addrdescrip != NULL && addrdescrip->reg != 0) 
 		return getOneReg(addrdescrip->reg);
 	else if(idleReg != 0) {
 		r = getOneReg(idleReg);
@@ -384,7 +398,7 @@ void updateDesLW(int reg, int varindex) {
 	for(i = 0; i < varnum; i++) {
 		if(i == varindex)
 			continue;
-		if((AddrDescripTable[i].reg | reg) != 0) {
+		if((AddrDescripTable[i].reg & reg) != 0) {
 			AddrDescripTable[i].reg = AddrDescripTable[i].reg ^ reg;
 		}
 	}
@@ -402,8 +416,17 @@ void updateDesIR3(int reg, int varindex){
 	for(i = 0; i < varnum; i++) {
 		if(i == varindex)
 			continue;
-		if((AddrDescripTable[i].reg | reg) != 0) {
-			AddrDescripTable[i].reg = AddrDescripTable[i].reg ^ reg;
+		if((AddrDescripTable[i].reg & reg) != 0) {
+			AddrDescripTable[i].reg = (AddrDescripTable[i].reg ^ reg);
+		}
+	}
+}
+void updateLITemp(int reg) {
+	int varnum = getAllVarNum(), i;
+	clearRegDes(reg);
+	for(i = 0; i < varnum; i++) {
+		if((AddrDescripTable[i].reg & reg) != 0) {
+			AddrDescripTable[i].reg = (AddrDescripTable[i].reg ^ reg);
 		}
 	}
 }

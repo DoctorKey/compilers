@@ -1,7 +1,7 @@
 #ifndef __ASM_H_
 #define __ASM_H_
 
-#include "IR.h"
+#include "stdio.h"
 
 typedef enum {
 	A_LABEL, A_LI, A_MOVE,
@@ -18,16 +18,27 @@ struct AsmCode_ {
 	char *label;
 };
 
+//kind: A_LABEL, A_J, A_JAL, A_JR
+AsmCode genlabel(int kind, char *label);
+AsmCode genLI(int x, int k);
+AsmCode genMOVE(int x, int y);
+AsmCode genADDI(int x, int y, int k);
+//kind: A_ADD, A_SUB, A_MUL
+AsmCode genCompute(int kind, int x, int y, int z);
+AsmCode genDIV(int y, int z);
+AsmCode genMFLO(int x);
+AsmCode genLW(int x, int k, int y);
 AsmCode genSW(int y, int k, int x);
+//kind: A_BEQ, A_BNE, A_BGT, A_BLT, A_BGE, A_BLE
+AsmCode genConJump(int kind, int x, int y, char *label);
 
-void transAllAsm(InterCodes IRhead);
+void printfAsm(FILE *tag, AsmCode asmcode); 
 
 typedef struct AsmCodes_* AsmCodes;
 struct AsmCodes_ {
 	AsmCode code;
 	AsmCodes prev, next;
 };
-void printfAsm(FILE *tag, AsmCode asmcode); 
 void printfAllAsm(FILE *tag); 
 #endif
 

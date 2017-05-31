@@ -541,6 +541,8 @@ __SYMTABLE_H_	symtable.h	2;"	d
 __TRANSLATEIR_H_	translateIR.h	2;"	d
 __TREE_H_	tree.h	2;"	d
 __VARREGMAP_H_	VarRegMap.h	2;"	d
+_prompt	output.s	/^_prompt: .asciiz "Enter an integer:"$/;"	l
+_ret	output.s	/^_ret: .asciiz "\\n"$/;"	l
 addArrayElem	symtable.c	/^Type addArrayElem(Type array, Type elem) {$/;"	f
 addAsmCode	asm.c	/^void addAsmCode(AsmCode code) {$/;"	f
 addDecFunc	semantichelp.c	/^void addDecFunc(Symbol symbol) {$/;"	f
@@ -631,8 +633,10 @@ free_buffer	file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
 func	symtable.h	/^		struct Func *func;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Func
 funcSymbol	semantichelp.h	/^	struct SymNode *funcSymbol;$/;"	m	struct:FuncList	typeref:struct:FuncList::SymNode
 funcnum	IR.h	/^	int funcnum;$/;"	m	struct:InterCodes_
+genADDI	asm.c	/^AsmCode genADDI(Operand x, Operand y, int k) {$/;"	f
 genArgsIR	translateIR.c	/^void genArgsIR(FieldList argtype, IRinfo irinfo) {$/;"	f
-genSW	asm.c	/^void genSW(int y, int k, int x) {$/;"	f
+genLW	asm.c	/^AsmCode genLW(int x, int k, int y) {$/;"	f
+genSW	asm.c	/^AsmCode genSW(int y, int k, int x) {$/;"	f
 getAllVarNum	VarRegMap.c	/^int getAllVarNum() {$/;"	f
 getDecFuncList	semantichelp.c	/^struct FuncList *getDecFuncList() {$/;"	f
 getDim	VarRegMap.c	/^int getDim(int num) {$/;"	f
@@ -645,6 +649,8 @@ getHashTableInfo	symtable.c	/^void getHashTableInfo(void) {$/;"	f
 getIRhead	IR.c	/^InterCodes getIRhead() {$/;"	f
 getIRtail	IR.c	/^InterCodes getIRtail() {$/;"	f
 getLabelnum	IR.c	/^int getLabelnum() {$/;"	f
+getMemReg	VarRegMap.c	/^int getMemReg(int varindex) {$/;"	f
+getMemk	VarRegMap.c	/^int getMemk(int varindex) {$/;"	f
 getName	name.c	/^const char *getName(int type)$/;"	f
 getNextLine	file.c	/^int getNextLine() {$/;"	f
 getOneReg	mips32.c	/^int getOneReg(int reg) {$/;"	f
@@ -694,6 +700,8 @@ kind	symtable.h	/^	enum {BASIC, ARRAY, STRUCTURE} kind;$/;"	m	struct:Type_	typer
 lBuffer	file.h	/^	int lBuffer;$/;"	m	struct:Buffer
 lMaxBuffer	file.c	/^int lMaxBuffer = 1000;$/;"	v
 label	asm.h	/^	char *label;$/;"	m	struct:AsmCode_
+label2	output.s	/^label2:$/;"	l
+label8	output.s	/^label8:$/;"	l
 labelcount	IRopt.c	/^int labelcount[LABEL_NUM] = {0};$/;"	v
 labelnum	IR.c	/^int labelnum = 0;$/;"	v
 labelreduce	IRopt.c	/^InterCodes labelreduce(InterCodes IRhead) {$/;"	f
@@ -711,7 +719,9 @@ lookupByType	symtable.c	/^Symbol lookupByType(char *name, int type) {$/;"	f
 lookupFieldListElem	symtable.c	/^Type lookupFieldListElem(FieldList fieldList, char *name) {$/;"	f
 lookupfieldListByName	semantichelp.c	/^FieldList lookupfieldListByName(FieldList fieldList, char *name) {$/;"	f
 main	main.c	/^int main(int argc, char** argv)$/;"	f
+main	output.s	/^main:$/;"	l
 mem	VarRegMap.h	/^	Mem mem;$/;"	m	struct:AddrDescrip_
+memvilid	VarRegMap.h	/^	int memvilid;$/;"	m	struct:AddrDescrip_
 mergeFieldList	symtable.c	/^FieldList mergeFieldList(FieldList front, FieldList tail) {$/;"	f
 my_pow	VarRegMap.c	/^int my_pow(int n,int i) {$/;"	f
 nBuffer	file.h	/^	int nBuffer;$/;"	m	struct:Buffer
@@ -789,6 +799,7 @@ printfallAsmtoFile	file.c	/^printfallAsmtoFile() {$/;"	f
 printfallIR	IR.c	/^void printfallIR(FILE *tag) {$/;"	f
 printfallIRtoFile	file.c	/^printfallIRtoFile() {$/;"	f
 pushErrorInfo	error.c	/^int pushErrorInfo(ErrorInfo errorInfo, int type) {$/;"	f
+read	output.s	/^read:$/;"	l
 reg	VarRegMap.h	/^	int reg;$/;"	m	struct:AddrDescrip_
 reg	mips32.h	/^	int reg;$/;"	m	struct:Mem_
 reg	mips32.h	/^	int reg;$/;"	m	struct:RegMap
@@ -800,6 +811,7 @@ right	IR.h	/^			Operand result, right;$/;"	m	struct:InterCode_::__anon11::__anon
 right1	IR.h	/^			Operand result, right1, right2;$/;"	m	struct:InterCode_::__anon11::__anon14
 right2	IR.h	/^			Operand result, right1, right2;$/;"	m	struct:InterCode_::__anon11::__anon14
 semanticAnalyze	semantic.c	/^void semanticAnalyze(TreeNode parent, int num) {$/;"	f
+setRegDes	mips32.c	/^void setRegDes(int reg, int varindex) {$/;"	f
 short	syntax.tab.c	185;"	d	file:
 showAllSymbol	symtable.c	/^void showAllSymbol(void) {$/;"	f
 showDecFuncList	semantichelp.c	/^void showDecFuncList() {$/;"	f
@@ -861,6 +873,10 @@ type_node	syntax.tab.h	/^	struct node* type_node;$/;"	m	union:YYSTYPE	typeref:st
 unput	lex.yy.c	202;"	d	file:
 upbound	symtable.h	/^			int upbound;$/;"	m	struct:Type_::__anon2::__anon3
 updateChildDepth	tree.c	/^void updateChildDepth(struct node *node)$/;"	f
+updateDesIR3	VarRegMap.c	/^void updateDesIR3(int reg, int varindex){$/;"	f
+updateDesIReq	VarRegMap.c	/^void updateDesIReq(int reg, int varindex) {$/;"	f
+updateDesLW	VarRegMap.c	/^void updateDesLW(int reg, int varindex) {$/;"	f
+updateDesSW	VarRegMap.c	/^void updateDesSW(int reg, int varindex) {$/;"	f
 updateDimension	VarRegMap.c	/^int updateDimension(int varnum) {$/;"	f
 updatelabelcount	IRopt.c	/^InterCodes updatelabelcount(InterCodes IRhead) {$/;"	f
 updatemap	VarRegMap.c	/^void updatemap(Operand op) {$/;"	f
@@ -872,6 +888,7 @@ varnum	IR.c	/^int varnum = 0;$/;"	v
 varnum	IR.h	/^	int varnum;$/;"	m	struct:Operand_
 varvec	VarRegMap.h	/^	int *varvec;$/;"	m	struct:AddrDescrip_
 varvec	mips32.h	/^	int *varvec;$/;"	m	struct:RegMap
+write	output.s	/^write:$/;"	l
 x	IR.h	/^			Operand x, relop, y, z;$/;"	m	struct:InterCode_::__anon11::__anon15
 x	asm.h	/^	int x;$/;"	m	struct:AsmCode_
 y	IR.h	/^			Operand x, relop, y, z;$/;"	m	struct:InterCode_::__anon11::__anon15

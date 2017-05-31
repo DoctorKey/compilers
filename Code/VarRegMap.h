@@ -9,6 +9,7 @@ int getDimension();
 int updateDimension(int varnum); 
 int *newVarVec(); 
 void freeVarVec(int *varvec); 
+void clearVec(int *varvec);
 int Vec2Index(int *varvec); 
 int countVar(int *varvec); 
 int VecIs0(int *varvec); 
@@ -42,5 +43,6 @@ int getReg(int varindex);
 void updateDesLW(int reg, int varindex);
 void updateDesSW(int reg, int varindex);
 void updateDesIR3(int reg, int varindex);
+void updateLITemp(int reg); 
 void updateDesIReq(int reg, int varindex);
 #endif

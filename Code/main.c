@@ -5,6 +5,7 @@
 #include "symtable.h"
 #include "IR.h"
 #include "asm.h"
+#include "transAsm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -23,7 +23,7 @@ int isVarInReg(int var, int reg) {
 	}
 }
 int getRegindex(int reg) {
-	int index = 1;
+	int index = 0;
 	while((reg & 0x1) != 0x1) {
 		index++;
 		reg = reg >> 1;
@@ -39,10 +39,16 @@ void setRegDes(int reg, int varindex) {
 	int i = getRegindex(reg);	
 	int dim = getDimension();
 	int j = getDim(varindex);
-	while(--dim >= 0) {
-		regMap[i].varvec[dim] = 0;
-	}
+	clearVec(&(regMap[i].varvec[dim]));
+//	while(--dim >= 0) {
+//		regMap[i].varvec[dim] = 0;
+//	}
 	regMap[i].varvec[j] = getVec(varindex);
+}
+void clearRegDes(int reg) {
+	int i = getRegindex(reg);	
+	int dim = getDimension();
+	clearVec(&(regMap[i].varvec[dim]));
 }
 int getOneReg(int reg) {
 	int result = 1;
@@ -113,6 +119,7 @@ void printfRegMap(FILE *tag) {
 		fprintf(tag, "\t%s", getRegName(regMap[i].reg));
 		fprintf(tag, "\t");
 		printfVarByVec(tag, regMap[i].varvec);
+//		printfVec(tag, regMap[i].varvec);
 		fprintf(tag, "\t");
 		j = i + REG_NUM / 2;
 		if((regMap[j].reg & idleReg) == 0) {
