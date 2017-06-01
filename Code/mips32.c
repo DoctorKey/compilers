@@ -35,6 +35,15 @@ void addVar2Reg(int reg, int varindex) {
 	int j = getDim(varindex);
 	regMap[i].varvec[j] = regMap[i].varvec[j] | getVec(varindex);
 }
+void clearVarInAllReg(int varindex) {
+	int i;
+	int j = getDim(varindex);
+	for(i = 0; i < REG_NUM; i++) {
+		if((regMap[i].varvec[j] & getVec(varindex)) != 0) {
+			regMap[i].varvec[j] = (regMap[i].varvec[j] ^ getVec(varindex));
+		}
+	}
+}
 void setRegDes(int reg, int varindex) {
 	int i = getRegindex(reg);	
 	int dim = getDimension();

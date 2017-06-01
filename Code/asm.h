@@ -28,6 +28,7 @@ AsmCode genCompute(int kind, int x, int y, int z);
 AsmCode genDIV(int y, int z);
 AsmCode genMFLO(int x);
 AsmCode genLW(int x, int k, int y);
+// *x = y // genSW(y, 0, x);
 AsmCode genSW(int y, int k, int x);
 //kind: A_BEQ, A_BNE, A_BGT, A_BLT, A_BGE, A_BLE
 AsmCode genConJump(int kind, int x, int y, char *label);

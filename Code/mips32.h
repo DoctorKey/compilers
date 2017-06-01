@@ -50,6 +50,7 @@ struct RegMap {
 };
 extern struct RegMap regMap[REG_NUM];
 void addVar2Reg(int reg, int varindex); 
+void clearVarInAllReg(int varindex); 
 void setRegDes(int reg, int varindex);
 void clearRegDes(int reg);
 void initRegMap(); 

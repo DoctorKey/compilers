@@ -170,6 +170,16 @@ void initAddrDescripTable(int varnum) {
 		AddrDescripTable[varnum].varvec[getDim(varnum)] = getVec(varnum);
 	}
 }
+int MemIsNull(int varindex) {
+	if(AddrDescripTable[varindex].mem->reg == 0)
+		return 1;
+	else
+		return 0;
+}
+void setMem(int varindex, int reg, int k) {
+	AddrDescripTable[varindex].mem->k = k;
+	AddrDescripTable[varindex].mem->reg = reg;
+}
 int getMemk(int varindex) {
 	return AddrDescripTable[varindex].mem->k;
 }
@@ -185,7 +195,7 @@ void printfAddrDescripTable(FILE *tag) {
 	for(i = 0; i < num; i++) {
 		fprintf(tag, "[%d]", i);
 		fprintf(tag, "\t%s\t", Optostring(AddrDescripTable[i].op));
-		if(AddrDescripTable[i].memvilid = 1) {
+		if(AddrDescripTable[i].memvilid == 1) {
 			fprintf(tag, "\033[31m\033[1m");
 			printfMem(tag, AddrDescripTable[i].mem);
 			fprintf(tag, "\033[0m");
@@ -342,6 +352,8 @@ int getReg(int varindex) {
 		// the op isn't var. it just a constant, but it needs a reg to save its value.
 	}else {
 		addrdescrip = &(AddrDescripTable[varindex]);
+		if(MemIsNull(varindex))
+			pareMem(varindex);
 	}
 	if(addrdescrip != NULL && addrdescrip->reg != 0) 
 		return getOneReg(addrdescrip->reg);
@@ -399,7 +411,7 @@ void updateDesLW(int reg, int varindex) {
 		if(i == varindex)
 			continue;
 		if((AddrDescripTable[i].reg & reg) != 0) {
-			AddrDescripTable[i].reg = AddrDescripTable[i].reg ^ reg;
+			AddrDescripTable[i].reg = (AddrDescripTable[i].reg ^ reg);
 		}
 	}
 }
@@ -432,6 +444,7 @@ void updateLITemp(int reg) {
 }
 void updateDesIReq(int reg, int varindex) {
 	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);
+	clearVarInAllReg(varindex);
 	addVar2Reg(reg, varindex);
 	addrdescrip->reg = reg;
 	addrdescrip->memvilid = 0;

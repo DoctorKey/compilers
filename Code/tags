@@ -60,6 +60,8 @@ BEGIN	lex.yy.c	126;"	d	file:
 BISON	Makefile	/^BISON = bison$/;"	m
 BeginToken	file.c	/^void BeginToken(char *t) {$/;"	f
 Buffer	file.h	/^struct Buffer {$/;"	s
+CALLEE_REG_NUM	transAsm.c	7;"	d	file:
+CALLER_REG_NUM	transAsm.c	6;"	d	file:
 CALL_IR	IR.h	/^		ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR } InterCodeKind;$/;"	e	enum:__anon10
 CC	Makefile	/^CC = gcc$/;"	m
 CFILES	Makefile	/^CFILES = $(shell find .\/ -name "*.c")$/;"	m
@@ -73,7 +75,6 @@ CompSt	name.h	/^	CompSt, StmtList, Stmt, M, N,  $/;"	e	enum:__anon16
 CompSt	syntax.y	/^CompSt : LC DefList StmtList RC $/;"	l
 CompStAnalyze	semantic.c	/^void CompStAnalyze(TreeNode parent, int num) {$/;"	f
 CompStTrans	translateIR.c	/^void CompStTrans(TreeNode parent, int num) {$/;"	f
-DEBUG3	VarRegMap.c	5;"	d	file:
 DEBUG4	main.h	16;"	d
 DEC_IR	IR.h	/^		GOTO_IR, IF_IR, RETURN_IR, DEC_IR, $/;"	e	enum:__anon10
 DIV	syntax.tab.c	/^     DIV = 268,$/;"	e	enum:yytokentype	file:
@@ -221,6 +222,7 @@ MINUS	syntax.tab.h	/^     MINUS = 266,$/;"	e	enum:yytokentype
 MTrans	translateIR.c	/^void MTrans(TreeNode parent, int num) {$/;"	f
 MUL_IR	IR.h	/^		ASSIGN_IR, ADD_IR, SUB_IR, MUL_IR, DIV_IR, $/;"	e	enum:__anon10
 Mem	mips32.h	/^typedef struct Mem_* Mem;$/;"	t	typeref:struct:Mem_
+MemIsNull	VarRegMap.c	/^int MemIsNull(int varindex) {$/;"	f
 Mem_	mips32.h	/^struct Mem_ {$/;"	s
 Mpop	IR.c	/^Operand Mpop() {$/;"	f
 Mpush	IR.c	/^void Mpush(Operand M) {$/;"	f
@@ -538,6 +540,7 @@ __SEMANTICHELP_H_	semantichelp.h	2;"	d
 __SEMANTIC_H_	semantic.h	2;"	d
 __STDC_LIMIT_MACROS	lex.yy.c	40;"	d	file:
 __SYMTABLE_H_	symtable.h	2;"	d
+__TRANSASM_H_	transAsm.h	2;"	d
 __TRANSLATEIR_H_	translateIR.h	2;"	d
 __TREE_H_	tree.h	2;"	d
 __VARREGMAP_H_	VarRegMap.h	2;"	d
@@ -548,12 +551,13 @@ addAsmCode	asm.c	/^void addAsmCode(AsmCode code) {$/;"	f
 addDecFunc	semantichelp.c	/^void addDecFunc(Symbol symbol) {$/;"	f
 addFunc	semantichelp.c	/^void addFunc(struct FuncList **funcList, Symbol symbol) {$/;"	f
 addIR	IR.c	/^void addIR(InterCode ir) {$/;"	f
+addInterCode	IR.c	/^InterCodes addInterCode(InterCodes head, InterCode ir) {$/;"	f
 addVar2Reg	mips32.c	/^void addVar2Reg(int reg, int varindex) {$/;"	f
 allocTimes	symtable.h	/^	int allocTimes;$/;"	m	struct:HashTableInfo
 alloca	syntax.tab.c	282;"	d	file:
 allvarnum	VarRegMap.c	/^int allvarnum = 0;$/;"	v
 argc	symtable.h	/^	int argc;$/;"	m	struct:Func
-argnum	asm.c	/^int argnum = 0;$/;"	v
+arglist	transAsm.c	/^InterCodes arglist = NULL;$/;"	v
 argsnum	semantic.c	/^int argsnum = 0;$/;"	v
 argtype	symtable.h	/^	FieldList argtype;$/;"	m	struct:Func
 array	symtable.h	/^		}array;$/;"	m	union:Type_::__anon2	typeref:struct:Type_::__anon2::__anon3
@@ -565,7 +569,9 @@ buffer	file.h	/^	char *buffer;$/;"	m	struct:Buffer
 children	tree.h	/^	struct node *children[CHILD_NUM];$/;"	m	struct:node	typeref:struct:node::node
 cleanHashTable	symtable.c	/^int cleanHashTable(void) {$/;"	f
 cleanSymList	symtable.c	/^int cleanSymList(Symbol head) {$/;"	f
+clearRegDes	mips32.c	/^void clearRegDes(int reg) {$/;"	f
 clearTree	tree.c	/^void clearTree(struct node *node)$/;"	f
+clearVec	VarRegMap.c	/^void clearVec(int *varvec) {$/;"	f
 closefile	file.c	/^closefile(void)$/;"	f
 closeoutputfile	file.c	/^closeoutputfile(void)$/;"	f
 cmpFieldList	semantichelp.c	/^int cmpFieldList(FieldList fieldList1, FieldList fieldList2) {$/;"	f
@@ -619,11 +625,13 @@ flex_uint32_t	lex.yy.c	/^typedef unsigned int flex_uint32_t;$/;"	t	file:
 flex_uint8_t	lex.yy.c	/^typedef uint8_t flex_uint8_t;$/;"	t	file:
 flex_uint8_t	lex.yy.c	/^typedef unsigned char flex_uint8_t; $/;"	t	file:
 formatStr	IR.c	/^char *formatStr(InterCode ir, Operand op) {$/;"	f
+fp	transAsm.c	/^int fp = 0;$/;"	v
 freeDecFuncList	semantichelp.c	/^void freeDecFuncList() {$/;"	f
 freeErrorInfoStack	error.c	/^void freeErrorInfoStack(struct ErrorInfoStack *head) {$/;"	f
 freeFieldList	symtable.c	/^void freeFieldList(FieldList fieldList) {$/;"	f
 freeFunc	symtable.c	/^void freeFunc(struct Func *func) {$/;"	f
 freeIR	IR.c	/^void freeIR(InterCodes ir) {$/;"	f
+freeIRs	IR.c	/^void freeIRs(InterCodes irlist) {$/;"	f
 freeSymNode	symtable.c	/^int freeSymNode(Symbol symNode) {$/;"	f
 freeTimes	symtable.h	/^	int freeTimes;$/;"	m	struct:HashTableInfo
 freeType	symtable.c	/^void freeType(Type type) {$/;"	f
@@ -633,10 +641,17 @@ free_buffer	file.c	/^free_buffer(struct Buffer *buffer){$/;"	f
 func	symtable.h	/^		struct Func *func;$/;"	m	union:SymNode::__anon6	typeref:struct:SymNode::__anon6::Func
 funcSymbol	semantichelp.h	/^	struct SymNode *funcSymbol;$/;"	m	struct:FuncList	typeref:struct:FuncList::SymNode
 funcnum	IR.h	/^	int funcnum;$/;"	m	struct:InterCodes_
-genADDI	asm.c	/^AsmCode genADDI(Operand x, Operand y, int k) {$/;"	f
+genADDI	asm.c	/^AsmCode genADDI(int x, int y, int k) {$/;"	f
 genArgsIR	translateIR.c	/^void genArgsIR(FieldList argtype, IRinfo irinfo) {$/;"	f
+genCompute	asm.c	/^AsmCode genCompute(int kind, int x, int y, int z) {$/;"	f
+genConJump	asm.c	/^AsmCode genConJump(int kind, int x, int y, char *label) {$/;"	f
+genDIV	asm.c	/^AsmCode genDIV(int y, int z) {$/;"	f
+genLI	asm.c	/^AsmCode genLI(int x, int k) {$/;"	f
 genLW	asm.c	/^AsmCode genLW(int x, int k, int y) {$/;"	f
+genMFLO	asm.c	/^AsmCode genMFLO(int x) {$/;"	f
+genMOVE	asm.c	/^AsmCode genMOVE(int x, int y) {$/;"	f
 genSW	asm.c	/^AsmCode genSW(int y, int k, int x) {$/;"	f
+genlabel	asm.c	/^AsmCode genlabel(int kind, char *label) {$/;"	f
 getAllVarNum	VarRegMap.c	/^int getAllVarNum() {$/;"	f
 getDecFuncList	semantichelp.c	/^struct FuncList *getDecFuncList() {$/;"	f
 getDim	VarRegMap.c	/^int getDim(int num) {$/;"	f
@@ -729,7 +744,6 @@ nRow	file.h	/^	int nRow;$/;"	m	struct:Buffer
 nTokenLength	file.h	/^	int nTokenLength;$/;"	m	struct:Buffer
 nTokenNextStart	file.h	/^	int nTokenNextStart;$/;"	m	struct:Buffer
 nTokenStart	file.h	/^	int nTokenStart;$/;"	m	struct:Buffer
-naiveTransIR3	asm.c	/^void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {$/;"	f
 name	name.c	/^const char *name[] = {$/;"	v
 name	symtable.h	/^	char *name;$/;"	m	struct:FieldList_
 name	symtable.h	/^	char *name;$/;"	m	struct:SymNode
@@ -779,26 +793,32 @@ op4	IR.h	/^		}op4;$/;"	m	union:InterCode_::__anon11	typeref:struct:InterCode_::_
 oplist	IR.c	/^	Operandlist oplist;$/;"	m	struct:Nlist_	file:
 outputFile	file.c	/^FILE *outputFile = NULL;$/;"	v
 outputfilename	file.c	/^char *outputfilename = NULL;$/;"	v
+pareMem	transAsm.c	/^void pareMem(int varindex) {$/;"	f
+pareReg	transAsm.c	/^int pareReg(Operand op) {$/;"	f
+popS	transAsm.c	/^void popS(int begin) {$/;"	f
+popT	transAsm.c	/^void popT(int begin) {$/;"	f
 prev	IR.h	/^	InterCodes prev, next;$/;"	m	struct:InterCodes_
 prev	asm.h	/^	AsmCodes prev, next;$/;"	m	struct:AsmCodes_
 printfAddrDescripTable	VarRegMap.c	/^void printfAddrDescripTable(FILE *tag) {$/;"	f
 printfAllAsm	asm.c	/^void printfAllAsm(FILE *tag) {$/;"	f
 printfAllReg	mips32.c	/^void printfAllReg(FILE *tag, int regvec) {$/;"	f
 printfAsm	asm.c	/^void printfAsm(FILE *tag, AsmCode asmcode) {$/;"	f
-printfAsmHead	asm.c	/^void printfAsmHead(FILE *tag) {$/;"	f
+printfAsmHead	transAsm.c	/^void printfAsmHead(FILE *tag) {$/;"	f
 printfErrorRow	error.c	/^printfErrorRow(char *errmsg, int start, int end) {$/;"	f
 printfExpIR	IR.c	/^void printfExpIR(FILE *tag, InterCode ir, int type) {$/;"	f
 printfIR	IR.c	/^void printfIR(FILE *tag, InterCode ir) {$/;"	f
 printfMem	mips32.c	/^void printfMem(FILE *tag, Mem mem) {$/;"	f
-printfReadAsm	asm.c	/^void printfReadAsm(FILE *tag) {$/;"	f
+printfReadAsm	transAsm.c	/^void printfReadAsm(FILE *tag) {$/;"	f
 printfRegMap	mips32.c	/^void printfRegMap(FILE *tag) {$/;"	f
 printfVarByVec	VarRegMap.c	/^void printfVarByVec(FILE *tag, int *varvec) {$/;"	f
 printfVec	VarRegMap.c	/^void printfVec(FILE *tag, int *varvec) {$/;"	f
-printfWriteAsm	asm.c	/^void printfWriteAsm(FILE *tag) {$/;"	f
+printfWriteAsm	transAsm.c	/^void printfWriteAsm(FILE *tag) {$/;"	f
 printfallAsmtoFile	file.c	/^printfallAsmtoFile() {$/;"	f
 printfallIR	IR.c	/^void printfallIR(FILE *tag) {$/;"	f
 printfallIRtoFile	file.c	/^printfallIRtoFile() {$/;"	f
 pushErrorInfo	error.c	/^int pushErrorInfo(ErrorInfo errorInfo, int type) {$/;"	f
+pushS	transAsm.c	/^int pushS() {$/;"	f
+pushT	transAsm.c	/^int pushT() {$/;"	f
 read	output.s	/^read:$/;"	l
 reg	VarRegMap.h	/^	int reg;$/;"	m	struct:AddrDescrip_
 reg	mips32.h	/^	int reg;$/;"	m	struct:Mem_
@@ -811,6 +831,7 @@ right	IR.h	/^			Operand result, right;$/;"	m	struct:InterCode_::__anon11::__anon
 right1	IR.h	/^			Operand result, right1, right2;$/;"	m	struct:InterCode_::__anon11::__anon14
 right2	IR.h	/^			Operand result, right1, right2;$/;"	m	struct:InterCode_::__anon11::__anon14
 semanticAnalyze	semantic.c	/^void semanticAnalyze(TreeNode parent, int num) {$/;"	f
+setMem	VarRegMap.c	/^void setMem(int varindex, int reg, int k) {$/;"	f
 setRegDes	mips32.c	/^void setRegDes(int reg, int varindex) {$/;"	f
 short	syntax.tab.c	185;"	d	file:
 showAllSymbol	symtable.c	/^void showAllSymbol(void) {$/;"	f
@@ -824,6 +845,7 @@ showTree	tree.c	/^void showTree(struct node *node)$/;"	f
 showType	symtable.c	/^void showType(Type type) {$/;"	f
 showVar	symtable.c	/^void showVar(struct Var *var) {$/;"	f
 size	symtable.h	/^			int size;$/;"	m	struct:Type_::__anon2::__anon3
+sp	transAsm.c	/^int sp = 0;$/;"	v
 specifierLock	semantic.c	/^int specifierLock = 0;$/;"	v
 spill	VarRegMap.c	/^void spill(int varindex) {$/;"	f
 spillAll	mips32.c	/^void spillAll(int reg) {$/;"	f
@@ -841,26 +863,27 @@ tail	symtable.h	/^	FieldList tail;$/;"	m	struct:FieldList_
 tempnum	IR.c	/^int tempnum = 0;$/;"	v
 tokenName	name.c	/^const char *tokenName[] = {$/;"	v
 totalErrorInfo	error.c	/^static int totalErrorInfo = 0;$/;"	v	file:
-transAllAsm	asm.c	/^void transAllAsm(InterCodes IRhead) {$/;"	f
-transAsm	asm.c	/^void transAsm(InterCode ir) {$/;"	f
-transIR3	asm.c	/^void transIR3(int kind, Operand x, Operand y, Operand z) {$/;"	f
-transadd	asm.c	/^void transadd(InterCode ir) {$/;"	f
-transarg	asm.c	/^void transarg(InterCode ir) {$/;"	f
-transassign	asm.c	/^void transassign(InterCode ir) {$/;"	f
-transcall	asm.c	/^void transcall(InterCode ir) {$/;"	f
-transdec	asm.c	/^void transdec(InterCode ir) {$/;"	f
-transdiv	asm.c	/^void transdiv(InterCode ir) {$/;"	f
-transfunc	asm.c	/^void transfunc(InterCode ir) {$/;"	f
-transgoto	asm.c	/^void transgoto(InterCode ir) {$/;"	f
-transif	asm.c	/^void transif(InterCode ir) {$/;"	f
-translabel	asm.c	/^void translabel(InterCode ir) {$/;"	f
+transADDI	transAsm.c	/^AsmCode transADDI(Operand x, Operand y, int k) {$/;"	f
+transAllAsm	transAsm.c	/^void transAllAsm(InterCodes IRhead) {$/;"	f
+transAsm	transAsm.c	/^void transAsm(InterCode ir) {$/;"	f
+transIR3	transAsm.c	/^void transIR3(int kind, Operand x, Operand y, Operand z) {$/;"	f
+transadd	transAsm.c	/^void transadd(InterCode ir) {$/;"	f
+transarg	transAsm.c	/^void transarg(InterCode ir) {$/;"	f
+transassign	transAsm.c	/^void transassign(InterCode ir) {$/;"	f
+transcall	transAsm.c	/^void transcall(InterCode ir) {$/;"	f
+transdec	transAsm.c	/^void transdec(InterCode ir) {$/;"	f
+transdiv	transAsm.c	/^void transdiv(InterCode ir) {$/;"	f
+transfunc	transAsm.c	/^void transfunc(InterCode ir) {$/;"	f
+transgoto	transAsm.c	/^void transgoto(InterCode ir) {$/;"	f
+transif	transAsm.c	/^void transif(InterCode ir) {$/;"	f
+translabel	transAsm.c	/^void translabel(InterCode ir) {$/;"	f
 translateIR	translateIR.c	/^void translateIR(TreeNode parent, int num) {$/;"	f
-transmul	asm.c	/^void transmul(InterCode ir) {$/;"	f
-transparam	asm.c	/^void transparam(InterCode ir) {$/;"	f
-transread	asm.c	/^void transread(InterCode ir) {$/;"	f
-transreturn	asm.c	/^void transreturn(InterCode ir) {$/;"	f
-transsub	asm.c	/^void transsub(InterCode ir) {$/;"	f
-transwrite	asm.c	/^void transwrite(InterCode ir) {$/;"	f
+transmul	transAsm.c	/^void transmul(InterCode ir) {$/;"	f
+transparam	transAsm.c	/^void transparam(InterCode ir) {$/;"	f
+transread	transAsm.c	/^void transread(InterCode ir) {$/;"	f
+transreturn	transAsm.c	/^void transreturn(InterCode ir) {$/;"	f
+transsub	transAsm.c	/^void transsub(InterCode ir) {$/;"	f
+transwrite	transAsm.c	/^void transwrite(InterCode ir) {$/;"	f
 true	main.h	8;"	d
 truelist	IR.h	/^	Operandlist truelist, falselist, nextlist;$/;"	m	struct:IRinfo_
 type	IR.h	/^	enum {String, Int, Float} type;$/;"	m	struct:Operand_	typeref:enum:Operand_::__anon8
@@ -878,6 +901,7 @@ updateDesIReq	VarRegMap.c	/^void updateDesIReq(int reg, int varindex) {$/;"	f
 updateDesLW	VarRegMap.c	/^void updateDesLW(int reg, int varindex) {$/;"	f
 updateDesSW	VarRegMap.c	/^void updateDesSW(int reg, int varindex) {$/;"	f
 updateDimension	VarRegMap.c	/^int updateDimension(int varnum) {$/;"	f
+updateLITemp	VarRegMap.c	/^void updateLITemp(int reg) {$/;"	f
 updatelabelcount	IRopt.c	/^InterCodes updatelabelcount(InterCodes IRhead) {$/;"	f
 updatemap	VarRegMap.c	/^void updatemap(Operand op) {$/;"	f
 updatemap2	VarRegMap.c	/^void updatemap2(Operand op) {$/;"	f

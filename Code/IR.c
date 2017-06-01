@@ -285,6 +285,28 @@ InterCodes newInterCodes(InterCode ir) {
 	new->next = NULL;
 	return new;
 }
+// new function in lab4
+InterCodes addInterCode(InterCodes head, InterCode ir) {
+	InterCodes temp = head;
+	InterCodes new = newInterCodes(ir);
+	if(head == NULL)
+		return new;
+	else {
+		while(temp->next) {
+			temp = temp->next;
+		}	
+		temp->next = new;
+		new->prev = temp;
+		return head;
+	}
+}
+void freeIRs(InterCodes irlist) {
+	if(irlist == NULL)
+		return;
+	if(irlist->next)
+		freeIRs(irlist->next);
+	free(irlist);
+}
 void addIR(InterCode ir) {
 	InterCodes new = NULL;
 	new = (InterCodes) malloc(sizeof(struct InterCodes_));
@@ -306,16 +328,6 @@ void addIR(InterCode ir) {
 		return;
 	}
 }
-/*
-InterCode getIRType(InterCode ir, Type type) {
-	if(type->kind == BASIC) {
-		ir->isComputeAddr = 0;
-	}else if(type->kind == ARRAY || type->kind == STRUCTURE) {
-		ir->isComputeAddr = 1;
-	}
-	return ir;
-}
-*/
 void freeIR(InterCodes ir) {
 	if(ir == NULL)
 		return;

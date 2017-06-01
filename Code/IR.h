@@ -83,6 +83,8 @@ Operand newLabel();
 char *Optostring(Operand op); 
 InterCode newInterCode(); 
 InterCodes newInterCodes(InterCode ir); 
+InterCodes addInterCode(InterCodes head, InterCode ir); 
+void freeIRs(InterCodes irlist); 
 void addIR(InterCode ir); 
 void freeIR(InterCodes ir);
 

@@ -27,6 +27,7 @@ struct AddrDescrip_ {
 	int memvilid;
 	Mem mem;
 };
+void setMem(int varindex, int reg, int k); 
 int getMemk(int varindex); 
 int getMemReg(int varindex); 
 

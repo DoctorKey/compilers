@@ -3,6 +3,8 @@
 
 #include "IR.h"
 
+void pareMem(int varindex);
+
 void transAllAsm(InterCodes IRhead);
 void printfAsmHead(FILE *tag);
 void printfReadAsm(FILE *tag); 
