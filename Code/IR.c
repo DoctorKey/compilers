@@ -573,6 +573,8 @@ void printfIR(FILE *tag, InterCode ir) {
 void printfallIR(FILE *tag) {
 	InterCodes temp = IRhead;
 	while(temp) {
+		if(temp->isblockhead == 1) 
+			fprintf(tag, "--------------------------\n");
 		printfIR(tag, temp->code);
 		fprintf(tag, "\n");
 		temp = temp->next;

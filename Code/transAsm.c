@@ -16,7 +16,8 @@ int pareReg(Operand op) {
 		// var is constant	
 		genLI(r, op->num_int);
 		updateLITemp(r);
-	}else if(isVarInReg(varnum, r) == false){
+	}else if(getMemactive(varnum) == 1 && isVarInReg(varnum, r) == false){
+	// if var's mem isn't active, it is of course that it don't need lw
 		genLW(r, getMemk(varnum), getMemReg(varnum));
 		updateDesLW(r, varnum);
 	}
@@ -37,38 +38,6 @@ AsmCode transADDI(Operand x, Operand y, int k) {
 	printfAddrDescripTable(stdout); 
 #endif
 }
-//void naiveTransIR3(int kind, Operand x, Operand y, Operand z) {
-//	AsmCode code;
-//	int rx, ry, rz;
-//	rx = T0;
-//	ry = T1;
-//	rz = T2;
-//	code = newAsmCode(A_LW);
-//	code->x = ry;
-//	code->y = SP;
-//	code->k = 0;
-//	addAsmCode(code);
-//	code = newAsmCode(A_LW);
-//	code->x = rz;
-//	code->y = SP;
-//	code->k = 0;
-//	addAsmCode(code);
-//	code = newAsmCode(kind);
-//	code->x = rx;
-//	code->y = ry; 
-//	code->z = rz;
-//	addAsmCode(code);
-//	code = newAsmCode(A_SW);
-//	code->x = ry;
-//	code->y = SP;
-//	code->k = 0;
-//	addAsmCode(code);
-//	code = newAsmCode(A_SW);
-//	code->x = rz;
-//	code->y = SP;
-//	code->k = 0;
-//	addAsmCode(code);
-//}
 void transIR3(int kind, Operand x, Operand y, Operand z) {
 	AsmCode code;
 	int xindex, yindex, zindex;
@@ -176,11 +145,19 @@ void popT(int begin) {
 }
 void pareMem(int varindex) {
 	sp -= 4;
+	genADDI(SP, SP, -4);
 	setMem(varindex, FP, sp-fp);
+	// just get a mem, wait for init mem
+	unactiveMem(varindex);
 }
 
 void translabel(InterCode ir) {
+	// new basic block
+	// spill all
+	spillAllVar();
 	genlabel(A_LABEL, Optostring(ir->op1.op1));
+	clearRegMap();
+	clearAddrDesTable();
 }
 void transfunc(InterCode ir) {
 	fp = sp = 0;
@@ -191,6 +168,8 @@ void transfunc(InterCode ir) {
 	genMOVE(FP, SP);
 	fp = sp;
 	pushS();
+	clearRegMap();
+	clearAddrDesTable();
 #ifdef DEBUG4
 	printfRegMap(stdout); 
 	printfAddrDescripTable(stdout); 
@@ -251,6 +230,7 @@ void transdiv(InterCode ir) {
 #endif
 }
 void transgoto(InterCode ir) {
+	spillAllVar();
 	genlabel(A_J, Optostring(ir->op1.op1));
 }
 void transif(InterCode ir) {
@@ -272,6 +252,7 @@ void transif(InterCode ir) {
 	}else if(strcmp(ir->op4.relop->str, "<=") == 0) {
 		kind = A_BLE;
 	}
+	spillAllVar();
 	genConJump(kind, rx, ry, Optostring(ir->op4.z));
 #ifdef DEBUG4
 	printfRegMap(stdout); 
@@ -286,6 +267,7 @@ void transreturn(InterCode ir) {
 	popS(0);
 	genADDI(SP, FP, 4);
 	genLW(FP, 0, FP);
+	spillAllVar();
 	genlabel(A_JR, NULL);
 #ifdef DEBUG4
 	printfRegMap(stdout); 

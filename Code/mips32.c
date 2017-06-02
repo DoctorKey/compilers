@@ -3,19 +3,31 @@
 #include "VarRegMap.h"
 
 struct RegMap regMap[REG_NUM];
+int tempReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
 int idleReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
+void updateIdleReg() {
+	int i, reg;
+	for(i = 0; i < REG_NUM; i++) {
+		reg = 1 << i;
+		if((reg & tempReg) == 0)
+			continue;
+		if(VecIs0(regMap[i].varvec)) {
+			idleReg = (idleReg | reg);
+		}
+	}
+}
 void initRegMap() {
 	int i, j;
 	for(i = 0; i < REG_NUM; i++) {
 		regMap[i].reg = 1 << i;
-		regMap[i].varvec = newVarVec();
+		regMap[i].varvec = newVec();
 	}
 }
 int isVarInReg(int var, int reg) {
 	int varnum = var;
 	int dim = getDim(varnum);
 	int vec = getVec(varnum);
-	vec = vec & regMap[getRegindex(reg)].varvec[dim];	
+	vec = (vec & regMap[getRegindex(reg)].varvec[dim]);	
 	if(vec == 0) {
 		return false;
 	}else {
@@ -43,24 +55,36 @@ void clearVarInAllReg(int varindex) {
 			regMap[i].varvec[j] = (regMap[i].varvec[j] ^ getVec(varindex));
 		}
 	}
+	updateIdleReg();
 }
 void setRegDes(int reg, int varindex) {
 	int i = getRegindex(reg);	
-	int dim = getDimension();
+	int dim = getVecDim();
 	int j = getDim(varindex);
 	clearVec(&(regMap[i].varvec[dim]));
-//	while(--dim >= 0) {
-//		regMap[i].varvec[dim] = 0;
-//	}
 	regMap[i].varvec[j] = getVec(varindex);
 }
 void clearRegDes(int reg) {
 	int i = getRegindex(reg);	
-	int dim = getDimension();
-	clearVec(&(regMap[i].varvec[dim]));
+	int dim = getVecDim();
+	clearVec(regMap[i].varvec);
+//	clearVec(&(regMap[i].varvec[dim]));
+	updateIdleReg();
+}
+void clearRegMap() {
+	int reg, i;
+	for(i = 0; i < REG_NUM; i++) {
+		reg = 1 << i;
+		clearRegDes(reg);
+	}
+	updateIdleReg();
 }
 int getOneReg(int reg) {
 	int result = 1;
+	if(reg == 0) {
+		fprintf(stderr, "no idle reg\n");
+		return 0;
+	}
 	while((reg & result) == 0) {
 		result = result << 1;
 	}
@@ -118,12 +142,9 @@ void printfRegMap(FILE *tag) {
 	fprintf(tag, "idle Reg: %08x\n", idleReg);
 	fprintf(tag, "[index]\tReg\tvec\t[index]\tReg\tvec\n");
 	for(i = 0; i < REG_NUM / 2; i++) {
+		fprintf(tag, "[%d]", i);	
 		if((regMap[i].reg & idleReg) == 0) {
-			fprintf(tag, "\033[31m\033[1m");
-			fprintf(tag, "[%d]", i);	
-			fprintf(tag, "\033[0m");
-		}else {
-			fprintf(tag, "[%d]", i);	
+			fprintf(tag, "*");
 		}
 		fprintf(tag, "\t%s", getRegName(regMap[i].reg));
 		fprintf(tag, "\t");
@@ -131,12 +152,9 @@ void printfRegMap(FILE *tag) {
 //		printfVec(tag, regMap[i].varvec);
 		fprintf(tag, "\t");
 		j = i + REG_NUM / 2;
+		fprintf(tag, "[%d]", j);	
 		if((regMap[j].reg & idleReg) == 0) {
-			fprintf(tag, "\033[31m\033[1m");
-			fprintf(tag, "[%d]", j);	
-			fprintf(tag, "\033[0m");
-		}else {
-			fprintf(tag, "[%d]", j);	
+			fprintf(tag, "*");
 		}
 		fprintf(tag, "\t%s", getRegName(regMap[j].reg));
 		fprintf(tag, "\t");
@@ -163,6 +181,13 @@ Mem newMem(int reg, int k) {
 }
 void printfMem(FILE *tag, Mem mem) {
 	fprintf(tag, "%d(%s)", mem->k, getRegName(mem->reg));	
+}
+void spillAllReg() {
+	int reg, i;
+	for(i = 0; i < REG_NUM; i++) {
+		reg = 1 << i;
+		spillAll(reg);
+	}
 }
 void spillAll(int reg) {
 	int varnum = getAllVarNum();

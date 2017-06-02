@@ -41,8 +41,10 @@
 #define FP 0x40000000
 #define RA 0x80000000
 
+#define TEMP_REG (0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7)
 #define REG_NUM 32
 extern int idleReg;
+void updateIdleReg();
 
 struct RegMap {
 	int reg;
@@ -50,9 +52,10 @@ struct RegMap {
 };
 extern struct RegMap regMap[REG_NUM];
 void addVar2Reg(int reg, int varindex); 
-void clearVarInAllReg(int varindex); 
 void setRegDes(int reg, int varindex);
+void clearVarInAllReg(int varindex); 
 void clearRegDes(int reg);
+void clearRegMap(); 
 void initRegMap(); 
 void printfRegMap(FILE *tag); 
 int getOneReg(int reg);
@@ -67,6 +70,7 @@ struct Mem_ {
 	int k;
 };
 Mem newMem(int reg, int k);
+void spillAllReg(); 
 void spillAll(int reg); 
 void printfMem(FILE *tag, Mem mem); 
 #endif
