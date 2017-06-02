@@ -256,8 +256,8 @@ int getReg(int varindex) {
 		// the op isn't var. it just a constant, but it needs a reg to save its value.
 	}else {
 		addrdescrip = &(AddrDescripTable[varindex]);
-		if(MemIsNull(varindex))
-			pareMem(varindex);
+//		if(MemIsNull(varindex))
+//			pareMem(varindex);
 	}
 	if(addrdescrip != NULL && addrdescrip->reg != 0) 
 		return getOneReg(addrdescrip->reg);

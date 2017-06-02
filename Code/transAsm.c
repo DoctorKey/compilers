@@ -328,6 +328,7 @@ void transparam(InterCode ir) {
 }
 void transread(InterCode ir) {
 	int rx;
+	spillAllVar();
 	genADDI(SP, SP, -4);
 	sp -= 4;
 	genSW(RA, 0, SP);
@@ -335,6 +336,8 @@ void transread(InterCode ir) {
 	genLW(RA, 0, SP);
 	genADDI(SP, SP, 4);
 	sp += 4;
+	clearRegMap();
+	clearAddrDesTable();
 	rx = pareReg(ir->op1.op1);
 	genMOVE(rx, V0);
 	updateDesIR3(rx, ir->op1.op1->varnum);
@@ -344,6 +347,7 @@ void transread(InterCode ir) {
 #endif
 }
 void transwrite(InterCode ir) {
+	spillAllVar();
 	genMOVE(A0, pareReg(ir->op1.op1));	
 	updateDesLW(A0, ir->op1.op1->varnum); 
 	genADDI(SP, SP, -4);
@@ -353,6 +357,8 @@ void transwrite(InterCode ir) {
 	genLW(RA, 0, SP);
 	genADDI(SP, SP, 4);
 	sp += 4;
+	clearRegMap();
+	clearAddrDesTable();
 #ifdef DEBUG4
 	printfRegMap(stdout); 
 	printfAddrDescripTable(stdout); 
