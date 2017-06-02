@@ -158,7 +158,12 @@ void translabel(InterCode ir) {
 	genlabel(A_LABEL, Optostring(ir->op1.op1));
 	clearRegMap();
 	clearAddrDesTable();
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
+int param = 0;
 void transfunc(InterCode ir) {
 	fp = sp = 0;
 	genlabel(A_LABEL, Optostring(ir->op1.op1));
@@ -170,6 +175,7 @@ void transfunc(InterCode ir) {
 	pushS();
 	clearRegMap();
 	clearAddrDesTable();
+	param = 0;
 #ifdef DEBUG4
 	printfRegMap(stdout); 
 	printfAddrDescripTable(stdout); 
@@ -232,6 +238,10 @@ void transdiv(InterCode ir) {
 void transgoto(InterCode ir) {
 	spillAllVar();
 	genlabel(A_J, Optostring(ir->op1.op1));
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
 void transif(InterCode ir) {
 	int rx, ry;
@@ -254,6 +264,9 @@ void transif(InterCode ir) {
 	}
 	spillAllVar();
 	genConJump(kind, rx, ry, Optostring(ir->op4.z));
+	// next is basic block
+	clearRegMap();
+	clearAddrDesTable();
 #ifdef DEBUG4
 	printfRegMap(stdout); 
 	printfAddrDescripTable(stdout); 
@@ -265,9 +278,9 @@ void transreturn(InterCode ir) {
 	genMOVE(V0, rx);
 	// this arg is no sence
 	popS(0);
+	spillAllVar();
 	genADDI(SP, FP, 4);
 	genLW(FP, 0, FP);
-	spillAllVar();
 	genlabel(A_JR, NULL);
 #ifdef DEBUG4
 	printfRegMap(stdout); 
@@ -282,40 +295,49 @@ void transarg(InterCode ir) {
 }
 void transcall(InterCode ir) {
 	int rx, tbegin;
+	InterCodes prev = NULL;
+	spillAllVar();
 	tbegin = pushT();
 	if(arglist) {
 		genMOVE(A0, pareReg(arglist->code->op1.op1));	
+		prev = arglist;
 		arglist = arglist->next;
-		freeIR(arglist->prev);
+		freeIR(prev);
 	}
 	if(arglist) {
 		genMOVE(A1, pareReg(arglist->code->op1.op1));	
+		prev = arglist;
 		arglist = arglist->next;
-		freeIR(arglist->prev);
+		freeIR(prev);
 	}
 	if(arglist) {
 		genMOVE(A2, pareReg(arglist->code->op1.op1));	
+		prev = arglist;
 		arglist = arglist->next;
-		freeIR(arglist->prev);
+		freeIR(prev);
 	}
 	if(arglist) {
 		genMOVE(A3, pareReg(arglist->code->op1.op1));	
+		prev = arglist;
 		arglist = arglist->next;
-		freeIR(arglist->prev);
+		freeIR(prev);
 	}
 	while(arglist) {
 		genSW(pareReg(arglist->code->op1.op1), getMemk(arglist->code->op1.op1->varnum), getMemReg(arglist->code->op1.op1->varnum));
+		prev = arglist;
 		arglist = arglist->next;
-		freeIR(arglist->prev);
+		freeIR(prev);
 	}
 	genADDI(SP, SP, -4);
 	sp -= 4;
 	genSW(RA, 0, SP);
 	genlabel(A_JAL, strdup(ir->op2.right->str));
+	genLW(RA, 0, SP);
 	genADDI(SP, SP, 4);
 	sp += 4;
-	genLW(RA, 0, SP);
 	popT(tbegin);
+	clearRegMap();
+	clearAddrDesTable();
 	rx = getReg(ir->op2.result->varnum);
 	genMOVE(rx, V0);
 	updateDesIR3(rx, ir->op2.result->varnum);
@@ -325,6 +347,21 @@ void transcall(InterCode ir) {
 #endif
 }
 void transparam(InterCode ir) {
+	param++;
+	switch(param) {
+	case 1:updateDesIR3(A0, ir->op1.op1->varnum);break;
+	case 2:updateDesIR3(A1, ir->op1.op1->varnum);break;
+	case 3:updateDesIR3(A2, ir->op1.op1->varnum);break;
+	case 4:updateDesIR3(A3, ir->op1.op1->varnum);break;
+	}
+	if(param > 4) {
+		setMem(ir->op1.op1->varnum, FP, 4+4*(param - 4));	
+		activeMem(ir->op1.op1->varnum);
+	}
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
 void transread(InterCode ir) {
 	int rx;
@@ -389,6 +426,11 @@ void transAllAsm(InterCodes IRhead) {
 	initmap(temp);
 	initRegMap();
 	while(temp) {
+#ifdef DEBUG4
+		fprintf(stdout, "ir:"); 
+		printfIR(stdout, temp->code);
+		fprintf(stdout, "\n"); 
+#endif
 		transAsm(temp->code);
 		temp = temp->next;
 	}
