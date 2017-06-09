@@ -274,8 +274,16 @@ void transif(InterCode ir) {
 }
 void transreturn(InterCode ir) {
 	int rx;
-	rx = getReg(ir->op1.op1->varnum);
-	genMOVE(V0, rx);
+	switch(ir->op1.op1->kind) {
+	case CONSTANT_OP:
+		genLI(V0, ir->op1.op1->num_int);	
+		break;
+	case TEMP_OP:
+	case VARIABLE_OP:
+		rx = getReg(ir->op1.op1->varnum);
+		genMOVE(V0, rx);
+		break;
+	}
 	// this arg is no sence
 	popS(0);
 	spillAllVar();
