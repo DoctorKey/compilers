@@ -292,12 +292,9 @@ InterCodes addInterCode(InterCodes head, InterCode ir) {
 	if(head == NULL)
 		return new;
 	else {
-		while(temp->next) {
-			temp = temp->next;
-		}	
-		temp->next = new;
-		new->prev = temp;
-		return head;
+		new->next = head;
+		head->prev = new;
+		return new;
 	}
 }
 void freeIRs(InterCodes irlist) {

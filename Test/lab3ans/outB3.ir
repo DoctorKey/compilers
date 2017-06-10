@@ -1,0 +1,68 @@
+FUNCTION squaRever :
+PARAM num
+flag := #0
+DEC array 12
+j := #0
+t1 := #0
+t2 := &array + t1
+t3 := num / #100
+*t2 := t3
+t4 := #4
+t5 := &array + t4
+t6 := num / #10
+t7 := #0
+t8 := &array + t7
+t9 := #10 * *t8
+t10 := t6 - t9
+*t5 := t10
+t11 := #8
+t12 := &array + t11
+t13 := #0
+t14 := &array + t13
+t15 := #100 * *t14
+t16 := num - t15
+t17 := #4
+t18 := &array + t17
+t19 := #10 * *t18
+t20 := t16 - t19
+*t12 := t20
+t21 := #0
+t22 := &array + t21
+t23 := #8
+t24 := &array + t23
+IF *t22 == *t24 GOTO label6
+flag := #0
+GOTO label13
+LABEL label6 :
+LABEL label7 :
+IF j >= #12 GOTO label12
+t27 := j * j
+t28 := t27 - num
+IF t28 != #0 GOTO label10
+flag := #1
+LABEL label10 :
+t30 := j + #1
+j := t30
+GOTO label7
+LABEL label12 :
+LABEL label13 :
+IF flag != #1 GOTO label15
+RETURN #1
+GOTO label16
+LABEL label15 :
+RETURN #0
+LABEL label16 :
+FUNCTION main :
+i := #100
+LABEL label17 :
+IF i >= #150 GOTO label22
+ARG i
+t33 := CALL squaRever
+IF t33 != #1 GOTO label20
+WRITE i
+LABEL label20 :
+t35 := i + #1
+i := t35
+GOTO label17
+LABEL label22 :
+RETURN #0

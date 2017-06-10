@@ -222,8 +222,6 @@ void transdiv(InterCode ir) {
 	int xindex, yindex, zindex;
 	int rx, ry, rz;
 	xindex = ir->op3.result->varnum;
-	yindex = ir->op3.right1->varnum;
-	zindex = ir->op3.right2->varnum;
 	rx = getReg(xindex);
 	ry = pareReg(ir->op3.right1);
 	rz = pareReg(ir->op3.right2);
@@ -274,16 +272,18 @@ void transif(InterCode ir) {
 }
 void transreturn(InterCode ir) {
 	int rx;
-	switch(ir->op1.op1->kind) {
-	case CONSTANT_OP:
-		genLI(V0, ir->op1.op1->num_int);	
-		break;
-	case TEMP_OP:
-	case VARIABLE_OP:
-		rx = getReg(ir->op1.op1->varnum);
-		genMOVE(V0, rx);
-		break;
-	}
+//	switch(ir->op1.op1->kind) {
+//	case CONSTANT_OP:
+//		genLI(V0, ir->op1.op1->num_int);	
+//		break;
+//	case TEMP_OP:
+//	case VARIABLE_OP:
+//		rx = getReg(ir->op1.op1->varnum);
+//		genMOVE(V0, rx);
+//		break;
+//	}
+	rx = pareReg(ir->op1.op1);
+	genMOVE(V0, rx);
 	// this arg is no sence
 	popS(0);
 	spillAllVar();
@@ -301,40 +301,53 @@ InterCodes arglist = NULL;
 void transarg(InterCode ir) {
 	arglist = addInterCode(arglist, ir);
 }
+InterCodes transferArg2A(InterCodes arglist, int reg) {
+	InterCodes prev = NULL;
+	if(arglist) {
+		arglist->prev = NULL;
+		if(arglist->code->op1.op1->kind == CONSTANT_OP) {
+			genLI(reg, arglist->code->op1.op1->num_int);	
+			updateLITemp(A0);
+		}else{
+			genMOVE(reg, pareReg(arglist->code->op1.op1));	
+		}
+		prev = arglist;
+		arglist = arglist->next;
+		freeIR(prev);
+		return arglist;
+	}
+	return NULL;
+}
 void transcall(InterCode ir) {
 	int rx, tbegin;
+	int argr, memk, memreg;
 	InterCodes prev = NULL;
 	spillAllVar();
 	tbegin = pushT();
+	arglist = transferArg2A(arglist, A0);
+	arglist = transferArg2A(arglist, A1);
+	arglist = transferArg2A(arglist, A2);
+	arglist = transferArg2A(arglist, A3);
 	if(arglist) {
-		genMOVE(A0, pareReg(arglist->code->op1.op1));	
-		prev = arglist;
-		arglist = arglist->next;
-		freeIR(prev);
-	}
-	if(arglist) {
-		genMOVE(A1, pareReg(arglist->code->op1.op1));	
-		prev = arglist;
-		arglist = arglist->next;
-		freeIR(prev);
-	}
-	if(arglist) {
-		genMOVE(A2, pareReg(arglist->code->op1.op1));	
-		prev = arglist;
-		arglist = arglist->next;
-		freeIR(prev);
-	}
-	if(arglist) {
-		genMOVE(A3, pareReg(arglist->code->op1.op1));	
-		prev = arglist;
-		arglist = arglist->next;
-		freeIR(prev);
-	}
-	while(arglist) {
-		genSW(pareReg(arglist->code->op1.op1), getMemk(arglist->code->op1.op1->varnum), getMemReg(arglist->code->op1.op1->varnum));
-		prev = arglist;
-		arglist = arglist->next;
-		freeIR(prev);
+		while(arglist->next != NULL){
+			arglist = arglist->next;
+		}
+		while(arglist) {
+			freeIR(arglist->next);
+			arglist->next = NULL;
+			if(arglist->code->op1.op1->kind == CONSTANT_OP) {
+				argr = pareReg(arglist->code->op1.op1);
+				genADDI(SP, SP, -4);
+				sp -= 4;
+				genSW(argr, 0, SP);
+			}else{
+				argr = pareReg(arglist->code->op1.op1);
+				memk = getMemk(arglist->code->op1.op1->varnum); 
+				memreg = getMemReg(arglist->code->op1.op1->varnum);
+				genSW(argr, memk, memreg);
+			}
+			arglist = arglist->prev;
+		}
 	}
 	genADDI(SP, SP, -4);
 	sp -= 4;

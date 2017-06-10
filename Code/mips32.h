@@ -1,6 +1,8 @@
 #ifndef __MIPS32_H_
 #define __MIPS32_H_
 
+#include "vec.h"
+
 #define ZERO 0x1
 #define AT 0x2
 
@@ -48,7 +50,7 @@ void updateIdleReg();
 
 struct RegMap {
 	int reg;
-	int *varvec;
+	vecType *varvec;
 };
 extern struct RegMap regMap[REG_NUM];
 void addVar2Reg(int reg, int varindex); 

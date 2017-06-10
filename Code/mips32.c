@@ -1,6 +1,7 @@
 #include "main.h"
 #include "mips32.h"
 #include "VarRegMap.h"
+#include "transAsm.h"
 
 struct RegMap regMap[REG_NUM];
 int tempReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
@@ -191,10 +192,12 @@ void spillAllReg() {
 }
 void spillAll(int reg) {
 	int varnum = getAllVarNum();
-	int *varvec = regMap[getRegindex(reg)].varvec;
+	vecType *varvec = regMap[getRegindex(reg)].varvec;
 	int i;
 	for(i = 0; i < varnum; i++) {
 		if((varvec[getDim(i)] & getVec(i)) != 0) {
+			if(MemIsNull(i))
+				pareMem(i);
 			spill(i);
 		}
 	}

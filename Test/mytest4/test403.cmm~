@@ -1,0 +1,19 @@
+int main()
+{
+	int num1;
+	int num2;
+	num1 = read();
+	num2 = read();
+	if(num1>0&&num2>0){
+		write(1);
+	}
+	else{
+		write(0);
+	}
+	if(!(num1<=0||num2<=0)){
+		write(1);
+	}
+	else {
+		write(0);
+	}
+}

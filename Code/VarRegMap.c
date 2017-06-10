@@ -1,6 +1,7 @@
 #include "VarRegMap.h"
 #include "mips32.h"
 #include "asm.h"
+#include "transAsm.h"
 
 //#define DEBUG3 1
 AddrDescrip AddrDescripTable = NULL;
@@ -12,11 +13,13 @@ int getAllVarNum() {
 	fprintf(stdout, "allvarnum is %d\n", allvarnum);
 #endif
 }
-void printfVarByVec(FILE *tag, int *varvec) {
+void printfVarByVec(FILE *tag, vecType *varvec) {
 	int varnum = getAllVarNum();
 	int i;
 	for(i = 0; i < varnum; i++) {
 		if((varvec[getDim(i)] & getVec(i)) != 0) {
+			fprintf(tag, "getdim %d ", getDim(i));
+			fprintf(tag, "var %d varvec %x ", i, getVec(i));
 			fprintf(tag, "%s,", Optostring(AddrDescripTable[i].op));
 		}
 	}
@@ -251,6 +254,7 @@ void spill(int varindex) {
 }
 int getReg(int varindex) {
 	int r = 1, i, min = 9999, this;
+	int temp;
 	AddrDescrip addrdescrip = NULL;
 	if(varindex == -1) {
 		// the op isn't var. it just a constant, but it needs a reg to save its value.
@@ -266,12 +270,10 @@ int getReg(int varindex) {
 		idleReg = idleReg ^ r;
 		return r;
 	}else{
-//		for(i = 0; i < REG_NUM; i++) {
-//			r = 1 << i;
-//			if(vInOther(r))
-//				return r;
-//		}	
 		for(i = 0; i < REG_NUM; i++) {
+			temp = 1 << i;
+			if((temp & TEMP_REG) == 0)
+				continue;
 			this = countVar(regMap[i].varvec);
 			if(this < min) {
 				min = this;
@@ -282,30 +284,6 @@ int getReg(int varindex) {
 		return r;
 	}
 }
-//int Allocate(Operand op) {
-//	if(idleReg != 0) 
-//		return getOneReg(idleReg);
-//	else {
-//		
-//	}
-//}
-//int Ensure(Operand op) {
-//	int result;
-//	AsmCode code;
-//	return T0;
-//	if(op->map->reg != 0) 
-//		result = getOneReg(op->map->reg);
-//	else {
-////		result = Allocate(op);	
-////		code = newAsmCode(A_LW);
-////		code->x = result;
-//////		code->y = 
-////		addAsmCode(code);
-//	}
-//}
-//void Free(int reg) {
-//	idleReg = idleReg | reg;
-//}
 void updateDesLW(int reg, int varindex) {
 	int varnum = getAllVarNum(), i;
 	AddrDescrip addrdescrip = &(AddrDescripTable[varindex]);

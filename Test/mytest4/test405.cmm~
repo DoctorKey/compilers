@@ -1,0 +1,17 @@
+int divisor(int m, int n){
+	int temp;
+	if ((m-m/n*n)==0){
+		return n;
+	}
+	else{
+		temp = m-m/n*n;
+		return divisor(n, temp);
+	} 
+}
+
+int main(){
+	int i;
+	i = divisor(39, 54);
+	write(i);
+	return 0;
+}

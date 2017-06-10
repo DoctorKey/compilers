@@ -1,0 +1,18 @@
+int isprimer(int num){
+	int i;
+	i = 2;
+	while(i<num){
+		if (num-num/i*i==0){
+			return 0;
+		}
+		i = i + 1;
+	}
+	return 1;
+}
+
+int main(){
+	int number;
+	number = read();
+	write(isprimer(number));
+	return 0;
+}

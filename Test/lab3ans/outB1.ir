@@ -1,0 +1,36 @@
+FUNCTION hanoi :
+PARAM n
+PARAM p1
+PARAM p2
+PARAM p3
+IF n != #1 GOTO label3
+t2 := p1 * #1000000
+t3 := t2 + p3
+WRITE t3
+GOTO label7
+LABEL label3 :
+t4 := n - #1
+ARG p2
+ARG p3
+ARG p1
+ARG t4
+t5 := CALL hanoi
+t6 := p1 * #1000000
+t7 := t6 + p3
+WRITE t7
+t8 := n - #1
+ARG p3
+ARG p1
+ARG p2
+ARG t8
+t9 := CALL hanoi
+LABEL label7 :
+RETURN #0
+FUNCTION main :
+sum := #3
+ARG #3
+ARG #2
+ARG #1
+ARG sum
+t10 := CALL hanoi
+RETURN #0

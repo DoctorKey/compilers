@@ -1,0 +1,58 @@
+FUNCTION Josepy :
+PARAM n
+PARAM m
+DEC people 400
+i := #1
+j := #0
+k := #0
+num := #0
+LABEL label1 :
+IF i > n GOTO label5
+t2 := i * #4
+t3 := &people + t2
+*t3 := #1
+t4 := i + #1
+i := t4
+GOTO label1
+LABEL label5 :
+i := #1
+LABEL label7 :
+IF i > n GOTO label25
+t6 := i * #4
+t7 := &people + t6
+IF *t7 != #1 GOTO label21
+t9 := i * #4
+t10 := &people + t9
+t11 := j + *t10
+j := t11
+IF j != m GOTO label16
+WRITE i
+j := #0
+t13 := i * #4
+t14 := &people + t13
+*t14 := #0
+t15 := k + #1
+k := t15
+LABEL label16 :
+IF k != n GOTO label20
+num := i
+RETURN #0
+LABEL label20 :
+LABEL label21 :
+IF i != n GOTO label23
+i := #0
+LABEL label23 :
+t18 := i + #1
+i := t18
+GOTO label7
+LABEL label25 :
+RETURN #0
+FUNCTION main :
+READ t19
+a := t19
+READ t20
+b := t20
+ARG b
+ARG a
+t21 := CALL Josepy
+RETURN #0

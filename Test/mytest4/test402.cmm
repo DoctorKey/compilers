@@ -1,0 +1,18 @@
+int main()
+{
+	int i, j, k;
+	i = read();
+	j = read();
+	k = i + j;
+	write(k);
+	k = i - j;
+	write(k);
+	k = i * j;
+	write(k);
+	k = i / j;
+	write(k);
+	k = k + k + k ;
+	write(k);
+	return 0;
+ 
+}

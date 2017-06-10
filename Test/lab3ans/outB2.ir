@@ -1,0 +1,67 @@
+FUNCTION gcd1 :
+PARAM a
+PARAM b
+t1 := a / b
+t2 := t1 * b
+t3 := a - t2
+temp := t3
+LABEL label2 :
+IF temp == #0 GOTO label7
+a := b
+b := temp
+t5 := a / b
+t6 := t5 * b
+t7 := a - t6
+temp := t7
+GOTO label2
+LABEL label7 :
+result := b
+RETURN result
+FUNCTION gcd2 :
+PARAM x
+PARAM y
+remainder := #0
+IF x <= y GOTO label15
+t9 := x / y
+t10 := t9 * y
+t11 := x - t10
+remainder := t11
+IF remainder != #0 GOTO label13
+RETURN y
+GOTO label14
+LABEL label13 :
+ARG remainder
+ARG y
+t13 := CALL gcd2
+RETURN t13
+LABEL label14 :
+GOTO label20
+LABEL label15 :
+t14 := y / x
+t15 := t14 * x
+t16 := y - t15
+remainder := t16
+IF remainder != #0 GOTO label18
+RETURN x
+GOTO label19
+LABEL label18 :
+ARG remainder
+ARG x
+t18 := CALL gcd2
+RETURN t18
+LABEL label19 :
+LABEL label20 :
+FUNCTION main :
+READ t19
+m := t19
+READ t20
+n := t20
+ARG n
+ARG m
+t21 := CALL gcd1
+WRITE t21
+ARG n
+ARG m
+t22 := CALL gcd2
+WRITE t22
+RETURN #0

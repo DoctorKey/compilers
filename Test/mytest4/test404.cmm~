@@ -1,0 +1,24 @@
+int ReturnOne(){
+	return 1;
+}
+
+int ReturnTwo(){
+	return 2;
+}
+
+int AddOne(int j){
+	return j+ReturnOne();
+}
+
+int Reverse(int k){
+	return -k;
+}
+
+int main(){
+	int i=0;
+	i = AddOne(i);
+	i = i + ReturnTwo();
+	write(i);
+	i = Reverse(i);
+	write(i);
+}

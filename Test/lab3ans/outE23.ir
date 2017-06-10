@@ -1,0 +1,178 @@
+FUNCTION display :
+PARAM chess2
+DEC chessplate 64
+i2 := #0
+j2 := #0
+LABEL label1 :
+IF i2 >= #4 GOTO label10
+j2 := #0
+LABEL label4 :
+IF j2 >= #4 GOTO label8
+t3 := i2 * #16
+t4 := &chessplate + t3
+t5 := j2 * #4
+t6 := t4 + t5
+t7 := i2 * #4
+t8 := t7 + j2
+t9 := t8 * #4
+t10 := chess2 + t9
+*t6 := *t10
+t11 := j2 + #1
+j2 := t11
+GOTO label4
+LABEL label8 :
+t12 := i2 + #1
+i2 := t12
+GOTO label1
+LABEL label10 :
+i2 := #0
+j2 := #0
+LABEL label13 :
+IF i2 >= #4 GOTO label23
+j2 := #0
+LABEL label16 :
+IF j2 >= #4 GOTO label21
+t15 := i2 * #16
+t16 := &chessplate + t15
+t17 := j2 * #4
+t18 := t16 + t17
+IF *t18 != #1 GOTO label19
+WRITE j2
+LABEL label19 :
+t20 := j2 + #1
+j2 := t20
+GOTO label16
+LABEL label21 :
+t21 := i2 + #1
+i2 := t21
+GOTO label13
+LABEL label23 :
+RETURN #0
+FUNCTION PutQueen :
+PARAM chess
+PARAM a
+PARAM b
+PARAM c
+PARAM n
+PARAM sum
+col := #0
+LABEL label26 :
+IF col >= #4 GOTO label47
+t23 := col * #4
+t24 := a + t23
+IF *t24 != #1 GOTO label45
+t26 := n + col
+t27 := t26 * #4
+t28 := b + t27
+IF *t28 != #1 GOTO label45
+t31 := n - col
+t32 := t31 + #3
+t33 := t32 * #4
+t34 := c + t33
+IF *t34 != #1 GOTO label45
+t37 := n * #4
+t38 := t37 + col
+t39 := t38 * #4
+t40 := chess + t39
+*t40 := #1
+t41 := col * #4
+t42 := a + t41
+*t42 := #0
+t43 := n + col
+t44 := t43 * #4
+t45 := b + t44
+*t45 := #0
+t46 := n - col
+t47 := t46 + #3
+t48 := t47 * #4
+t49 := c + t48
+*t49 := #0
+IF n != #3 GOTO label38
+t51 := sum + #1
+sum := t51
+ARG chess
+t52 := CALL display
+GOTO label40
+LABEL label38 :
+t53 := n + #1
+ARG sum
+ARG t53
+ARG c
+ARG b
+ARG a
+ARG chess
+t54 := CALL PutQueen
+sum := t54
+LABEL label40 :
+t55 := n * #4
+t56 := t55 + col
+t57 := t56 * #4
+t58 := chess + t57
+*t58 := #0
+t59 := n + col
+t60 := t59 * #4
+t61 := b + t60
+*t61 := #1
+t62 := n - col
+t63 := t62 + #3
+t64 := t63 * #4
+t65 := c + t64
+*t65 := #1
+t66 := col * #4
+t67 := a + t66
+*t67 := #1
+LABEL label45 :
+t68 := col + #1
+col := t68
+GOTO label26
+LABEL label47 :
+RETURN sum
+FUNCTION main :
+DEC chess1 64
+DEC a1 16
+DEC b1 28
+DEC c1 28
+sum1 := #0
+i1 := #0
+LABEL label50 :
+IF i1 >= #16 GOTO label54
+t70 := i1 * #4
+t71 := &chess1 + t70
+*t71 := #0
+t72 := i1 + #1
+i1 := t72
+GOTO label50
+LABEL label54 :
+i1 := #0
+LABEL label56 :
+IF i1 >= #4 GOTO label60
+t74 := i1 * #4
+t75 := &a1 + t74
+*t75 := #1
+t76 := i1 + #1
+i1 := t76
+GOTO label56
+LABEL label60 :
+i1 := #0
+LABEL label62 :
+IF i1 >= #7 GOTO label67
+t78 := i1 * #4
+t79 := &b1 + t78
+*t79 := #1
+t80 := i1 * #4
+t81 := &c1 + t80
+*t81 := #1
+t82 := i1 + #1
+i1 := t82
+GOTO label62
+LABEL label67 :
+ARG sum1
+ARG #0
+ARG &c1
+ARG &b1
+ARG &a1
+ARG &chess1
+t83 := CALL PutQueen
+sum1 := t83
+WRITE sum1
+RETURN #0

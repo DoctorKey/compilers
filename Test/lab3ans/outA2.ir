@@ -1,0 +1,71 @@
+FUNCTION main :
+READ t1
+year := t1
+READ t2
+month := t2
+t3 := year / #100
+t4 := t3 * #100
+IF year != t4 GOTO label22
+t6 := year / #400
+t7 := t6 * #400
+IF year != t7 GOTO label12
+IF month != #2 GOTO label7
+WRITE #29
+GOTO label11
+LABEL label7 :
+t10 := month / #2
+t11 := t10 * #2
+IF month != t11 GOTO label10
+WRITE #30
+GOTO label11
+LABEL label10 :
+WRITE #31
+LABEL label11 :
+GOTO label21
+LABEL label12 :
+IF month != #2 GOTO label15
+WRITE #28
+GOTO label20
+LABEL label15 :
+t14 := month / #2
+t15 := t14 * #2
+IF month != t15 GOTO label18
+WRITE #30
+GOTO label20
+LABEL label18 :
+WRITE #31
+LABEL label20 :
+LABEL label21 :
+GOTO label41
+LABEL label22 :
+t17 := year / #4
+t18 := t17 * #4
+IF year != t18 GOTO label32
+IF month != #2 GOTO label26
+WRITE #29
+GOTO label31
+LABEL label26 :
+t21 := month / #2
+t22 := t21 * #2
+IF month != t22 GOTO label29
+WRITE #30
+GOTO label31
+LABEL label29 :
+WRITE #31
+LABEL label31 :
+GOTO label41
+LABEL label32 :
+IF month != #2 GOTO label35
+WRITE #28
+GOTO label40
+LABEL label35 :
+t25 := month / #2
+t26 := t25 * #2
+IF month != t26 GOTO label38
+WRITE #30
+GOTO label40
+LABEL label38 :
+WRITE #31
+LABEL label40 :
+LABEL label41 :
+RETURN #0

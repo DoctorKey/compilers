@@ -1,6 +1,7 @@
 #include "vec.h"
 #include "main.h"
 #include "mips32.h"
+#include "VarRegMap.h"
 /*--------------------------------------------------
 	VarVec
 ----------------------------------------------------*/
@@ -18,10 +19,10 @@ int getVecDim() {
 /*
 	memory management
 */
-int *newVec() {
-	int *varvec = NULL;
+vecType *newVec() {
+	vecType *varvec = NULL;
 	int dim = getVecDim();
-	varvec = (int*) malloc(sizeof(int)*dim);
+	varvec = (vecType*) malloc(sizeof(vecType)*dim);
 	if(varvec == NULL){
 		fprintf(stderr, "can't malloc\n");
 		return NULL;
@@ -29,7 +30,7 @@ int *newVec() {
 	clearVec(varvec);
 	return varvec;
 }
-void freeVarVec(int *varvec) {
+void freeVarVec(vecType *varvec) {
 	if(varvec == NULL)
 		return;
 	free(varvec);
@@ -37,7 +38,7 @@ void freeVarVec(int *varvec) {
 /*
 	single compute
 */
-void clearVec(int *varvec) {
+void clearVec(vecType *varvec) {
 	int dim = getVecDim();
 	if(varvec == NULL)
 		return;
@@ -48,62 +49,66 @@ void clearVec(int *varvec) {
 /*
 	two vec compute
 */
-int *VecCompute(int *varvec1, char compute, int *varvec2) {
-	int i, vec;
-	int *result = newVec();
-	int dimension = getVecDim();
-	if(varvec2 == 0) {
-		varvec2 = newVec();
-	}
-	if(compute == '=') {
-		for(i = 0; i < dimension; i++) {
-			varvec1[i] = varvec2[i];	
-		}
-	}else if(compute == '&') {
-		for(i = 0; i < dimension; i++) {
-			varvec1[i] = varvec1[i] & varvec2[i];	
-		}
-	}else if(compute == '|') {
-		for(i = 0; i < dimension; i++) {
-			varvec1[i] = varvec1[i] | varvec2[i];	
-		}
-	}else if(compute == '^') {
-		for(i = 0; i < dimension; i++) {
-			varvec1[i] = varvec1[i] ^ varvec2[i];	
-		}
-	}else if(compute == '$') {
-	// 1 $ 1 = 0, 1 $ 0 = 1, 0 $ 0 = 0, 0 $ 1 = 0;
-		for(i = 0; i < dimension; i++) {
-			vec = varvec1[i];
-			varvec1[i] = varvec1[i] ^ varvec2[i];	
-			varvec1[i] = varvec1[i] & vec;
-		}
-	}
-}
+//int *VecCompute(vecType *varvec1, char compute, vecType *varvec2) {
+//	int i;
+//	vecType vec;
+//	vecType *result = newVec();
+//	int dimension = getVecDim();
+//	if(varvec2 == 0) {
+//		varvec2 = newVec();
+//	}
+//	if(compute == '=') {
+//		for(i = 0; i < dimension; i++) {
+//			varvec1[i] = varvec2[i];	
+//		}
+//	}else if(compute == '&') {
+//		for(i = 0; i < dimension; i++) {
+//			varvec1[i] = varvec1[i] & varvec2[i];	
+//		}
+//	}else if(compute == '|') {
+//		for(i = 0; i < dimension; i++) {
+//			varvec1[i] = varvec1[i] | varvec2[i];	
+//		}
+//	}else if(compute == '^') {
+//		for(i = 0; i < dimension; i++) {
+//			varvec1[i] = varvec1[i] ^ varvec2[i];	
+//		}
+//	}else if(compute == '$') {
+//	// 1 $ 1 = 0, 1 $ 0 = 1, 0 $ 0 = 0, 0 $ 1 = 0;
+//		for(i = 0; i < dimension; i++) {
+//			vec = varvec1[i];
+//			varvec1[i] = varvec1[i] ^ varvec2[i];	
+//			varvec1[i] = varvec1[i] & vec;
+//		}
+//	}
+//}
 int updateDimension(int varnum) {
-	int count = varnum;
-	int dim = 0;
-	dim = 0;
-	while(count != 0){
-		count = count/32;
-		dim++;
-	}
+//	int count = varnum;
+//	int dim = 0;
+//	dim = 0;
+//	while(count != 0){
+//		count = count / VARNUM_IN_ONE_VEC;
+//		dim++;
+//	}
+	int dim = varnum / VARNUM_IN_ONE_VEC + 1;
 	return dim;
 }
 int getDim(int num) {
-	int i = 0;
-	while(num / 32 != 0) {
-		num = num / 32;
-		i++;
-	}
-	return i;
+//	int i = 0;
+//	while(num / 32 != 0) {
+//		num = num / 32;
+//		i++;
+//	}
+//	return i;
+	return num / VARNUM_IN_ONE_VEC;
 }
-int getVec(int num) {
+vecType getVec(int num) {
 	int i;
-	i = num % 32;
+//	i = num % 32;
+	i = num % VARNUM_IN_ONE_VEC;
 	return 1 << i;
 }
-int countVar(int *varvec) {
+int countVar(vecType *varvec) {
 	int i, count = 0, vec, j;
 	int dim = getVecDim();
 	for(i = 0;i < dim; i++) {
@@ -115,9 +120,14 @@ int countVar(int *varvec) {
 			vec = vec >> 1;
 		}
 	}
+#ifdef DEBUG4
+	printfVarByVec(stdout, varvec); 
+	printfVec(stdout, varvec);	
+	fprintf(stdout, "count is %d\n", count);
+#endif
 	return count;
 }
-int VecIs0(int *varvec) {
+int VecIs0(vecType *varvec) {
 	int i;
 	int dim = getVecDim();
 	for(i = 0; i < dim; i++) {
@@ -126,29 +136,29 @@ int VecIs0(int *varvec) {
 	}
 	return true;
 }
-int my_pow(int n,int i) {
-	int result = 1;
-	if(i == 0)
-		return 1;
-	while(i != 0) {
-		result = result * n;
-		i--;
-	}
-	return result;
-}
-int Vec2Index(int *varvec) {
-	int result = 0, i, j;
-	int dim = getVecDim();
-	for(i = 0; i < dim; i++) {
-		j = getRegindex(varvec[i]);	
-		result = result + my_pow(32, i) * j;
-	}
-	return result;
-}
-void printfVec(FILE *tag, int *varvec) {
+//int my_pow(int n,int i) {
+//	int result = 1;
+//	if(i == 0)
+//		return 1;
+//	while(i != 0) {
+//		result = result * n;
+//		i--;
+//	}
+//	return result;
+//}
+//int Vec2Index(vecType *varvec) {
+//	int result = 0, i, j;
+//	int dim = getVecDim();
+//	for(i = 0; i < dim; i++) {
+//		j = getRegindex(varvec[i]);	
+//		result = result + my_pow(32, i) * j;
+//	}
+//	return result;
+//}
+void printfVec(FILE *tag, vecType *varvec) {
 	int dim = getVecDim();
 	int i;
 	for(i = 0; i < dim; i++) {
-		fprintf(tag, "%08x ", varvec[i]);
+		fprintf(tag, "%x ", varvec[i]);
 	}
 }

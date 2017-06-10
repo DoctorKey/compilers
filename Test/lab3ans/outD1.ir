@@ -1,0 +1,141 @@
+FUNCTION changeCal :
+PARAM r1
+t1 := r1 + #345
+t2 := t1 - #345
+t3 := r1 * r2
+t4 := t2 + t3
+t5 := r1 * r2
+t6 := t4 - t5
+t7 := r1 * r1
+t8 := t6 + t7
+t9 := r1 * r1
+t10 := t8 - t9
+r2 := t10
+t11 := r2 * #2
+t12 := r2 * #3
+t13 := t11 - t12
+t14 := r2 * #2
+t15 := t13 + t14
+t16 := #17
+t17 := t15 + t16
+t18 := #3
+t19 := t17 + t18
+t20 := #20
+t21 := t19 - t20
+r2 := t21
+t22 := #13
+t23 := #11
+t24 := t22 - t23
+r2 := t24
+t25 := #20
+t26 := r1 + t25
+t27 := #20
+t28 := t26 - t27
+t29 := #0
+t30 := t28 - t29
+r2 := t30
+RETURN r2
+FUNCTION main :
+t31 := #13
+t32 := #11
+t33 := t31 - t32
+a := t33
+t34 := #4
+b := t34
+t35 := #8
+t36 := #30
+t37 := t36 / #3
+t38 := t35 + t37
+t39 := t38 - #4
+c := t39
+t40 := a + b
+t41 := t40 - c
+d := t41
+t42 := a + b
+t43 := c * #2
+t44 := t42 + t43
+e := t44
+t45 := a + b
+t46 := t45 + c
+f := t46
+g1 := #42
+i := #0
+t47 := a + b
+t48 := t47 + c
+t49 := t48 - d
+t50 := t49 - e
+t51 := t50 + f
+f := t51
+LABEL label7 :
+t52 := b - a
+IF t52 >= f GOTO label17
+t54 := i * #4
+t55 := g1 + t54
+t56 := t55 + #3
+t57 := t56 + #4
+t58 := t57 + #5
+g1 := t58
+ARG b
+t59 := CALL changeCal
+t60 := f - t59
+t61 := a * #2
+t62 := t60 + t61
+t63 := c * d
+t64 := t62 + t63
+t65 := t64 - f
+g := t65
+t66 := i + #1
+t67 := t66 + #0
+i := t67
+t68 := i + #3
+t69 := t68 + #1
+i := t69
+t70 := i - #2
+t71 := t70 - #2
+i := t71
+t72 := i / #3
+t73 := t72 * #3
+t74 := i - t73
+ARG a
+t75 := CALL changeCal
+t76 := a - t75
+t77 := t76 + b
+t78 := t77 - b
+t79 := t78 + c
+t80 := t79 - c
+IF t74 != t80 GOTO label15
+t82 := f + #1
+t83 := t82 + #1
+f := t83
+LABEL label15 :
+t84 := f - #2
+t85 := t84 + #1
+f := t85
+GOTO label7
+LABEL label17 :
+t86 := g1 - #2
+t87 := t86 + #3
+h := t87
+WRITE h
+i := g1
+LABEL label21 :
+t88 := #1222
+IF g1 < t88 GOTO label26
+t90 := g1 + #1024
+i := t90
+ARG g1
+t91 := CALL changeCal
+t92 := t91 - #1
+g1 := t92
+i := g1
+GOTO label21
+LABEL label26 :
+WRITE g1
+t93 := a + b
+a := t93
+t94 := a + b
+b := t94
+t95 := a + b
+c := t95
+WRITE c
+RETURN #0

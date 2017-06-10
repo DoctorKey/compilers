@@ -10,7 +10,7 @@ typedef struct AddrDescrip_* AddrDescrip;
 struct AddrDescrip_ {
 	struct Operand_* op;
 	int index;
-	int *varvec;
+	vecType *varvec;
 	int reg;
 	int memactive;
 	Mem mem;
@@ -21,13 +21,12 @@ int getMemactive(int varindex);
 void setMem(int varindex, int reg, int k); 
 int getMemk(int varindex); 
 int getMemReg(int varindex); 
+int MemIsNull(int varindex); 
 
 void clearAddrDesTable(); 
 void printfAddrDescripTable(FILE *tag); 
-void printfVarByVec(FILE *tag, int *varvec);
+void printfVarByVec(FILE *tag, vecType *varvec);
 void initmap(InterCodes IRhead);
-//void Free(int reg); 
-//int Ensure(Operand op); 
 
 void spillAllVar(); 
 void spill(int varindex);

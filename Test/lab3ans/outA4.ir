@@ -1,0 +1,61 @@
+FUNCTION main :
+DEC x 20
+i := #0
+N := #5
+j := #0
+LABEL label1 :
+IF i >= #5 GOTO label5
+t2 := i * #4
+t3 := &x + t2
+READ t4
+*t3 := t4
+t5 := i + #1
+i := t5
+GOTO label1
+LABEL label5 :
+i := N
+LABEL label7 :
+IF i <= #0 GOTO label20
+LABEL label9 :
+t7 := i - #1
+IF j >= t7 GOTO label17
+t9 := j * #4
+t10 := &x + t9
+t11 := j + #1
+t12 := t11 * #4
+t13 := &x + t12
+IF *t10 <= *t13 GOTO label15
+t15 := j * #4
+t16 := &x + t15
+temp := *t16
+t17 := j * #4
+t18 := &x + t17
+t19 := j + #1
+t20 := t19 * #4
+t21 := &x + t20
+*t18 := *t21
+t22 := j + #1
+t23 := t22 * #4
+t24 := &x + t23
+*t24 := temp
+LABEL label15 :
+t25 := j + #1
+j := t25
+GOTO label9
+LABEL label17 :
+j := #0
+t26 := i - #1
+i := t26
+GOTO label7
+LABEL label20 :
+i := #0
+LABEL label22 :
+IF i >= #5 GOTO label26
+t28 := i * #4
+t29 := &x + t28
+WRITE *t29
+t30 := i + #1
+i := t30
+GOTO label22
+LABEL label26 :
+RETURN #0

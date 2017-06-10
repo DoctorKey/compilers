@@ -1,0 +1,14 @@
+int myadd(int m, int n)
+{
+	int j;
+	j = m+n;
+	return j;
+}
+
+int main()
+{
+	int i;
+	i = myadd(4,2);
+	write(i);
+	return 0;
+}

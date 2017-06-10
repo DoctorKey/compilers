@@ -1,0 +1,12 @@
+int return_one()
+{
+	return 1;
+}
+
+int main()
+{
+	int i;
+	i = return_one();
+	write(i);
+	return 0;
+}

@@ -1,0 +1,33 @@
+FUNCTION fact :
+PARAM m
+result := #1
+j := #1
+LABEL label1 :
+IF j > m GOTO label5
+t2 := result * j
+result := t2
+t3 := j + #1
+j := t3
+GOTO label1
+LABEL label5 :
+RETURN result
+FUNCTION main :
+DEC x 20
+i := #0
+N := #5
+LABEL label7 :
+IF i >= N GOTO label12
+t5 := i * #4
+t6 := &x + t5
+t7 := i + #2
+*t6 := t7
+t8 := i * #4
+t9 := &x + t8
+ARG *t9
+t10 := CALL fact
+WRITE t10
+t11 := i + #1
+i := t11
+GOTO label7
+LABEL label12 :
+RETURN #0
