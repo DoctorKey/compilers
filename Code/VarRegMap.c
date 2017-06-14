@@ -18,8 +18,8 @@ void printfVarByVec(FILE *tag, vecType *varvec) {
 	int i;
 	for(i = 0; i < varnum; i++) {
 		if((varvec[getDim(i)] & getVec(i)) != 0) {
-			fprintf(tag, "getdim %d ", getDim(i));
-			fprintf(tag, "var %d varvec %x ", i, getVec(i));
+//			fprintf(tag, "getdim %d ", getDim(i));
+//			fprintf(tag, "var %d varvec %x ", i, getVec(i));
 			fprintf(tag, "%s,", Optostring(AddrDescripTable[i].op));
 		}
 	}
@@ -252,6 +252,7 @@ void spill(int varindex) {
 	updateDesSW(addrdescrip->reg, varindex);
 	activeMem(varindex);
 }
+int lastr, lastlastr;
 int getReg(int varindex) {
 	int r = 1, i, min = 9999, this;
 	int temp;
@@ -275,12 +276,14 @@ int getReg(int varindex) {
 			if((temp & TEMP_REG) == 0)
 				continue;
 			this = countVar(regMap[i].varvec);
-			if(this < min) {
+			if(this < min && (temp & lastr) == 0 && (temp & lastlastr) == 0) {
 				min = this;
 				r = 1 << i;
 			}
 		}	
 		spillAll(r);
+		lastlastr = lastr;
+		lastr = r;
 		return r;
 	}
 }

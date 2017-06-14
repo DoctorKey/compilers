@@ -344,6 +344,10 @@ void transadd(InterCode ir) {
 			offset = getMemk(ir->op3.right1->varnum);
 			genADDI(rt, base, offset);
 			updateLITemp(rt);
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 			transIR3_regy(A_ADD, ir->op3.result, rt, ir->op3.right2); 
 		}
 	}
@@ -451,13 +455,15 @@ void transarg(InterCode ir) {
 }
 InterCodes transferArg2A(InterCodes arglist, int reg) {
 	InterCodes prev = NULL;
+	char type;
 	if(arglist) {
 		arglist->prev = NULL;
 		if(arglist->code->op1.op1->kind == CONSTANT_OP) {
 			genLI(reg, arglist->code->op1.op1->num_int);	
 			updateLITemp(A0);
 		}else{
-			genMOVE(reg, pareReg(arglist->code->op1.op1));	
+			type = getAddrOpType(arglist->code, arglist->code->op1.op1);
+			genMOVE(reg, pareReg_plus(arglist->code->op1.op1, type));	
 		}
 		prev = arglist;
 		arglist = arglist->next;
@@ -489,6 +495,7 @@ void transcall(InterCode ir) {
 				sp -= 4;
 				genSW(argr, 0, SP);
 			}else{
+				// TODO arg *t
 				argr = pareReg(arglist->code->op1.op1);
 				memk = getMemk(arglist->code->op1.op1->varnum); 
 				memreg = getMemReg(arglist->code->op1.op1->varnum);

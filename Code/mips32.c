@@ -40,7 +40,7 @@ int getRegindex(REGBIT reg) {
 	int index = 0;
 	while((reg & 0x1) != 0x1) {
 		index++;
-		reg = reg >> 1;
+		reg = (reg >> 1);
 	}
 	return index;
 }
@@ -154,6 +154,7 @@ void printfRegMap(FILE *tag) {
 		printfVarByVec(tag, regMap[i].varvec);
 //		printfVec(tag, regMap[i].varvec);
 		fprintf(tag, "\t");
+
 		j = i + REG_NUM / 2;
 		fprintf(tag, "[%d]", j);	
 		if((regMap[j].reg & idleReg) == 0) {

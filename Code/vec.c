@@ -121,11 +121,11 @@ int countVar(vecType *varvec) {
 			vec = vec >> 1;
 		}
 	}
-#ifdef DEBUG4
-	printfVarByVec(stdout, varvec); 
-	printfVec(stdout, varvec);	
-	fprintf(stdout, "count is %d\n", count);
-#endif
+//#ifdef DEBUG4
+//	printfVarByVec(stdout, varvec); 
+//	printfVec(stdout, varvec);	
+//	fprintf(stdout, "count is %d\n", count);
+//#endif
 	return count;
 }
 int VecIs0(vecType *varvec) {

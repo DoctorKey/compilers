@@ -4,16 +4,18 @@ int squaRever(int num)
 	int array[3];
 	int j = 0;
 	array[0] = num / 100;
-	array[1] = num / 10 - 10 * array[0];
-	array[2] = num - 100 * array[0] - 10 * array[1];
 	write(array[0]);
+	array[1] = num / 10 - 10 * array[0];
+	write(array[1]);
+	array[2] = num - 100 * array[0] - 10 * array[1];
 	write(array[2]);
 	if (array[0] != array[2]) {
 		flag = 0;
-
+		write(-1);
 	}
 	else {
 		while (j < 12) {
+			write(j * j -num);
 			if ((j * j - num) == 0)
 				flag = 1;
 			j = j + 1;
@@ -29,7 +31,7 @@ int squaRever(int num)
 
 int main()
 {
-	int i = 100;
+	int i = 121;
 	if (squaRever(i) == 1)
 		write(i);
 
