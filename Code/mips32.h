@@ -45,35 +45,38 @@
 
 #define TEMP_REG (0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7)
 #define REG_NUM 32
-extern int idleReg;
+// int is 32bits
+typedef int REGBIT;
+
+extern REGBIT idleReg;
 void updateIdleReg();
 
 struct RegMap {
-	int reg;
+	REGBIT reg;
 	vecType *varvec;
 };
 extern struct RegMap regMap[REG_NUM];
-void addVar2Reg(int reg, int varindex); 
-void setRegDes(int reg, int varindex);
+void addVar2Reg(REGBIT reg, int varindex); 
+void setRegDes(REGBIT reg, int varindex);
 void clearVarInAllReg(int varindex); 
-void clearRegDes(int reg);
+void clearRegDes(REGBIT reg);
 void clearRegMap(); 
 void initRegMap(); 
 void printfRegMap(FILE *tag); 
-int getOneReg(int reg);
-int isVarInReg(int var, int reg); 
-int getRegindex(int reg); 
-char *getRegName(int reg); 
-void printfAllReg(FILE *tag, int regvec); 
+REGBIT getOneReg(REGBIT reg);
+int isVarInReg(int var, REGBIT reg); 
+int getRegindex(REGBIT reg); 
+char *getRegName(REGBIT reg); 
+void printfAllReg(FILE *tag, REGBIT regvec); 
 
 typedef struct Mem_* Mem;
 struct Mem_ {
-	int reg;
+	REGBIT reg;
 	int k;
 };
-Mem newMem(int reg, int k);
+Mem newMem(REGBIT reg, int k);
 void spillAllReg(); 
-void spillAll(int reg); 
+void spillAll(REGBIT reg); 
 void printfMem(FILE *tag, Mem mem); 
 #endif
 

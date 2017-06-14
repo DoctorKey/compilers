@@ -103,13 +103,14 @@ int getDim(int num) {
 	return num / VARNUM_IN_ONE_VEC;
 }
 vecType getVec(int num) {
-	int i;
+	vecType i;
 //	i = num % 32;
 	i = num % VARNUM_IN_ONE_VEC;
 	return 1 << i;
 }
 int countVar(vecType *varvec) {
-	int i, count = 0, vec, j;
+	int i, count = 0, j;
+	vecType vec;
 	int dim = getVecDim();
 	for(i = 0;i < dim; i++) {
 		vec = varvec[i];

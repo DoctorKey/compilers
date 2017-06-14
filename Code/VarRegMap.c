@@ -267,7 +267,7 @@ int getReg(int varindex) {
 		return getOneReg(addrdescrip->reg);
 	else if(idleReg != 0) {
 		r = getOneReg(idleReg);
-		idleReg = idleReg ^ r;
+		idleReg = (idleReg ^ r);
 		return r;
 	}else{
 		for(i = 0; i < REG_NUM; i++) {

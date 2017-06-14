@@ -8,6 +8,22 @@
 int sp = 0;
 int fp = 0;
 
+char getAddrOpType(InterCode ir, Operand op) {
+	if(ir->isComputeAddr == 0) {
+		if(op->isAddr == 0) {
+			return '0';
+		}else {
+			return '*';
+		}
+	}else if(ir->isComputeAddr == 1) {
+		if(op->isAddr == 0) {
+			return '&';
+		}else {
+			return '0';
+		}
+	}
+
+}
 int pareReg(Operand op) {
 	int r;
 	int varnum = op->varnum;
@@ -23,6 +39,36 @@ int pareReg(Operand op) {
 	}
 	return r;
 }
+int pareReg_plus(Operand op, char type) {
+	int r, rt;
+	int base, offset;
+	int varnum = op->varnum;
+	if(type == '&') {
+		rt = getReg(-1);	
+		base = getMemReg(op->varnum);
+		offset = getMemk(op->varnum);
+		genADDI(rt, base, offset);
+		updateLITemp(rt);
+		return rt;
+	}else if(type == '*') {
+		rt = pareReg(op);
+		r = getReg(-1);
+		genLW(r, 0, rt);
+		updateLITemp(r);
+		return r;
+	}
+	r = getReg(varnum);
+	if(varnum == -1) {
+		// var is constant	
+		genLI(r, op->num_int);
+		updateLITemp(r);
+	}else if(getMemactive(varnum) == 1 && isVarInReg(varnum, r) == false){
+	// if var's mem isn't active, it is of cause that it don't need lw
+		genLW(r, getMemk(varnum), getMemReg(varnum));
+		updateDesLW(r, varnum);
+	}
+	return r;
+}
 AsmCode transADDI(Operand x, Operand y, int k) {
 	AsmCode code;
 	int xindex, yindex;
@@ -32,6 +78,48 @@ AsmCode transADDI(Operand x, Operand y, int k) {
 	rx = getReg(xindex);
 	ry = pareReg(y); 
 	genADDI(rx, ry, k);
+	updateDesIR3(rx, xindex);
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
+}
+void transIR3_regy(int kind, Operand x, int y, Operand z) {
+	AsmCode code;
+	int xindex, yindex, zindex;
+	int rx, ry, rz;
+	xindex = x->varnum;
+//	yindex = y->varnum;
+	zindex = z->varnum;
+	rx = getReg(xindex);
+//	ry = pareReg(y);
+	rz = pareReg(z);
+	genCompute(kind, rx, y, rz);
+	updateDesIR3(rx, xindex);
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
+}
+void transIR3_plus(int kind, InterCode ir) {
+	Operand x, y, z;
+	AsmCode code;
+	int xindex, yindex, zindex;
+	int rx, ry, rz;
+	char xtype, ytype, ztype;
+	x = ir->op3.result;
+	y = ir->op3.right1;
+	z = ir->op3.right2;
+	xindex = x->varnum;
+	yindex = y->varnum;
+	zindex = z->varnum;
+	xtype = getAddrOpType(ir, x);
+	ytype = getAddrOpType(ir, y);
+	ztype = getAddrOpType(ir, z);
+	rx = getReg(xindex);
+	ry = pareReg_plus(y, ytype);
+	rz = pareReg_plus(z, ztype);
+	genCompute(kind, rx, ry, rz);
 	updateDesIR3(rx, xindex);
 #ifdef DEBUG4
 	printfRegMap(stdout); 
@@ -183,18 +271,55 @@ void transfunc(InterCode ir) {
 }
 void transassign(InterCode ir) {
 	AsmCode code;
-	int rx, ry;
+	int rx, ry, rt;
 	int xindex, yindex;
+	char xtype, ytype;
 	if(ir->op2.right->kind == CONSTANT_OP) {
-		xindex = ir->op2.result->varnum;
-		rx = getReg(xindex);
-		genLI(rx, ir->op2.right->num_int);
-		updateDesIR3(rx, xindex);
+		xtype = getAddrOpType(ir, ir->op2.result);
+		switch(xtype) {
+		case '0':
+			xindex = ir->op2.result->varnum;
+			rx = getReg(xindex);
+			genLI(rx, ir->op2.right->num_int);
+			updateDesIR3(rx, xindex);
+			break;
+		case '*':
+			rt = pareReg(ir->op2.right);
+			xindex = ir->op2.result->varnum;
+			rx = getReg(xindex);
+			genSW(rt, 0, rx);
+			updateDesSW(rx, xindex);
+			//TODO may need kill all reg
+			break;
+		case '&':
+			break;
+		}
 	}else {
-		xindex = ir->op2.result->varnum;
-		yindex = ir->op2.right->varnum;
-		ry = pareReg(ir->op2.right);
-		updateDesIReq(ry, xindex);
+		xtype = getAddrOpType(ir, ir->op2.result);
+		ytype = getAddrOpType(ir, ir->op2.right);
+		if(xtype == '0' && ytype == '0') {
+			// x = y
+			xindex = ir->op2.result->varnum;
+			yindex = ir->op2.right->varnum;
+			ry = pareReg(ir->op2.right);
+			updateDesIReq(ry, xindex);
+		}else if(xtype == '*' && ytype == '0') {
+			// *x = y
+			xindex = ir->op2.result->varnum;
+			yindex = ir->op2.right->varnum;
+			ry = pareReg(ir->op2.right);
+			rx = getReg(xindex);
+			genSW(ry, 0, rx);
+			updateDesSW(rx, xindex);
+		}else if(xtype == '0' && ytype == '*') {
+			// x = *y
+			xindex = ir->op2.result->varnum;
+			yindex = ir->op2.right->varnum;
+			ry = pareReg(ir->op2.right);
+			rx = getReg(xindex);
+			genLW(rx, 0, ry);
+			updateDesLW(rx, xindex);
+		}
 	}
 #ifdef DEBUG4
 	printfRegMap(stdout); 
@@ -202,29 +327,51 @@ void transassign(InterCode ir) {
 #endif
 }
 void transadd(InterCode ir) {
+	int rt, base, offset;
+	char xtype, ytype, ztype;
+	xtype = getAddrOpType(ir, ir->op3.result);
+	ytype = getAddrOpType(ir, ir->op3.right1);
+	ztype = getAddrOpType(ir, ir->op3.right2);
 	if(ir->op3.right2->kind == CONSTANT_OP) {
 		transADDI(ir->op3.result, ir->op3.right1, ir->op3.right2->num_int);
 	}else {
-		transIR3(A_ADD, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+//		transIR3_plus(A_ADD, ir);
+		if(ytype == '0') {
+			transIR3(A_ADD, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+		}else if(ytype == '&') {
+			rt = getReg(-1);	
+			base = getMemReg(ir->op3.right1->varnum);
+			offset = getMemk(ir->op3.right1->varnum);
+			genADDI(rt, base, offset);
+			updateLITemp(rt);
+			transIR3_regy(A_ADD, ir->op3.result, rt, ir->op3.right2); 
+		}
 	}
 }
 void transsub(InterCode ir) {
 	if(ir->op3.right2->kind == CONSTANT_OP) {
 		transADDI(ir->op3.result, ir->op3.right1, -ir->op3.right2->num_int);
 	}else {
-		transIR3(A_SUB, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+		transIR3_plus(A_SUB, ir);
+//		transIR3(A_SUB, ir->op3.result, ir->op3.right1, ir->op3.right2); 
 	}
 }
 void transmul(InterCode ir) {
-	transIR3(A_MUL, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+//	transIR3(A_MUL, ir->op3.result, ir->op3.right1, ir->op3.right2); 
+	transIR3_plus(A_MUL, ir);
 }
 void transdiv(InterCode ir) {
 	int xindex, yindex, zindex;
 	int rx, ry, rz;
+	char ytype, ztype;
 	xindex = ir->op3.result->varnum;
 	rx = getReg(xindex);
-	ry = pareReg(ir->op3.right1);
-	rz = pareReg(ir->op3.right2);
+	ytype = getAddrOpType(ir, ir->op3.right1);
+	ztype = getAddrOpType(ir, ir->op3.right2);
+	ry = pareReg_plus(ir->op3.right1, ytype);
+	rz = pareReg_plus(ir->op3.right2, ztype);
+//	ry = pareReg(ir->op3.right1);
+//	rz = pareReg(ir->op3.right2);
 	genDIV(ry, rz);
 	genMFLO(rx);
 	updateDesIR3(rx, xindex);
@@ -272,16 +419,6 @@ void transif(InterCode ir) {
 }
 void transreturn(InterCode ir) {
 	int rx;
-//	switch(ir->op1.op1->kind) {
-//	case CONSTANT_OP:
-//		genLI(V0, ir->op1.op1->num_int);	
-//		break;
-//	case TEMP_OP:
-//	case VARIABLE_OP:
-//		rx = getReg(ir->op1.op1->varnum);
-//		genMOVE(V0, rx);
-//		break;
-//	}
 	rx = pareReg(ir->op1.op1);
 	genMOVE(V0, rx);
 	// this arg is no sence
@@ -296,6 +433,17 @@ void transreturn(InterCode ir) {
 #endif
 }
 void transdec(InterCode ir) {
+	int size = ir->op2.right->num_int;
+	int varindex = ir->op2.result->varnum;
+	sp -= size;
+	genADDI(SP, SP, -size);
+	setMem(varindex, FP, sp-fp);
+	// just get a mem, wait for init mem
+	unactiveMem(varindex);
+#ifdef DEBUG4
+	printfRegMap(stdout); 
+	printfAddrDescripTable(stdout); 
+#endif
 }
 InterCodes arglist = NULL;
 void transarg(InterCode ir) {
@@ -406,8 +554,15 @@ void transread(InterCode ir) {
 }
 void transwrite(InterCode ir) {
 	spillAllVar();
-	genMOVE(A0, pareReg(ir->op1.op1));	
-	updateDesLW(A0, ir->op1.op1->varnum); 
+	if(ir->op1.op1->isAddr == 1) {
+		// write *op
+		genLW(A0, 0, pareReg(ir->op1.op1));	
+		updateDesLW(A0, ir->op1.op1->varnum); 
+	}else {
+		// write op
+		genMOVE(A0, pareReg(ir->op1.op1));	
+		updateDesLW(A0, ir->op1.op1->varnum); 
+	}
 	genADDI(SP, SP, -4);
 	sp -= 4;
 	genSW(RA, 0, SP);
@@ -441,6 +596,8 @@ void transAsm(InterCode ir) {
 	case READ_IR:		transread(ir);		break;
 	case WRITE_IR:		transwrite(ir);		break;
 	}	
+	// have fun
+	updateIdleReg();
 }
 void transAllAsm(InterCodes IRhead) {
 	InterCodes temp = IRhead;

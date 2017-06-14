@@ -4,10 +4,11 @@
 #include "transAsm.h"
 
 struct RegMap regMap[REG_NUM];
-int tempReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
-int idleReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
+REGBIT tempReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
+REGBIT idleReg = 0|T0|T1|T2|T3|T4|T5|T6|T7|T8|T9|S0|S1|S2|S3|S4|S5|S6|S7;
 void updateIdleReg() {
-	int i, reg;
+	int i;
+	REGBIT reg;
 	for(i = 0; i < REG_NUM; i++) {
 		reg = 1 << i;
 		if((reg & tempReg) == 0)
@@ -18,16 +19,16 @@ void updateIdleReg() {
 	}
 }
 void initRegMap() {
-	int i, j;
+	int i;
 	for(i = 0; i < REG_NUM; i++) {
 		regMap[i].reg = 1 << i;
 		regMap[i].varvec = newVec();
 	}
 }
-int isVarInReg(int var, int reg) {
+int isVarInReg(int var, REGBIT reg) {
 	int varnum = var;
 	int dim = getDim(varnum);
-	int vec = getVec(varnum);
+	vecType vec = getVec(varnum);
 	vec = (vec & regMap[getRegindex(reg)].varvec[dim]);	
 	if(vec == 0) {
 		return false;
@@ -35,7 +36,7 @@ int isVarInReg(int var, int reg) {
 		return true;
 	}
 }
-int getRegindex(int reg) {
+int getRegindex(REGBIT reg) {
 	int index = 0;
 	while((reg & 0x1) != 0x1) {
 		index++;
@@ -43,7 +44,7 @@ int getRegindex(int reg) {
 	}
 	return index;
 }
-void addVar2Reg(int reg, int varindex) {
+void addVar2Reg(REGBIT reg, int varindex) {
 	int i = getRegindex(reg);	
 	int j = getDim(varindex);
 	regMap[i].varvec[j] = regMap[i].varvec[j] | getVec(varindex);
@@ -58,30 +59,30 @@ void clearVarInAllReg(int varindex) {
 	}
 	updateIdleReg();
 }
-void setRegDes(int reg, int varindex) {
+void setRegDes(REGBIT reg, int varindex) {
 	int i = getRegindex(reg);	
 	int dim = getVecDim();
 	int j = getDim(varindex);
 	clearVec(&(regMap[i].varvec[dim]));
 	regMap[i].varvec[j] = getVec(varindex);
 }
-void clearRegDes(int reg) {
+void clearRegDes(REGBIT reg) {
 	int i = getRegindex(reg);	
 	int dim = getVecDim();
 	clearVec(regMap[i].varvec);
-//	clearVec(&(regMap[i].varvec[dim]));
-	updateIdleReg();
+//	updateIdleReg();
 }
 void clearRegMap() {
-	int reg, i;
+	int i;
+	REGBIT reg;
 	for(i = 0; i < REG_NUM; i++) {
 		reg = 1 << i;
 		clearRegDes(reg);
 	}
-	updateIdleReg();
+//	updateIdleReg();
 }
-int getOneReg(int reg) {
-	int result = 1;
+REGBIT getOneReg(REGBIT reg) {
+	REGBIT result = 1;
 	if(reg == 0) {
 		fprintf(stderr, "no idle reg\n");
 		return 0;
@@ -91,7 +92,7 @@ int getOneReg(int reg) {
 	}
 	return result;
 }
-char *getRegName(int reg) {
+char *getRegName(REGBIT reg) {
 	switch(reg) {
 	case ZERO: return strdup("$zero");
 	case AT: return strdup("$at");
@@ -128,8 +129,9 @@ char *getRegName(int reg) {
 	default: return strdup("null");
 	}
 }
-void printfAllReg(FILE *tag, int regvec) {
-	int i, reg;
+void printfAllReg(FILE *tag, REGBIT regvec) {
+	int i;
+	REGBIT reg;
 	for(i = 0; i < REG_NUM; i++) {
 		reg = 1 << i;
 		if((reg & regvec) != 0) {
@@ -169,7 +171,7 @@ void printfRegMap(FILE *tag) {
 
 -----------------------------------------------------
 */
-Mem newMem(int reg, int k) {
+Mem newMem(REGBIT reg, int k) {
 	Mem result = NULL;
 	result = (Mem) malloc(sizeof(struct Mem_));
 	if(result == NULL) {
@@ -184,13 +186,14 @@ void printfMem(FILE *tag, Mem mem) {
 	fprintf(tag, "%d(%s)", mem->k, getRegName(mem->reg));	
 }
 void spillAllReg() {
-	int reg, i;
+	int i;
+	REGBIT reg;
 	for(i = 0; i < REG_NUM; i++) {
 		reg = 1 << i;
 		spillAll(reg);
 	}
 }
-void spillAll(int reg) {
+void spillAll(REGBIT reg) {
 	int varnum = getAllVarNum();
 	vecType *varvec = regMap[getRegindex(reg)].varvec;
 	int i;
