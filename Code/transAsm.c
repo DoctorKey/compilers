@@ -274,6 +274,7 @@ void transassign(InterCode ir) {
 	int rx, ry, rt;
 	int xindex, yindex;
 	char xtype, ytype;
+	int base, offset;
 	if(ir->op2.right->kind == CONSTANT_OP) {
 		xtype = getAddrOpType(ir, ir->op2.result);
 		switch(xtype) {
@@ -308,7 +309,7 @@ void transassign(InterCode ir) {
 			xindex = ir->op2.result->varnum;
 			yindex = ir->op2.right->varnum;
 			ry = pareReg(ir->op2.right);
-			rx = getReg(xindex);
+			rx = pareReg(ir->op2.result);
 			genSW(ry, 0, rx);
 			updateDesSW(rx, xindex);
 		}else if(xtype == '0' && ytype == '*') {
@@ -319,6 +320,17 @@ void transassign(InterCode ir) {
 			rx = getReg(xindex);
 			genLW(rx, 0, ry);
 			updateDesLW(rx, xindex);
+		}else if(xtype == '*' && ytype == '*') {
+			// *x = *y
+			xindex = ir->op2.result->varnum;
+			yindex = ir->op2.right->varnum;
+			ry = pareReg(ir->op2.right);
+			rt = getReg(-1);
+			genLW(rt, 0, ry);
+
+			rx = pareReg(ir->op2.result);
+			genSW(rt, 0, rx);
+			updateDesSW(rx, xindex);
 		}
 	}
 #ifdef DEBUG4
@@ -335,10 +347,7 @@ void transadd(InterCode ir) {
 	if(ir->op3.right2->kind == CONSTANT_OP) {
 		transADDI(ir->op3.result, ir->op3.right1, ir->op3.right2->num_int);
 	}else {
-//		transIR3_plus(A_ADD, ir);
-		if(ytype == '0') {
-			transIR3(A_ADD, ir->op3.result, ir->op3.right1, ir->op3.right2); 
-		}else if(ytype == '&') {
+		if(ytype == '&') {
 			rt = getReg(-1);	
 			base = getMemReg(ir->op3.right1->varnum);
 			offset = getMemk(ir->op3.right1->varnum);
@@ -349,6 +358,10 @@ void transadd(InterCode ir) {
 	printfAddrDescripTable(stdout); 
 #endif
 			transIR3_regy(A_ADD, ir->op3.result, rt, ir->op3.right2); 
+//		}else if(ytype == '0') {
+		}else {
+			transIR3_plus(A_ADD, ir);
+//			transIR3(A_ADD, ir->op3.result, ir->op3.right1, ir->op3.right2); 
 		}
 	}
 }
@@ -395,8 +408,13 @@ void transgoto(InterCode ir) {
 void transif(InterCode ir) {
 	int rx, ry;
 	int kind;
-	rx = pareReg(ir->op4.x);
-	ry = pareReg(ir->op4.y);
+	char xtype, ytype;
+//	rx = pareReg(ir->op4.x);
+//	ry = pareReg(ir->op4.y);
+	xtype = getAddrOpType(ir, ir->op4.x);
+	ytype = getAddrOpType(ir, ir->op4.y);
+	rx = pareReg_plus(ir->op4.x, xtype);
+	ry = pareReg_plus(ir->op4.y, ytype);
 
 	if(strcmp(ir->op4.relop->str, "==") == 0) {
 		kind = A_BEQ;
@@ -423,7 +441,9 @@ void transif(InterCode ir) {
 }
 void transreturn(InterCode ir) {
 	int rx;
-	rx = pareReg(ir->op1.op1);
+	char xtype;
+	xtype = getAddrOpType(ir, ir->op1.op1);
+	rx = pareReg_plus(ir->op1.op1, xtype);
 	genMOVE(V0, rx);
 	// this arg is no sence
 	popS(0);
@@ -474,6 +494,7 @@ InterCodes transferArg2A(InterCodes arglist, int reg) {
 }
 void transcall(InterCode ir) {
 	int rx, tbegin;
+	char xtype;
 	int argr, memk, memreg;
 	InterCodes prev = NULL;
 	spillAllVar();
@@ -514,9 +535,19 @@ void transcall(InterCode ir) {
 	popT(tbegin);
 	clearRegMap();
 	clearAddrDesTable();
-	rx = getReg(ir->op2.result->varnum);
-	genMOVE(rx, V0);
-	updateDesIR3(rx, ir->op2.result->varnum);
+	//add *t = call()
+	xtype = getAddrOpType(ir, ir->op2.result);
+	if(xtype == '0') {
+		// x = y
+		rx = getReg(ir->op2.result->varnum);
+		genMOVE(rx, V0);
+		updateDesIR3(rx, ir->op2.result->varnum);
+	}else if(xtype == '*') {
+		// *x = y
+		rx = pareReg(ir->op2.result);
+		genSW(V0, 0, rx);
+		updateDesSW(rx, ir->op2.result->varnum);
+	}
 #ifdef DEBUG4
 	printfRegMap(stdout); 
 	printfAddrDescripTable(stdout); 

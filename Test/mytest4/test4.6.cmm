@@ -1,0 +1,11 @@
+int main() {
+	int a[2];
+	int i;
+	i = 0;
+	a[i] = read();
+	a[i + 1] = read();
+	i = i + 1;
+	write(a[i]);
+	write(a[i - 1]);
+	return 0;
+}

@@ -81,9 +81,9 @@ int main(int argc, char** argv)
 #endif
 
 #if LAB_4 == true
-	printfallIR(stderr);
+//	printfallIR(stderr);
 	transAllAsm(getIRhead());
-	printfAllAsm(stdout);
+//	printfAllAsm(stdout);
 	printfallAsmtoFile();
 	closeoutputfile();
 #endif
