@@ -8,10 +8,10 @@
 #define true 1
 #define false 0
 
-#define LAB_1 false
-#define LAB_2 true
-#define LAB_3 true
-#define LAB_4 true
+#define LAB_1 true
+#define LAB_2 false
+#define LAB_3 false
+#define LAB_4 false
 
 //#define DEBUG4 true
 

@@ -6,6 +6,7 @@
 #include "translateIR.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 extern int yylineno;
 void updateChildDepth(struct node *node)
@@ -24,21 +25,25 @@ struct node *newNode(int type,int num, ...)
 	int i;
 	/* if the file has more than minlineno lines, change the init value of minlineno */
 	int minlineno = 9999;
-	void **argc = (void **)&num + 1;
+    va_list ap;
 	struct node *temp = malloc(sizeof(struct node));
+	struct node *arg_node;
 	if(!temp) {
 		printf("out of space");
 		exit(0);
 	}
 	temp->nodetype = type;
 	temp->depth = 0;
-	for(i = 0;i < num;i++, argc++) {
-		if(*argc == NULL)
+    va_start(ap, num);
+	for(i = 0; i < num; i++) {
+        arg_node = va_arg(ap, struct node*);
+		if(arg_node == NULL)
 			continue;
-		temp->children[i] = (struct node*)*argc;
+		temp->children[i] = arg_node;
 		updateChildDepth(temp->children[i]);
 		minlineno = temp->children[i]->lineno < minlineno? temp->children[i]->lineno: minlineno;
 	}
+    va_end(ap);
 	temp->lineno = minlineno;
 	for(;i != CHILD_NUM; i++) {
 		temp->children[i] = NULL;
